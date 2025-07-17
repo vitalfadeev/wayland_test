@@ -176,6 +176,20 @@ Data_device_manager {
 
 struct
 DataSource {
+    wl_data_device* _super;
+    alias _super this;
+
+    pragma (inline,true):
+    int    add_listener  (const wl_data_device_listener* listener, void* data)   { return wl_data_device_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_data_device_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_data_device_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_data_device_get_version (_super); }
+    void   destroy       ()                                             {        wl_data_device_destroy (_super); }
+    //void   release       ()                                             {        wl_data_device_release (_super); }
+}
+
+struct
+DataDevice {
     wl_data_source* _super;
     alias _super this;
 
@@ -186,6 +200,8 @@ DataSource {
     //uint   get_version   ()                                             { return wl_pointer_get_version (_super); }
     void   destroy       ()                                             {        wl_data_source_destroy (_super); }
     //void   release       ()                                             {        wl_data_source_release (_super); }
+    void   offer         (const char *mime_type)                        {        wl_data_source_offer (_super,mime_type); }
+    //void   set_actions   (uint dnd_actions)                             {        wl_data_source_set_actions (_super,dnd_actions); }
 }
 
 struct
