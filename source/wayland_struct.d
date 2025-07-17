@@ -175,7 +175,7 @@ Data_device_manager {
 }
 
 struct
-DataSource {
+DataDevice {
     wl_data_device* _super;
     alias _super this;
 
@@ -186,10 +186,12 @@ DataSource {
     //uint   get_version   ()                                             { return wl_data_device_get_version (_super); }
     void   destroy       ()                                             {        wl_data_device_destroy (_super); }
     //void   release       ()                                             {        wl_data_device_release (_super); }
+    void   start_drag    (DataSource source, Surface origin, Surface icon, uint serial) { wl_data_device_start_drag(_super,source,origin,icon,serial); }
+    void   set_selection (DataSource source, uint serial)               {        wl_data_device_set_selection (_super,source,serial); }
 }
 
 struct
-DataDevice {
+DataSource {
     wl_data_source* _super;
     alias _super this;
 
@@ -201,7 +203,6 @@ DataDevice {
     void   destroy       ()                                             {        wl_data_source_destroy (_super); }
     //void   release       ()                                             {        wl_data_source_release (_super); }
     void   offer         (const char *mime_type)                        {        wl_data_source_offer (_super,mime_type); }
-    //void   set_actions   (uint dnd_actions)                             {        wl_data_source_set_actions (_super,dnd_actions); }
 }
 
 struct
