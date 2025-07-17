@@ -413,3 +413,42 @@ app_state {
 
 alias uint32_t = uint;
 */
+
+
+extern (C)
+static 
+void 
+keyboard_handle_keymap (void *data, wl_keyboard* keyboard, uint format, int fd, uint size) {
+    //
+}
+
+extern (C)
+static 
+void 
+keyboard_handle_enter (void *data, wl_keyboard* keyboard, uint serial, wl_surface* surface, wl_array* keys) {
+    //
+}
+
+extern (C)
+static 
+void 
+keyboard_handle_leave (void *data, wl_keyboard* keyboard, uint serial, wl_surface* surface) {
+    //
+}
+
+extern (C)
+static 
+void 
+keyboard_handle_key (void *data, wl_keyboard* keyboard, uint serial, uint time, uint key, uint state_w) {
+    //
+}
+
+void
+listen_keyboard () {
+    auto cb = wl_keyboard_listener (
+        &keyboard_handle_keymap,
+        &keyboard_handle_enter,
+        &keyboard_handle_leave,
+        &keyboard_handle_key,
+    );
+}
