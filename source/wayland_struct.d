@@ -175,6 +175,20 @@ Data_device_manager {
 }
 
 struct
+DataSource {
+    wl_data_source* _super;
+    alias _super this;
+
+    pragma (inline,true):
+    int    add_listener  (const wl_data_source_listener* listener, void* data)   { return wl_data_source_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_data_source_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_data_source_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_pointer_get_version (_super); }
+    void   destroy       ()                                             {        wl_data_source_destroy (_super); }
+    //void   release       ()                                             {        wl_data_source_release (_super); }
+}
+
+struct
 Shell {
     wl_shell* _super;
     alias _super this;
