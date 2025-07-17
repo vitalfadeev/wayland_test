@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/wayland_test
+wayland_test.so
+wayland_test.dylib
+wayland_test.dll
+wayland_test.a
+wayland_test.lib
+wayland_test-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

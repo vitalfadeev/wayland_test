@@ -1,0 +1,12 @@
+{
+	"name": "wayland_test",
+	"authors": [
+		"vf"
+	],
+	"copyright": "Copyright © 2025, vf",
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"dependencies"   : {
+    	"wayland-client-d"   : { "path":"deps/wayland-client-d" }
+	},
+}
