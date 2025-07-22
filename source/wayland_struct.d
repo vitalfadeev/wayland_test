@@ -1,7 +1,9 @@
-import wayland.client;
-import wayland.client.dy_loader;
-import std.stdio : printf;
+public import wayland.client;
+public import wayland.client.dy_loader;
+public import wayland.client.egl;
+import std.stdio             : printf;
 import core.sys.posix.signal : timespec;
+import core.stdc.string      : strcmp;
 
 pragma (lib, "wayland-client");
 // libwayland-client0
@@ -25,9 +27,11 @@ pragma (lib, "wayland-client");
 struct
 Wayland {
     pragma (inline,true):
-    Display display ()                  { return Display (wl_display_connect (null)); }
-    Display display (const char *name)  { return Display (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
-    Display display (int fd)            { return Display (wl_display_connect_to_fd (fd)); }
+    Display display ()                  { return cast(Display) (wl_display_connect (null)); }
+    Display display (const char *name)  { return cast(Display) (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
+    Display display (int fd)            { return cast(Display) (wl_display_connect_to_fd (fd)); }
+
+    wayland_ctx ctx ()                  { return wayland_ctx (); }
 }
 
 struct
@@ -37,13 +41,13 @@ Display {
 
     pragma (inline,true):
     version (WaylandServer)
-    Compositor  compositor       ()                         { return Compositor (wl_display_get_registry (_super)); }
-    Registry    registry         ()                         { return Registry (wl_display_get_registry (_super)); }
+    Compositor  compositor       ()                         { return cast(Compositor) (wl_display_get_registry (_super)); }
+    Registry    registry         ()                         { return cast(Registry) (wl_display_get_registry (_super)); }
     //Pointer     pointer          ()                         { return Pointer (wl_display_bind (_super, null)); }
-    Queue       queue            ()                         { return Queue (wl_display_create_queue (_super)); }
+    Queue       queue            ()                         { return cast(Queue) (wl_display_create_queue (_super)); }
     //Queue       queue            (const char *name)         { return Queue (wl_display_create_queue_with_name (_super,name)); }
 
-    Queue       create_queue     ()                         { return Queue (wl_display_create_queue (_super)); }
+    Queue       create_queue     ()                         { return cast(Queue) (wl_display_create_queue (_super)); }
     //Queue       create_queue_with_name (const char *name)   { return Queue (wl_display_create_queue_with_name (_super,name)); }
     int         dispatch         ()                         { return wl_display_dispatch (_super); }
     int         dispatch_pending ()                         { return wl_display_dispatch_pending (_super); }
@@ -100,15 +104,6 @@ Log {
 // wl_fixed_t
 
 struct
-Compositor {
-    wl_compositor* _super;
-    alias _super this;
-
-    pragma (inline,true):
-    Surface surface () { return Surface (wl_compositor_create_surface (_super)); }
-}
-
-struct
 Surface {
     wl_surface* _super;
     alias _super this;
@@ -122,7 +117,7 @@ Surface {
     //void      release              ()                                             {        wl_seat_release (_super); }
     void      attach               (Buffer buffer, int x, int y)                  {        wl_surface_attach(_super,buffer,x,y); }
     void      damage               (int x, int y, int width, int height)          {        wl_surface_damage (_super,x,y,width,height); }
-    Callback  frame                ()                                             { return Callback (wl_surface_frame (_super)); }
+    Callback  frame                ()                                             { return cast(Callback) (wl_surface_frame (_super)); }
     void      set_opaque_region    (Region region)                                {       wl_surface_set_opaque_region (_super,region); }
     void      set_input_region     (Region region)                                {       wl_surface_set_input_region (_super,region); }
     void      commit               ()                                             {       wl_surface_commit (_super); }
@@ -151,13 +146,23 @@ Buffer {
     void*  get_user_data ()                                             { return wl_buffer_get_user_data (_super); }
     //uint   get_version   ()                                             { return wl_buffer_get_version (_super); }
     void   destroy       ()                                             {        wl_buffer_destroy (_super); }
-    //void   release       ()                                             {        wl_seat_release (_super); }
+    //void   release       ()                                             {        wl_buffer_release (_super); }
 }
 
 struct
 Registry {
     wl_registry* _super;
     alias _super this;
+
+    pragma (inline,true):
+    int    add_listener  (const wl_registry_listener* listener, void* data) { return wl_registry_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_registry_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_registry_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_registry_get_version (_super); }
+    void   destroy       ()                                             {        wl_registry_destroy (_super); }
+    //void   release       ()                                             {        wl_registry_release (_super); }
+
+    void*  bind (uint name, const wl_interface* interface_, uint version_) { return wl_registry_bind (_super,name,interface_,version_); }
 }
 
 struct
@@ -170,8 +175,8 @@ Data_device_manager {
     void* get_user_data ()                      { return wl_data_device_manager_get_user_data (_super); }
     //uint  get_version ()                        {        wl_data_device_manager_get_version (_super); }
     void  destroy ()                            {        wl_data_device_manager_destroy (_super); }
-    wl_data_source* create_data_source ()       { return wl_data_device_manager_create_data_source (_super); }
-    wl_data_device* get_data_device (Seat seat) { return wl_data_device_manager_get_data_device (_super,seat); }
+    DataSource create_data_source ()       { return cast (DataSource) wl_data_device_manager_create_data_source (_super); }
+    DataDevice get_data_device (Seat seat) { return cast (DataDevice) wl_data_device_manager_get_data_device (_super,seat); }
 }
 
 struct
@@ -211,19 +216,21 @@ Shell {
     alias _super this;
 
     pragma (inline,true):
+    //int    add_listener  (const wl_subsurface* listener, void* data) { return wl_shell_add_listener (_super,listener,data); }
     void   set_user_data (void* user_data)       {        wl_shell_set_user_data (_super,user_data); }
     void*  get_user_data ()                      { return wl_shell_get_user_data (_super); }
     //uint   get_version   ()                      { return wl_shell_get_version (_super); }
     void   destroy       ()                      {        wl_shell_destroy (_super); }
-    ShellSurface get_shell_surface (Surface surface) { return ShellSurface (wl_shell_get_shell_surface (_super,surface)); }
+    Shell_surface get_shell_surface (Surface surface) { return cast (Shell_surface) wl_shell_get_shell_surface (_super,surface); }
 }
 
 struct
-ShellSurface {
+Shell_surface {
     wl_shell_surface* _super;
     alias _super this;
 
     pragma (inline,true):
+    int    add_listener  (const wl_shell_surface_listener* listener, void* data) { return wl_shell_surface_add_listener (_super,listener,data); }
     void   set_user_data (void* user_data)       {        wl_shell_surface_set_user_data (_super,user_data); }
     void*  get_user_data ()                      { return wl_shell_surface_get_user_data (_super); }
     //uint   get_version   ()                      { return wl_shell_surface_get_version (_super); }
@@ -246,9 +253,9 @@ Seat {
     alias _super this;
 
     pragma (inline,true):
-    Keyboard get_keyboard () { return Keyboard (wl_seat_get_keyboard (_super)); }
-    Pointer  get_pointer  () { return Pointer  (wl_seat_get_pointer (_super)); }
-    Touch    get_touch    () { return Touch    (wl_seat_get_touch (_super)); }
+    Keyboard keyboard () { return cast(Keyboard) (wl_seat_get_keyboard (_super)); }
+    Pointer  pointer  () { return cast(Pointer)  (wl_seat_get_pointer (_super)); }
+    Touch    touch    () { return cast(Touch)    (wl_seat_get_touch (_super)); }
 
     int      add_listener  (const wl_seat_listener* listener, void* data) { return wl_seat_add_listener (_super,listener,data); }
     void     set_user_data (void* user_data)                              {        wl_seat_set_user_data (_super,user_data); }
@@ -347,7 +354,7 @@ Subcompositor {
     //uint       get_version   ()                                             { return wl_subcompositor_get_version (_super); }
     void       destroy       ()                                             {        wl_subcompositor_destroy (_super); }
     //void       release       ()                                             {        wl_subcompositor_release (_super); }
-    Subsurface get_subsurface (Surface surface, Surface parent)         { return Subsurface (wl_subcompositor_get_subsurface (_super,surface,parent)); }
+    Subsurface get_subsurface (Surface surface, Surface parent)         { return cast(Subsurface) (wl_subcompositor_get_subsurface (_super,surface,parent)); }
 }
 
 struct
@@ -368,6 +375,57 @@ Subsurface {
     void   set_sync      ()                                             {         wl_subsurface_set_sync (_super); }
     void   set_desync    ()                                             {         wl_subsurface_set_desync (_super); }
 }
+
+struct
+Compositor {
+    wl_compositor* _super;
+    alias _super this;
+
+    pragma (inline,true):
+    //int    add_listener  (const wl_subsurface* listener, void* data) { return wl_compositor_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_compositor_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_compositor_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_compositor_get_version (_super); }
+    void   destroy       ()                                             {        wl_compositor_destroy (_super); }
+    //void   release       ()                                             {        wl_compositor_release (_super); }
+
+    Surface create_surface () { return cast (Surface) wl_compositor_create_surface (_super); }
+    Region  create_region  () { return cast (Region)  wl_compositor_create_region  (_super); }
+}
+
+struct
+Shm {
+    wl_shm* _super;
+    alias _super this;
+
+    pragma (inline,true):
+    //int    add_listener  (const wl_subsurface* listener, void* data) { return wl_shm_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_shm_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_shm_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_shm_get_version (_super); }
+    void   destroy       ()                                             {        wl_shm_destroy (_super); }
+    //void   release       ()                                             {        wl_shm_release (_super); }
+
+    Shm_pool create_pool (int fd, int size)                             { return cast (Shm_pool) wl_shm_create_pool(_super,fd,size); }
+}
+
+struct
+Shm_pool {
+    wl_shm_pool* _super;
+    alias _super this;
+
+    pragma (inline,true):
+    //int    add_listener  (const wl_subsurface* listener, void* data) { return wl_shm_pool_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_shm_pool_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_shm_pool_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_shm_pool_get_version (_super); }
+    void   destroy       ()                                             {        wl_shm_pool_destroy (_super); }
+    //void   release       ()                                             {        wl_shm_pool_release (_super); }
+
+    Buffer create_buffer (int offset, int width, int height, int stride, uint format) { return cast (Buffer) wl_shm_pool_create_buffer (_super,offset,width,height,stride,format); }
+    void   resize        (int size) { wl_shm_pool_resize (_super,size); }
+}
+
 
 /*
 struct 
@@ -415,40 +473,311 @@ alias uint32_t = uint;
 */
 
 
-extern (C)
-static 
-void 
-keyboard_handle_keymap (void *data, wl_keyboard* keyboard, uint format, int fd, uint size) {
-    //
+
+struct
+Seat_listener {
+    static
+    wl_seat_listener listener = 
+        wl_seat_listener (
+            &capabilities,
+            &name,
+        );
+    
+    extern (C)
+    static 
+    void
+    capabilities (void *data, wl_seat* wl_seat, uint capabilities) {
+        printf ("  seat.capabilities: %x\n", capabilities);
+
+        auto ctx   = cast (wayland_ctx*) data;
+        auto input = &ctx.input;
+
+        if (capabilities & WL_SEAT_CAPABILITY_POINTER) {
+            input.pointer = (cast (Seat) wl_seat).pointer;
+            printf ("    pointer: %p\n", &input.pointer);
+            input.pointer.add_listener (&Pointer_listener.listener, &ctx.input);
+        }
+        if (capabilities & WL_SEAT_CAPABILITY_KEYBOARD) {
+            input.keyboard = (cast (Seat) wl_seat).keyboard;
+            printf ("    keyboard: %p\n", &input.keyboard);
+            input.keyboard.add_listener (&Keyboard_listener.listener, &ctx.input);
+        }
+        if(capabilities & WL_SEAT_CAPABILITY_TOUCH) {
+            input.touch = (cast (Seat) wl_seat).touch ();
+            printf ("    touch: %p\n", &input.touch);
+            input.touch.add_listener (&Touch_listener.listener, &ctx.input);
+        }
+    }
+
+    extern (C)
+    static 
+    void
+    name (void *data, wl_seat *wl_seat, const char *name) {
+        printf ("  seat.name: %s\n", name);
+    }
 }
 
-extern (C)
-static 
-void 
-keyboard_handle_enter (void *data, wl_keyboard* keyboard, uint serial, wl_surface* surface, wl_array* keys) {
-    //
+struct
+Registry_listener {
+    static
+    wl_registry_listener listener = 
+        wl_registry_listener (
+            &global,
+            &global_remove,
+        );
+
+    extern (C)
+    static 
+    void 
+    global (void* data, wl_registry* wl_registry, uint name, const char* interface_, uint version_) {
+        wayland_ctx* ctx = cast (wayland_ctx*) data;
+        printf ("registry.global: %s\n", interface_);
+
+        if (!strcmp (interface_,wl_compositor_interface.name)) {
+            ctx.compositor = cast (Compositor) cast (wl_compositor*) ctx.registry.bind (name, wl_compositor_interface, 1);
+
+        } else 
+        if (!strcmp (interface_,wl_shm_interface.name)) {
+            ctx.shm = cast (Shm) cast (wl_shm*) ctx.registry.bind (name, wl_shm_interface, 1);
+
+        } else 
+        if (!strcmp(interface_, wl_shell_interface.name)) {
+            ctx.shell = cast (Shell) cast (wl_shell*) ctx.registry.bind (name, wl_shell_interface, 1);
+
+        } else 
+        if (!strcmp (interface_,wl_seat_interface.name)) {
+            ctx.seat = cast (Seat) cast (wl_seat*) ctx.registry.bind (name, wl_seat_interface, 1);
+            ctx.seat.add_listener (&Seat_listener.listener, ctx);
+
+        //} else 
+        //if (!strcmp (interface_,"xdg_wm_base")) {
+        //    ctx.xdg_wm_base = wl_registry_bind (ctx.wl_registry, name, xdg_wm_base_interface, 1);
+        //    xdg_wm_base_add_listener (ctx.xdg_wm_base, &wayland_xdg_wm_base_listener, ctx);
+
+        //} else 
+        //if (!strcmp (interface_, "wl_output")) {
+        //    wl_output* wl_output = cast (wl_output*) wl_registry_bind (ctx.wl_registry, name, wl_output_interface, 1);
+        //    wl_output_add_listener (wl_output, &wayland_output_listener, null);
+        }
+    }
+
+    extern (C)
+    static 
+    void 
+    global_remove (void* data, wl_registry* wl_registry, uint name) {
+        //
+    }
 }
 
-extern (C)
-static 
-void 
-keyboard_handle_leave (void *data, wl_keyboard* keyboard, uint serial, wl_surface* surface) {
-    //
+struct
+Pointer_listener {
+    static
+    wl_pointer_listener listener = 
+        wl_pointer_listener (
+            &enter,
+            &leave,
+            &motion,
+            &button,
+            &axis,
+        );
+
+    extern (C)
+    static 
+    void 
+    enter (void *data, wl_pointer *wl_pointer, uint serial, wl_surface *surface, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+        printf ("  pointer.enter: surface: %p, xy: (%d,%d)\n", surface, surface_x, surface_y);
+    }
+
+    extern (C)
+    static 
+    leave (void *data, wl_pointer *wl_pointer, uint serial, wl_surface *surface) {
+        printf ("  pointer.leave: surface: %p\n", surface);
+    } 
+
+    extern (C)
+    static 
+    void 
+    motion (void *data, wl_pointer *wl_pointer, uint time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+        printf ("  pointer.motion: xy: (%d,%d)\n", surface_x, surface_y);
+    }
+
+    extern (C)
+    static 
+    void 
+    button (void *data, wl_pointer *wl_pointer, uint serial, uint time, uint button, uint state) {
+        printf ("  pointer.button: button: %d: %d\n", button, state);
+    }
+
+    extern (C)
+    static 
+    void 
+    axis (void *data, wl_pointer *wl_pointer, uint time, uint axis, wl_fixed_t value) {
+        printf ("  pointer.axis: axis: %d: %d\n", axis, value);
+    }
 }
 
-extern (C)
-static 
-void 
-keyboard_handle_key (void *data, wl_keyboard* keyboard, uint serial, uint time, uint key, uint state_w) {
-    //
+struct
+Keyboard_listener {
+    static
+    wl_keyboard_listener listener = 
+        wl_keyboard_listener (
+            &keymap,
+            &enter,
+            &leave,
+            &key,
+            &modifiers,
+            &repeat_info,
+        );
+
+    extern (C)
+    static 
+    void 
+    keymap (void *data, wl_keyboard *wl_keyboard, uint format, int fd, uint size) {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    enter (void *data, wl_keyboard *wl_keyboard, uint serial, wl_surface *surface, wl_array *keys) {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    leave (void *data, wl_keyboard *wl_keyboard, uint serial, wl_surface *surface) {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    key (void *data, wl_keyboard *wl_keyboard, uint serial, uint time, uint key, uint state) {
+        printf ("  pointer.key: axis: %d: %d\n", key, state);
+    }
+
+    extern (C)
+    static 
+    void 
+    modifiers (void *data, wl_keyboard *wl_keyboard, uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group) {
+        printf ("  pointer.modifiers: group: %d\n", group);
+    }
+
+    extern (C)
+    static 
+    void 
+    repeat_info (void *data, wl_keyboard *wl_keyboard, int rate, int delay) {
+        printf ("  pointer.repeat_info: group: %d,%d\n", rate, delay);
+    }
 }
 
-void
-listen_keyboard () {
-    auto cb = wl_keyboard_listener (
-        &keyboard_handle_keymap,
-        &keyboard_handle_enter,
-        &keyboard_handle_leave,
-        &keyboard_handle_key,
-    );
+struct
+Touch_listener {
+    static
+    wl_touch_listener listener = 
+        wl_touch_listener (
+            &down,
+            &up,
+            &motion,
+            &frame,
+            &cancel,
+        );
+
+    extern (C)
+    static 
+    void 
+    down (void *data, wl_touch *wl_touch, uint serial, uint time, wl_surface *surface, int id, wl_fixed_t x, wl_fixed_t y) {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    up (void *data, wl_touch *wl_touch, uint serial, uint time, int id) {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    motion (void *data, wl_touch *wl_touch, uint time, int id, wl_fixed_t x, wl_fixed_t y)  {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    frame (void *data, wl_touch *wl_touch) {
+        //
+    }
+
+    extern (C)
+    static 
+    void 
+    cancel (void *data, wl_touch *wl_touch) {
+        //
+    }    
 }
+
+struct 
+Input {
+    int repeat_fd;
+
+    Keyboard keyboard;
+    Pointer  pointer;
+    Touch    touch;
+
+    //pointer_event pointer_event;
+    //touch_event   touch_event;
+    //xkb           xkb;
+
+    //xkb_keysym_t sym;
+    //uint         code;
+    //uint         modifiers;
+
+    //xkb_keysym_t repeat_sym;
+    //uint         repeat_key;
+
+    //int          repeat_rate_sec;
+    //int          repeat_rate_nsec;
+    //int          repeat_delay_sec;
+    //int          repeat_delay_nsec;
+
+    //struct 
+    //Notify {
+    //    key = void function (wl_keyboard_key_state state, xkb_keysym_t sym, uint code);
+    //}
+    //Notify notify;
+
+    int key_pending;
+}
+
+struct 
+wayland_ctx {
+    Display    display;
+    Registry   registry;
+    Seat       seat;
+    Compositor compositor;
+    Surface    surface;
+    Shm        shm;
+    Shell      shell;
+
+    //.xdg_wm_base*   xdg_wm_base;
+
+    //.xdg_surface*   xdg_surface;
+    //.xdg_toplevel*  xdg_toplevel;
+    //.buffer[2]      buffers;
+    Input          input;
+
+    struct Frame_callback {
+        wl_callback* _wl_callback;
+        void function (void *, void *) user_callback;
+        void* data;
+    };
+    Frame_callback frame_callback;
+
+    int width, height;
+
+    void* user_ctx;
+};
