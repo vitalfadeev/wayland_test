@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/wl
+wl.so
+wl.dylib
+wl.dll
+wl.a
+wl.lib
+wl-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

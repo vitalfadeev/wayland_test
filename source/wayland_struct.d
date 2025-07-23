@@ -23,6 +23,8 @@ pragma (lib, "wayland-client");
 
 // https://wayland.freedesktop.org/docs/html/apb.html#Client-classwl__display
 
+alias uint32_t = uint;
+
 
 struct
 Wayland {
@@ -31,8 +33,56 @@ Wayland {
     Display display (const char *name)  { return cast(Display) (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
     Display display (int fd)            { return cast(Display) (wl_display_connect_to_fd (fd)); }
 
-    wayland_ctx ctx ()                  { return wayland_ctx (); }
+    wayland_ctx* ctx ()                  { return new wayland_ctx (); }
 }
+
+extern (C) wl_proxy* wl_proxy_marshal_flags   (wl_proxy* proxy, uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, ...);
+extern (C) wl_proxy* wl_proxy_marshal_array_flags (wl_proxy* proxy, uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, wl_argument* args);
+extern (C) void*     wl_proxy_create_wrapper  (void* proxy);
+extern (C) void      wl_proxy_wrapper_destroy (void* proxy_wrapper);
+extern (C) wl_proxy* wl_proxy_marshal_array_constructor_versioned (wl_proxy* proxy, uint32_t opcode, wl_argument* args, const wl_interface* interface_, uint32_t version_);
+extern (C) uint32_t  wl_proxy_get_version (wl_proxy* proxy);
+extern (C) void      wl_proxy_set_tag (wl_proxy *proxy, const char** tag);
+extern (C) char**    wl_proxy_get_tag (wl_proxy* proxy);
+
+
+
+
+
+struct
+Proxy {
+    wl_proxy* _super;
+    alias _super this;
+
+    alias Callback = extern (C) void function ();
+
+
+    pragma (inline,true):
+    auto                 add_listener           (Callback* callback, void* data)         { return wl_proxy_add_listener (_super,callback,data); }
+    wl_proxy*            marshal_flags          ( uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags ...) { return wl_proxy_marshal_flags (_super,opcode,interface_,version_,flags); }
+    wl_proxy*            marshal_array_flags    (uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, wl_argument* args) { return wl_proxy_marshal_array_flags (_super,opcode,interface_,version_,flags,args); }
+    void                 marshal                (wl_proxy* p, uint32_t opcode, ...) { return wl_proxy_marshal (_super,opcode,_argptr); }
+    void                 marshal_array          (uint32_t opcode, wl_argument* args)    { return wl_proxy_marshal_array (_super,opcode,args); }
+    wl_proxy*            create                 (const wl_interface* interface_)        { return wl_proxy_create(_super,interface_); }
+    void *               create_wrapper         ()                                      { return wl_proxy_create_wrapper (_super); }
+    void                 wrapper_destroy        (void *proxy_wrapper)                   { return wl_proxy_wrapper_destroy (proxy_wrapper); }
+    //wl_proxy*            marshal_constructor    (uint32_t opcode, const wl_interface* interface_, ...) { return wl_proxy_marshal_constructor (_super, uint32_t opcode, const wl_interface* interface_, ...); }
+    //wl_proxy*            marshal_constructor_versioned (uint32_t opcode, const wl_interface* interface_, uint32_t version, ...) { return wl_proxy_marshal_constructor_versioned (_super, uint32_t opcode, const wl_interface* interface_, uint32_t version, ...); }
+    wl_proxy*            marshal_array_constructor           (uint32_t opcode, wl_argument* args, const wl_interface* interface_)                    { return wl_proxy_marshal_array_constructor (_super,opcode,args,interface_); }
+    wl_proxy*            marshal_array_constructor_versioned (uint32_t opcode, wl_argument* args, const wl_interface* interface_, uint32_t version_) { return wl_proxy_marshal_array_constructor_versioned (_super,opcode,args,interface_,version_); }
+    void                 destroy                ()                                      { return wl_proxy_destroy (_super); }
+    const (void*)        get_listener           ()                                      { return wl_proxy_get_listener (_super); }
+    int                  add_dispatcher         (wl_dispatcher_func_t dispatcher_func, const void * dispatcher_data, void *data) { return wl_proxy_add_dispatcher (_super,dispatcher_func,dispatcher_data,data); }
+    void                 set_user_data          (void *user_data)                       { return wl_proxy_set_user_data (_super,user_data); }
+    void*                get_user_data          ()                                      { return wl_proxy_get_user_data (_super); }
+    uint32_t             get_version            ()                                      { return wl_proxy_get_version (_super); }
+    uint32_t             get_id                 ()                                      { return wl_proxy_get_id (_super); }
+    void                 set_tag                (const char** tag)                      { return wl_proxy_set_tag (_super,tag); }
+    const (char*)*       get_tag                ()                                      { return wl_proxy_get_tag (_super); }
+    const (char*)        get_class              ()                                      { return wl_proxy_get_class (_super); }
+    void                 set_queue              (wl_event_queue* queue)                 { return wl_proxy_set_queue (_super,queue); }
+}
+
 
 struct
 Display {
@@ -104,7 +154,7 @@ Log {
 // wl_fixed_t
 
 struct
-Surface {
+Surface {  // surface -  is a rectangular area that is displayed on the screen
     wl_surface* _super;
     alias _super this;
 
@@ -475,13 +525,74 @@ alias uint32_t = uint;
 
 
 struct
+Registry_listener {
+    static
+    wl_registry_listener listener = 
+        wl_registry_listener (
+            &global,
+            &global_remove,
+        );
+
+    extern (C)
+    static 
+    void 
+    global (void* data, wl_registry* wl_registry, uint name, const char* interface_, uint version_) {
+        wayland_ctx* ctx = cast (wayland_ctx*) data;
+        printf ("registry.global: %s\n", interface_);
+
+        if (!strcmp (interface_,wl_compositor_interface.name)) {
+            ctx.compositor = cast (Compositor) cast (wl_compositor*) ctx.registry.bind (name, wl_compositor_interface, 1);
+
+        } else 
+        if (!strcmp (interface_,wl_shm_interface.name)) {
+            ctx.shm = cast (Shm) cast (wl_shm*) ctx.registry.bind (name, wl_shm_interface, min (version_, 1));
+
+        } else 
+        if (!strcmp(interface_, xdg_wm_base_interface.name)) {  // xdg_wm_base
+            ctx.xdg_wm_base = wl_registry_bind (registry, name, xdg_wm_base_interface, 1);
+            xdg_wm_base_add_listener(xdg_wm_base, &xdg_wm_base_listener, NULL);
+        } else 
+        if (!strcmp(interface_, wl_shell_interface.name)) {  // wl_shell | gtk_shell1
+            ctx.shell = cast (Shell) cast (wl_shell*) ctx.registry.bind (name, wl_shell_interface, min (version_, 1));
+        } else 
+        if (!strcmp(interface_, "gtk_shell1")) {
+            //ctx.gtk_shell = cast (GTK_shell) cast (wl_shell*) ctx.registry.bind (name, wl_shell_interface, min (version_, 1));
+            // gtk_shell1
+            // gtk_surface1
+
+        } else 
+        if (!strcmp (interface_,wl_seat_interface.name)) {
+            printf ("interface: seat: %s\n", wl_seat_interface.name);
+            ctx.seat = cast (Seat) cast (wl_seat*) ctx.registry.bind (name, wl_seat_interface, min (version_, 1));
+            ctx.seat.add_listener (&Seat_listener.listener, ctx);
+
+        //} else 
+        //if (!strcmp (interface_,"xdg_wm_base")) {
+        //    ctx.xdg_wm_base = wl_registry_bind (ctx.wl_registry, name, xdg_wm_base_interface, 1);
+        //    xdg_wm_base_add_listener (ctx.xdg_wm_base, &wayland_xdg_wm_base_listener, ctx);
+
+        //} else 
+        //if (!strcmp (interface_, "wl_output")) {
+        //    wl_output* wl_output = cast (wl_output*) wl_registry_bind (ctx.wl_registry, name, wl_output_interface, 1);
+        //    wl_output_add_listener (wl_output, &wayland_output_listener, null);
+        }
+    }
+
+    extern (C)
+    static 
+    void 
+    global_remove (void* data, wl_registry* wl_registry, uint name) {
+        //
+    }
+}
+
+struct
 Seat_listener {
     static
-    wl_seat_listener listener = 
-        wl_seat_listener (
-            &capabilities,
-            &name,
-        );
+    wl_seat_listener listener = wl_seat_listener (
+        capabilities: &capabilities,
+        name:         &name,
+    );
     
     extern (C)
     static 
@@ -514,58 +625,6 @@ Seat_listener {
     void
     name (void *data, wl_seat *wl_seat, const char *name) {
         printf ("  seat.name: %s\n", name);
-    }
-}
-
-struct
-Registry_listener {
-    static
-    wl_registry_listener listener = 
-        wl_registry_listener (
-            &global,
-            &global_remove,
-        );
-
-    extern (C)
-    static 
-    void 
-    global (void* data, wl_registry* wl_registry, uint name, const char* interface_, uint version_) {
-        wayland_ctx* ctx = cast (wayland_ctx*) data;
-        printf ("registry.global: %s\n", interface_);
-
-        if (!strcmp (interface_,wl_compositor_interface.name)) {
-            ctx.compositor = cast (Compositor) cast (wl_compositor*) ctx.registry.bind (name, wl_compositor_interface, 1);
-
-        } else 
-        if (!strcmp (interface_,wl_shm_interface.name)) {
-            ctx.shm = cast (Shm) cast (wl_shm*) ctx.registry.bind (name, wl_shm_interface, 1);
-
-        } else 
-        if (!strcmp(interface_, wl_shell_interface.name)) {
-            ctx.shell = cast (Shell) cast (wl_shell*) ctx.registry.bind (name, wl_shell_interface, 1);
-
-        } else 
-        if (!strcmp (interface_,wl_seat_interface.name)) {
-            ctx.seat = cast (Seat) cast (wl_seat*) ctx.registry.bind (name, wl_seat_interface, 1);
-            ctx.seat.add_listener (&Seat_listener.listener, ctx);
-
-        //} else 
-        //if (!strcmp (interface_,"xdg_wm_base")) {
-        //    ctx.xdg_wm_base = wl_registry_bind (ctx.wl_registry, name, xdg_wm_base_interface, 1);
-        //    xdg_wm_base_add_listener (ctx.xdg_wm_base, &wayland_xdg_wm_base_listener, ctx);
-
-        //} else 
-        //if (!strcmp (interface_, "wl_output")) {
-        //    wl_output* wl_output = cast (wl_output*) wl_registry_bind (ctx.wl_registry, name, wl_output_interface, 1);
-        //    wl_output_add_listener (wl_output, &wayland_output_listener, null);
-        }
-    }
-
-    extern (C)
-    static 
-    void 
-    global_remove (void* data, wl_registry* wl_registry, uint name) {
-        //
     }
 }
 
@@ -755,13 +814,16 @@ Input {
 
 struct 
 wayland_ctx {
-    Display    display;
-    Registry   registry;
-    Seat       seat;
-    Compositor compositor;
-    Surface    surface;
-    Shm        shm;
-    Shell      shell;
+    Display       display;
+    Registry      registry;
+    Seat          seat;
+    Compositor    compositor;
+    Surface       surface;
+    Shm           shm;
+    Shell         shell;
+    Shell_surface shell_surface;
+    Shm_pool      pool;
+    Buffer        buffer;
 
     //.xdg_wm_base*   xdg_wm_base;
 
@@ -781,3 +843,6 @@ wayland_ctx {
 
     void* user_ctx;
 };
+
+auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
+auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }

@@ -15,15 +15,9 @@ static const  int CURSOR_HOT_SPOT_X = 10;
 static const  int CURSOR_HOT_SPOT_Y = 35;
 static const uint PIXEL_FORMAT_ID   = WL_SHM_FORMAT_ARGB8888;
 
-Shm           shm;
-Shm_pool      pool;
-Shell_surface surface;
-Buffer        buffer;
-Compositor    compositor;
-Shell         shell;
-Pointer       pointer;
-
-static bool   done = false;
+// ctx
+static wayland_ctx* ctx;
+static bool  done = false;
 
 void 
 on_button (uint button) {
@@ -34,13 +28,27 @@ on_button (uint button) {
 int
 main () {
     auto wayland  = Wayland ();
-    auto ctx     = wayland.ctx ();
+         ctx      = wayland.ctx ();
 
     // setup
     ctx.display  = wayland.display;
     ctx.registry = ctx.display.registry;
-    ctx.registry.add_listener (&Registry_listener.listener,&ctx);
+    ctx.registry.add_listener (&Registry_listener.listener,ctx);
+    //ctx.display.dispatch ();
     ctx.display.roundtrip ();
+    ctx.registry.destroy ();
+
+    if (!ctx.shell) {
+        printf ("Can't find shell\n");
+        return EXIT_FAILURE;
+    } 
+    else {
+        printf ("Found shell\n");
+    }
+
+    auto surface       = ctx.compositor.create_surface ();
+    auto shell_surface = ctx.shell.get_shell_surface (surface);
+    shell_surface.set_toplevel ();
 
     //
     auto image = open ("images.bin", O_RDWR);
@@ -50,16 +58,26 @@ main () {
         return EXIT_FAILURE;
     }
 
-    pool    = hello_create_memory_pool (shm,image);
-    surface = hello_create_surface (compositor,shell);
-    buffer  = hello_create_buffer (pool, WIDTH, HEIGHT);
-              hello_bind_buffer (buffer, surface);
-              hello_set_cursor_from_pool (pool, CURSOR_WIDTH, CURSOR_HEIGHT, CURSOR_HOT_SPOT_X, CURSOR_HOT_SPOT_Y);
-              hello_set_button_callback (surface,&on_button);
+    printf ("%d\n", 1);
+    ctx.pool    = hello_create_memory_pool (ctx.shm,image);
+    printf ("%d\n", 2);
+//    ? shell
+    ctx.shell_surface = hello_create_surface (ctx.compositor,ctx.shell);
+    printf ("%d\n", 3);
+    ctx.buffer  = hello_create_buffer (ctx.pool,WIDTH,HEIGHT);
+    printf ("%d\n", 4);
+              hello_bind_buffer (ctx.buffer,ctx.shell_surface);
+    printf ("%d\n", 5);
+              hello_set_cursor_from_pool (ctx.pool,ctx.compositor,ctx.input.pointer,CURSOR_WIDTH,CURSOR_HEIGHT,CURSOR_HOT_SPOT_X,CURSOR_HOT_SPOT_Y);
+    printf ("%d\n", 6);
+              hello_set_button_callback (ctx.shell_surface,&on_button);
+    printf ("%d\n", 7);
 
     //
     while (!done) {
+        printf ("%d\n", 8);
         if (ctx.display.dispatch () < 0) {
+            printf ("loop: dispatch 1\n");
             perror ("Main loop error");
             done = true;
         }
@@ -182,11 +200,14 @@ const shell_surface_listener = wl_shell_surface_listener (
 Shell_surface
 hello_create_surface (Compositor compositor, Shell shell) {
     auto surface = compositor.create_surface ();
+    printf ("%d\n", 10);
 
     if (surface is null)
         return cast (Shell_surface) null;
 
+    printf ("%p\n", shell._super);
     auto shell_surface = shell.get_shell_surface (surface);
+    printf ("%d\n", 11);
 
     if (shell_surface is null) {
         surface.destroy ();
@@ -226,15 +247,15 @@ hello_bind_buffer (Buffer buffer, Shell_surface shell_surface) {
 
 struct 
 pointer_data {
-    wl_surface* surface;
-    wl_buffer*  buffer;
-    int         hot_spot_x;
-    int         hot_spot_y;
-    wl_surface* target_surface;
+    Surface surface;
+    Buffer  buffer;
+    int     hot_spot_x;
+    int     hot_spot_y;
+    Surface target_surface;
 }
 
 void 
-hello_set_cursor_from_pool (Shm_pool pool, uint width, uint height, int hot_spot_x, int hot_spot_y) {
+hello_set_cursor_from_pool (Shm_pool pool, Compositor compositor, Pointer pointer, uint width, uint height, int hot_spot_x, int hot_spot_y) {
     auto data = new pointer_data ();
     data.hot_spot_x = hot_spot_x;
     data.hot_spot_y = hot_spot_y;
@@ -248,7 +269,8 @@ hello_set_cursor_from_pool (Shm_pool pool, uint width, uint height, int hot_spot
     if (data.buffer is null)
         goto cleanup_surface;
 
-    pointer.set_user_data (data);
+    printf ("%p\n", pointer._super);
+    if (pointer) pointer.set_user_data (data);
 
     return;
 
@@ -266,3 +288,12 @@ hello_set_button_callback (Shell_surface shell_surface, void function (uint) cal
     surface.set_user_data (callback);
 }
 
+void 
+hello_cleanup_wayland () {
+    ctx.input.pointer.destroy ();
+    ctx.seat.destroy ();
+    ctx.shell.destroy ();
+    ctx.shm.destroy ();
+    ctx.compositor.destroy ();
+    ctx.display.disconnect ();
+}
