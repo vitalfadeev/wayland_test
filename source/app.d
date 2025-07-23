@@ -1,11 +1,11 @@
 import std.stdio;
-import wayland_struct;
 import core.sys.posix.sys.mman : mmap,munmap,PROT_READ,MAP_SHARED,MAP_FAILED;
 import core.sys.posix.sys.stat : fstat,stat_t;
 import core.sys.posix.fcntl    : open,O_RDWR;
 import core.stdc.stdlib        : EXIT_SUCCESS,EXIT_FAILURE;
 import core.stdc.stdlib        : free;
 import std.conv                : to;
+import wayland_struct;
 
 static const uint WIDTH             = 320;
 static const uint HEIGHT            = 200;

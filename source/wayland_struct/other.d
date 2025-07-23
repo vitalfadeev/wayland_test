@@ -1,3 +1,5 @@
+module wayland_struct.other;
+
 public import wayland.client;
 public import wayland.client.dy_loader;
 public import wayland.client.egl;
@@ -5,25 +7,8 @@ import std.stdio             : printf;
 import core.sys.posix.signal : timespec;
 import core.stdc.string      : strcmp;
 
-pragma (lib, "wayland-client");
-// libwayland-client0
-// libwayland-dev
-//
-// /usr/include/wayland-client-core.h
-// /usr/include/wayland-client-protocol.h
-// /usr/include/wayland-client.h
-// /usr/include/wayland-cursor.h
-// /usr/include/wayland-egl-core.h
-// /usr/include/wayland-egl.h
-// /usr/include/wayland-server-core.h
-// /usr/include/wayland-server-protocol.h
-// /usr/include/wayland-server.h
-// /usr/include/wayland-util.h
-// /usr/include/wayland-version.h
 
 // https://wayland.freedesktop.org/docs/html/apb.html#Client-classwl__display
-
-alias uint32_t = uint;
 
 
 struct
@@ -36,86 +21,22 @@ Wayland {
     wayland_ctx* ctx ()                  { return new wayland_ctx (); }
 }
 
-extern (C) wl_proxy* wl_proxy_marshal_flags   (wl_proxy* proxy, uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, ...);
-extern (C) wl_proxy* wl_proxy_marshal_array_flags (wl_proxy* proxy, uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, wl_argument* args);
-extern (C) void*     wl_proxy_create_wrapper  (void* proxy);
-extern (C) void      wl_proxy_wrapper_destroy (void* proxy_wrapper);
-extern (C) wl_proxy* wl_proxy_marshal_array_constructor_versioned (wl_proxy* proxy, uint32_t opcode, wl_argument* args, const wl_interface* interface_, uint32_t version_);
-extern (C) uint32_t  wl_proxy_get_version (wl_proxy* proxy);
-extern (C) void      wl_proxy_set_tag (wl_proxy *proxy, const char** tag);
-extern (C) char**    wl_proxy_get_tag (wl_proxy* proxy);
-
-
-
 
 
 struct
-Proxy {
-    wl_proxy* _super;
-    alias _super this;
-
-    alias Callback = extern (C) void function ();
-
-
-    pragma (inline,true):
-    auto                 add_listener           (Callback* callback, void* data)         { return wl_proxy_add_listener (_super,callback,data); }
-    wl_proxy*            marshal_flags          ( uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags ...) { return wl_proxy_marshal_flags (_super,opcode,interface_,version_,flags); }
-    wl_proxy*            marshal_array_flags    (uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, wl_argument* args) { return wl_proxy_marshal_array_flags (_super,opcode,interface_,version_,flags,args); }
-    void                 marshal                (wl_proxy* p, uint32_t opcode, ...) { return wl_proxy_marshal (_super,opcode,_argptr); }
-    void                 marshal_array          (uint32_t opcode, wl_argument* args)    { return wl_proxy_marshal_array (_super,opcode,args); }
-    wl_proxy*            create                 (const wl_interface* interface_)        { return wl_proxy_create(_super,interface_); }
-    void *               create_wrapper         ()                                      { return wl_proxy_create_wrapper (_super); }
-    void                 wrapper_destroy        (void *proxy_wrapper)                   { return wl_proxy_wrapper_destroy (proxy_wrapper); }
-    //wl_proxy*            marshal_constructor    (uint32_t opcode, const wl_interface* interface_, ...) { return wl_proxy_marshal_constructor (_super, uint32_t opcode, const wl_interface* interface_, ...); }
-    //wl_proxy*            marshal_constructor_versioned (uint32_t opcode, const wl_interface* interface_, uint32_t version, ...) { return wl_proxy_marshal_constructor_versioned (_super, uint32_t opcode, const wl_interface* interface_, uint32_t version, ...); }
-    wl_proxy*            marshal_array_constructor           (uint32_t opcode, wl_argument* args, const wl_interface* interface_)                    { return wl_proxy_marshal_array_constructor (_super,opcode,args,interface_); }
-    wl_proxy*            marshal_array_constructor_versioned (uint32_t opcode, wl_argument* args, const wl_interface* interface_, uint32_t version_) { return wl_proxy_marshal_array_constructor_versioned (_super,opcode,args,interface_,version_); }
-    void                 destroy                ()                                      { return wl_proxy_destroy (_super); }
-    const (void*)        get_listener           ()                                      { return wl_proxy_get_listener (_super); }
-    int                  add_dispatcher         (wl_dispatcher_func_t dispatcher_func, const void * dispatcher_data, void *data) { return wl_proxy_add_dispatcher (_super,dispatcher_func,dispatcher_data,data); }
-    void                 set_user_data          (void *user_data)                       { return wl_proxy_set_user_data (_super,user_data); }
-    void*                get_user_data          ()                                      { return wl_proxy_get_user_data (_super); }
-    uint32_t             get_version            ()                                      { return wl_proxy_get_version (_super); }
-    uint32_t             get_id                 ()                                      { return wl_proxy_get_id (_super); }
-    void                 set_tag                (const char** tag)                      { return wl_proxy_set_tag (_super,tag); }
-    const (char*)*       get_tag                ()                                      { return wl_proxy_get_tag (_super); }
-    const (char*)        get_class              ()                                      { return wl_proxy_get_class (_super); }
-    void                 set_queue              (wl_event_queue* queue)                 { return wl_proxy_set_queue (_super,queue); }
-}
-
-
-struct
-Display {
-    wl_display* _super;
+Registry {
+    wl_registry* _super;
     alias _super this;
 
     pragma (inline,true):
-    version (WaylandServer)
-    Compositor  compositor       ()                         { return cast(Compositor) (wl_display_get_registry (_super)); }
-    Registry    registry         ()                         { return cast(Registry) (wl_display_get_registry (_super)); }
-    //Pointer     pointer          ()                         { return Pointer (wl_display_bind (_super, null)); }
-    Queue       queue            ()                         { return cast(Queue) (wl_display_create_queue (_super)); }
-    //Queue       queue            (const char *name)         { return Queue (wl_display_create_queue_with_name (_super,name)); }
+    int    add_listener  (const wl_registry_listener* listener, void* data) { return wl_registry_add_listener (_super,listener,data); }
+    void   set_user_data (void* user_data)                              {        wl_registry_set_user_data (_super,user_data); }
+    void*  get_user_data ()                                             { return wl_registry_get_user_data (_super); }
+    //uint   get_version   ()                                             { return wl_registry_get_version (_super); }
+    void   destroy       ()                                             {        wl_registry_destroy (_super); }
+    //void   release       ()                                             {        wl_registry_release (_super); }
 
-    Queue       create_queue     ()                         { return cast(Queue) (wl_display_create_queue (_super)); }
-    //Queue       create_queue_with_name (const char *name)   { return Queue (wl_display_create_queue_with_name (_super,name)); }
-    int         dispatch         ()                         { return wl_display_dispatch (_super); }
-    int         dispatch_pending ()                         { return wl_display_dispatch_pending (_super); }
-    int         dispatch_queue   (Queue queue)              { return wl_display_dispatch_queue (_super,queue); }
-    int         dispatch_queue_pending (Queue queue)        { return wl_display_dispatch_queue_pending (_super,queue); }
-    //int         dispatch_queue_timeout (Queue queue, timespec* timeout)  { return wl_display_dispatch_queue_timeout (_super,queue,timeout); }
-    void        disconnect       ()                         {        wl_display_disconnect (_super); }
-    int         get_fd           ()                         { return wl_display_get_fd (_super); }
-    int         roundtrip        ()                         { return wl_display_roundtrip (_super); }
-    int         roundtrip_queue  (Queue queue)              { return wl_display_roundtrip_queue (_super,queue); }
-    int         read_events      ()                         { return wl_display_read_events (_super); }
-    int         prepare_read_queue (Queue queue)            { return wl_display_prepare_read_queue(_super,queue); }
-    int         prepare_read     ()                         { return wl_display_prepare_read (_super); }
-    void        cancel_read      ()                         { return wl_display_cancel_read (_super); }
-    int         get_error        ()                         { return wl_display_get_error (_super); }
-    uint        get_protocol_error (const wl_interface** interface_, uint* id) { return wl_display_get_protocol_error (_super,interface_,id); }
-    int         fulsh            ()                         { return wl_display_flush (_super); }
-    //void        set_max_buffer_size (size_t max_buffer_size) {        wl_display_set_max_buffer_size (_super,max_buffer_size); }
+    void*  bind (uint name, const wl_interface* interface_, uint version_) { return wl_registry_bind (_super,name,interface_,version_); }
 }
 
 
@@ -197,22 +118,6 @@ Buffer {
     //uint   get_version   ()                                             { return wl_buffer_get_version (_super); }
     void   destroy       ()                                             {        wl_buffer_destroy (_super); }
     //void   release       ()                                             {        wl_buffer_release (_super); }
-}
-
-struct
-Registry {
-    wl_registry* _super;
-    alias _super this;
-
-    pragma (inline,true):
-    int    add_listener  (const wl_registry_listener* listener, void* data) { return wl_registry_add_listener (_super,listener,data); }
-    void   set_user_data (void* user_data)                              {        wl_registry_set_user_data (_super,user_data); }
-    void*  get_user_data ()                                             { return wl_registry_get_user_data (_super); }
-    //uint   get_version   ()                                             { return wl_registry_get_version (_super); }
-    void   destroy       ()                                             {        wl_registry_destroy (_super); }
-    //void   release       ()                                             {        wl_registry_release (_super); }
-
-    void*  bind (uint name, const wl_interface* interface_, uint version_) { return wl_registry_bind (_super,name,interface_,version_); }
 }
 
 struct
