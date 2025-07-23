@@ -34,6 +34,13 @@ wl_interface {
     const (wl_message*) events;
 }
 
+//wl_interface 
+//foo_interface = wl_interface (
+//    "foo", 1,
+//    2, foo_requests,
+//    1, foo_events
+//);
+
 union 
 wl_argument {
     int           i; // signed integer

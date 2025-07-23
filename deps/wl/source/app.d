@@ -611,3 +611,17 @@ _struct_cb () {
 	);
 }
 
+
+
+// 
+pragma (inline,true)
+wl_registry*
+wl_display_get_registry (struct wl_display *wl_display) {
+	wl_proxy* registry;
+
+	registry = wl_proxy_marshal_flags (cast (wl_proxy*) wl_display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, wl_proxy_get_version(cast (wl_proxy*) wl_display), 0, null);
+
+	return cast (wl_registry*) registry;
+}
+
+auto wl_registry_interface = wl_interface ();
