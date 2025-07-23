@@ -6,14 +6,13 @@ import std.range : empty;
 void 
 main () {
 	// READ-WRITE
-	foreach (protocol; Reader ("wayland.xml")) {
-		writeln (protocol.name);
-	}
+	foreach (protocol; Reader ("wayland.xml"))
+		D_File_Writer (protocol).write ();
 }
 
 struct
 Reader {
-	Protocol[]  protocols;
+	Protocol[] protocols;
     alias protocols this;
 
     this (string file_name) {
@@ -25,6 +24,71 @@ Reader {
    }
 }
 
+
+struct
+D_File_Writer {
+	Protocol protocol;
+
+	void
+	write () {
+		writefln ("// protocol %s", protocol.name);
+		writefln ("");
+		foreach (iface; protocol.interfaces) {
+			writefln ("module %s.%s;", protocol.name, iface.name);
+			writefln ("");
+			writefln ("extern (C):");
+
+			foreach (req; iface.requests) {
+				writef   ("auto %s (", req.name);
+				foreach (arg; req.args) {
+					writef   ("%s %s,", arg.type, arg.name);
+				}
+				writefln (");");
+			}
+			writefln ("");
+
+			foreach (eve; iface.events) {
+				writef   ("auto %s (", eve.name);
+				foreach (arg; eve.args) {
+					writef   ("%s %s,", arg.type, arg.name);
+				}
+				writefln (");");
+			}
+
+			foreach (enu; iface.enums) {
+				writefln ("enum %s (", enu.name);
+				foreach (ent; enu.entries) {
+					writefln ("  %s = %s,", ent.name, ent.value);
+				}
+				writefln ("}");
+			}
+
+			writefln ("");
+		}
+	}
+}
+
+struct
+Writer {
+	Protocol protocol;
+
+	void
+	write () {
+		writefln ("%s", protocol.name);
+		foreach (iface; protocol.interfaces) {
+			writefln ("  %s", iface.name);
+			foreach (req; iface.requests) {
+				writefln ("    %s", req.name);
+			}
+			foreach (eve; iface.events) {
+				writefln ("    %s", eve.name);
+			}
+			foreach (enu; iface.enums) {
+				writefln ("    %s", enu.name);
+			}
+		}
+	}
+}
 
 auto
 _Protocol (XML) (XML root) {
@@ -242,15 +306,15 @@ _Entry (XML) (XML root) {
 
 struct
 Protocol {
-    string 		 name;
+    string 		name;
     string      copyright;
     Interface[] interfaces;
 }
 
 struct
 Interface {
-    string 		 name;
-    string 		 version_;
+    string 		name;
+    string 		version_;
     Description description;
     Request[]   requests;
     Event[]     events;
@@ -266,20 +330,20 @@ Description {
 struct
 Request {
     Description description;
-    string 		 since;
-    string 		 name;
-    string 		 type;
-    Arg[] 		 args;
+    string 		since;
+    string 		name;
+    string 		type;
+    Arg[] 		args;
 }
 
 struct
 Event {
     Description description;
-    string 		 since;
-    string 		 name;
-    string 		 type;
-    string 		 deprecated_since;
-    Arg[] 		 args;
+    string 		since;
+    string 		name;
+    string 		type;
+    string 		deprecated_since;
+    Arg[] 		args;
 }
 
 struct
@@ -296,10 +360,10 @@ Arg {
 struct
 Enum {
 	Description description;
-	string  		name;
-	string  		bitfield;
-	string  		since;
-	Entry[] 		entries;
+	string  	name;
+	string  	bitfield;
+	string  	since;
+	Entry[] 	entries;
 }
 
 struct
