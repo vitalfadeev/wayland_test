@@ -1,7 +1,9 @@
 import std.stdio;
 import std.file;
+import std.string;
 import dxml.dom;
 import std.range : empty;
+import std.algorithm.searching : canFind;
 
 void 
 main () {
@@ -38,34 +40,67 @@ D_File_Writer {
 			writefln ("");
 			writefln ("extern (C):");
 
+			auto struct_name = iface.name.capitalize;
+			writefln ("struct");
+			writefln ("%s {", struct_name);
+			writefln ("  %s* _super;", iface.name);
+			writefln ("  alias _super this;");
+			writefln ("");
+
 			foreach (req; iface.requests) {
-				writef   ("auto %s (", req.name);
-				foreach (arg; req.args) {
-					writef   ("%s %s,", arg.type, arg.name);
+				writef   ("  auto %s (", req.name);
+				foreach (i,arg; req.args) {
+					if (i > 0)
+						writef   (", ");
+					writef   ("%s %s", arg.type.to_d_type, arg.name.to_d_name);
 				}
 				writefln (");");
 			}
-			writefln ("");
 
 			foreach (eve; iface.events) {
-				writef   ("auto %s (", eve.name);
-				foreach (arg; eve.args) {
-					writef   ("%s %s,", arg.type, arg.name);
+				writef   ("  auto %s (", eve.name);
+				foreach (i,arg; eve.args) {
+					if (i > 0)
+						writef   (", ");
+					writef   ("%s %s", arg.type, arg.name.to_d_name);
 				}
 				writefln (");");
 			}
 
 			foreach (enu; iface.enums) {
-				writefln ("enum %s (", enu.name);
+				writefln ("");
+				writefln ("  enum");
+				writefln ("  %s {", enu.name);
 				foreach (ent; enu.entries) {
-					writefln ("  %s = %s,", ent.name, ent.value);
+					writefln ("    %s = %s,", ent.name.to_d_type, ent.value);
 				}
-				writefln ("}");
+				writefln ("  }");
 			}
 
+			writefln ("}");  // struct_name
 			writefln ("");
 		}
 	}
+}
+
+string
+to_d_name (string a) {
+	static string[string] reserved = [
+		"interface" : "iface",
+		"version"   : "ver",
+	];
+
+	return reserved.get (a, a);
+}
+
+string
+to_d_type (string a) {
+	static string[string] reserved = [
+		"new_id" : "new_id",
+		"object" : "object",
+	];
+
+	return reserved.get (a, a);
 }
 
 struct
