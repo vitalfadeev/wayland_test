@@ -1,6 +1,7 @@
 import std.stdio;
 import std.file;
 import std.string;
+import std.conv;
 import dxml.dom;
 import std.range : empty;
 import std.algorithm.searching : canFind;
@@ -58,7 +59,7 @@ D_File_Writer {
 			// Request
 			if (iface.requests.length) {
 				writefln ("");
-				writefln ("  // Request");
+				writefln ("  // Requests");
 				writefln ("  pragma (inline,true):");
 				foreach (req; iface.requests) {
 					auto ret_type  = "";  // check arg.type == "new_id" && check|get arg.interface_ 
@@ -76,7 +77,7 @@ D_File_Writer {
 						}
 						else {                       // arg
 							auto arg_type = arg.type.to_d_type (arg);  // wl_surface* surface -> Wl_surface surface
-							arg_type = arg.interface_.length? arg_type.capitalize: (arg_type~"*");
+							arg_type = arg.interface_.length? arg_type: (arg_type~"*");
 							writef   ("%s%s %s", ((i > 0)? ", " : ""), arg_type, arg.name.to_d_name);
 							i ++;
 						}
@@ -84,10 +85,12 @@ D_File_Writer {
 					writef   (") { ");
 					if (ret_type.length) {
 						if (ret_iface)  // cast (Wl_shell_surface) cast (wl_shell_surface*))
-						writef   ("return cast (%s) wl_proxy_marshal_flags (_super, opcode.%s, &%s_interface, wl_proxy_get_version (_super), 0, null);", ret_type, req.name, ret_type);
+						writef   ("return cast (%s) wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null);", ret_type, req.name, ret_type);
+						else
+						writef   ("return           wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null);", ret_type, req.name, ret_type);
 					}
 					else {
-						writef   ("                 wl_proxy_marshal_flags (_super, opcode.%s, &%s_interface, wl_proxy_get_version (_super), 0, null);", req.name, "wl_proxy");
+						writef   ("                 wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null);", req.name, "wl_proxy");
 					}
 					writefln ("  }");
 				}
@@ -96,7 +99,7 @@ D_File_Writer {
 			// Event
 			if (iface.events.length) {
 				writefln ("");
-				writefln ("  // Event");
+				writefln ("  // Events");
 				writefln ("  struct");
 				writefln ("  Listener {");
 				// callbacks
@@ -144,6 +147,17 @@ D_File_Writer {
 				}
 				writefln ("  }");
 			}
+
+			// Interface
+			writefln ("");
+			writefln ("  // Interface");
+			writefln ("  static const wl_message[] _requests = [wl_message ()];");
+			writefln ("  static const wl_message[] _events   = [wl_message ()];");
+			writefln ("  static const wl_interface interface = {");
+			writefln ("  	\"%s\", %d,", iface_name, iface.version_.to!int);
+			writefln ("  	%d, _requests,", iface.requests.length);
+			writefln ("  	%d, _events", iface.events.length);
+			writefln ("  };", iface_name);
 
 			writefln ("}");  // struct_name
 			writefln ("");
