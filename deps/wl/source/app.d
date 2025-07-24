@@ -33,46 +33,114 @@ D_File_Writer {
 
 	void
 	write () {
-		writefln ("// protocol %s", protocol.name);
+		// alias wl_id = wl_proxy;
+
+		// Protocol
+		auto protocol_name = protocol.name;
+		writefln ("// protocol %s", protocol_name);
 		writefln ("");
 		foreach (iface; protocol.interfaces) {
-			writefln ("module %s.%s;", protocol.name, iface.name);
+			// Interface
+			auto iface_name  = iface.name;
+			writefln ("module %s.%s;", protocol_name, iface_name);
 			writefln ("");
 			writefln ("extern (C):");
-
-			auto struct_name = iface.name.capitalize;
-			writefln ("struct");
-			writefln ("%s {", struct_name);
-			writefln ("  %s* _super;", iface.name);
-			writefln ("  alias _super this;");
 			writefln ("");
 
-			foreach (req; iface.requests) {
-				writef   ("  auto %s (", req.name);
-				foreach (i,arg; req.args) {
-					if (i > 0)
-						writef   (", ");
-					writef   ("%s %s", arg.type.to_d_type, arg.name.to_d_name);
-				}
-				writefln (");");
-			}
+			// Interface struct
+			//auto struct_name = iface_name.capitalize;
+			auto struct_name = iface_name;
+			writefln ("struct");
+			writefln ("%s {", struct_name);
+			writefln ("  wl_proxy* _super;");
+			writefln ("  alias _super this;");
 
-			foreach (eve; iface.events) {
-				writef   ("  auto %s (", eve.name);
-				foreach (i,arg; eve.args) {
-					if (i > 0)
-						writef   (", ");
-					writef   ("%s %s", arg.type, arg.name.to_d_name);
-				}
-				writefln (");");
-			}
-
-			foreach (enu; iface.enums) {
+			// Request
+			if (iface.requests.length) {
 				writefln ("");
+				writefln ("  // Request");
+				writefln ("  pragma (inline,true):");
+				foreach (req; iface.requests) {
+					auto ret_type  = "";  // check arg.type == "new_id" && check|get arg.interface_ 
+					auto ret_name  = "";
+					auto ret_iface = false;
+					// new_id
+
+					writef   ("  auto %s (", req.name);
+					size_t i;
+					foreach (arg; req.args) {
+						if (arg.type == "new_id") {  // ret
+							ret_type  = arg.type.to_d_type (arg);
+							ret_name  = arg.name.to_d_name;
+							ret_iface = (arg.interface_.length)? true : false;
+						}
+						else {                       // arg
+							auto arg_type = arg.type.to_d_type (arg);  // wl_surface* surface -> Wl_surface surface
+							arg_type = arg.interface_.length? arg_type.capitalize: (arg_type~"*");
+							writef   ("%s%s %s", ((i > 0)? ", " : ""), arg_type, arg.name.to_d_name);
+							i ++;
+						}
+					}
+					writef   (") { ");
+					if (ret_type.length) {
+						if (ret_iface)  // cast (Wl_shell_surface) cast (wl_shell_surface*))
+						writef   ("return cast (%s) wl_proxy_marshal_flags (_super, opcode.%s, &%s_interface, wl_proxy_get_version (_super), 0, null);", ret_type, req.name, ret_type);
+					}
+					else {
+						writef   ("                 wl_proxy_marshal_flags (_super, opcode.%s, &%s_interface, wl_proxy_get_version (_super), 0, null);", req.name, "wl_proxy");
+					}
+					writefln ("  }");
+				}
+			}
+
+			// Event
+			if (iface.events.length) {
+				writefln ("");
+				writefln ("  // Event");
+				writefln ("  struct");
+				writefln ("  Listener {");
+				// callbacks
+				foreach (eve; iface.events) {
+					auto eve_name = eve.name;
+					writefln ("    %s_cb %s;", eve_name, eve_name);
+				}
+				writefln ("");
+				// alias
+				foreach (eve; iface.events) {
+					auto eve_name = eve.name;
+					writef   ("    alias %s_cb = void function (", eve_name);
+					writef   (     "void* data, %s* %s", iface_name, iface_name);
+					foreach (i,arg; eve.args) {
+						writef   (", ");
+						writef   ("%s %s", arg.type, arg.name.to_d_name);
+					}
+					writefln (");");
+				}
+				writefln ("  }"); // struct listener
+			}
+
+			// Enum
+			if (iface.enums.length) {
+				writefln ("");
+				writefln ("  // Enums");
+				foreach (enu; iface.enums) {
+					writefln ("  enum");
+					writefln ("  %s {", enu.name.to_d_name);
+					foreach (ent; enu.entries) {
+						writefln ("    %s = %s,", ent.name.to_d_name, ent.value);
+					}
+					writefln ("  }");
+				}
+			}
+
+			// Opcode
+			if (iface.requests.length) {
+				writefln ("");
+				writefln ("  // Opcodes");
 				writefln ("  enum");
-				writefln ("  %s {", enu.name);
-				foreach (ent; enu.entries) {
-					writefln ("    %s = %s,", ent.name.to_d_type, ent.value);
+				writefln ("  opcode : uint {");
+				foreach (i,req; iface.requests) {
+					writefln ("    %s = %d,", req.name, i);
 				}
 				writefln ("  }");
 			}
@@ -90,17 +158,42 @@ to_d_name (string a) {
 		"version"   : "ver",
 	];
 
+	if (a.startsWith ("0") || 
+	    a.startsWith ("1") || 
+	    a.startsWith ("2") || 
+	    a.startsWith ("3") || 
+	    a.startsWith ("4") || 
+	    a.startsWith ("5") || 
+	    a.startsWith ("6") || 
+	    a.startsWith ("7") || 
+	    a.startsWith ("8") || 
+	    a.startsWith ("9")  
+	)
+		a = "_" ~ a;
+
 	return reserved.get (a, a);
 }
 
 string
-to_d_type (string a) {
+to_d_type (string a, Arg arg) {
 	static string[string] reserved = [
 		"new_id" : "new_id",
 		"object" : "object",
 	];
 
-	return reserved.get (a, a);
+	auto t = reserved.get (a, a);
+
+	if (t == "new_id") {
+		if (arg.interface_.length)
+			t = arg.interface_;  // wl_surface
+	}
+
+	if (t == "object") {
+		if (arg.interface_.length)
+			t = arg.interface_;  // wl_surface
+	}
+	
+	return t;
 }
 
 struct
@@ -262,7 +355,7 @@ _Arg (XML) (XML root) {
 	foreach (a; root.attributes) {
 		switch (a.name) {
 	 		case "summary"    : _this.summary  	 = a.value; break;
-	 		case "name"       : _this.name 	    = a.value; break;
+	 		case "name"       : _this.name 	     = a.value; break;
 	 		case "type"       : _this.type   	 = a.value; break;
 	 		case "interface"  : _this.interface_ = a.value; break;
 	 		case "enum"       : _this.enum_   	 = a.value; break;
@@ -614,9 +707,10 @@ _struct_cb () {
 
 
 // 
+version (NEVER):
 pragma (inline,true)
 wl_registry*
-wl_display_get_registry (struct wl_display *wl_display) {
+wl_display_get_registry (wl_display *wl_display) {
 	wl_proxy* registry;
 
 	registry = wl_proxy_marshal_flags (cast (wl_proxy*) wl_display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, wl_proxy_get_version(cast (wl_proxy*) wl_display), 0, null);
@@ -625,3 +719,24 @@ wl_display_get_registry (struct wl_display *wl_display) {
 }
 
 auto wl_registry_interface = wl_interface ();
+
+version (NEVER) {
+	//<interface name="foo" version="1">
+	//  <request name="a"></request>
+	//  <request name="b"></request>
+	//  <event name="c"></event>
+	//</interface>
+
+	wl_list foo_requests;
+	wl_list foo_events;
+
+	wl_interface foo_interface = {
+		"foo", 1,
+		2, foo_requests,
+		1, foo_events
+	};
+
+	// extern const struct wl_interface %s_interface;
+	// extern const struct wl_interface %s_interface;
+}
+

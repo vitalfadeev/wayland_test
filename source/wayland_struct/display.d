@@ -1,6 +1,6 @@
-module wayland_struct.proxy;
+module wayland_struct.display;
 
-import wayland_struct.types;
+import wayland_struct.util;
 
 extern (C) {
 struct wl_display;
