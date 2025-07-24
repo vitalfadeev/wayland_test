@@ -67,6 +67,9 @@ D_File_Writer {
 					auto ret_iface = false;
 					// new_id
 
+					// , offset, width, height, stride, format
+					string _args;
+
 					writef   ("  auto %s (", req.name);
 					size_t i;
 					foreach (arg; req.args) {
@@ -81,16 +84,18 @@ D_File_Writer {
 							writef   ("%s%s %s", ((i > 0)? ", " : ""), arg_type, arg.name.to_d_name);
 							i ++;
 						}
+
+						_args ~= ", " ~ arg.name;
 					}
 					writef   (") { ");
 					if (ret_type.length) {
 						if (ret_iface)  // cast (Wl_shell_surface) cast (wl_shell_surface*))
-						writef   ("return cast (%s) wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null);", ret_type, req.name, ret_type);
+						writef   ("return cast (%s) wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null%s);", ret_type, req.name, ret_type, _args);
 						else
-						writef   ("return           wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null);", ret_type, req.name, ret_type);
+						writef   ("return           wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null%s);", ret_type, req.name, ret_type, _args);
 					}
 					else {
-						writef   ("                 wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null);", req.name, "wl_proxy");
+						writef   ("                 wl_proxy_marshal_flags (_super, opcode.%s,          null, wl_proxy_get_version (_super), 0, null%s);", req.name, _args);
 					}
 					writefln ("  }");
 				}
@@ -717,40 +722,3 @@ _struct_cb () {
 		(_wl_name, _wl_name, _wl_name, _wl_name, _wl_name)
 	);
 }
-
-
-
-// 
-version (NEVER):
-pragma (inline,true)
-wl_registry*
-wl_display_get_registry (wl_display *wl_display) {
-	wl_proxy* registry;
-
-	registry = wl_proxy_marshal_flags (cast (wl_proxy*) wl_display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, wl_proxy_get_version(cast (wl_proxy*) wl_display), 0, null);
-
-	return cast (wl_registry*) registry;
-}
-
-auto wl_registry_interface = wl_interface ();
-
-version (NEVER) {
-	//<interface name="foo" version="1">
-	//  <request name="a"></request>
-	//  <request name="b"></request>
-	//  <event name="c"></event>
-	//</interface>
-
-	wl_list foo_requests;
-	wl_list foo_events;
-
-	wl_interface foo_interface = {
-		"foo", 1,
-		2, foo_requests,
-		1, foo_events
-	};
-
-	// extern const struct wl_interface %s_interface;
-	// extern const struct wl_interface %s_interface;
-}
-
