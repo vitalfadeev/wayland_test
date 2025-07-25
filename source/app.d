@@ -13,7 +13,7 @@ static const uint CURSOR_WIDTH      = 100;
 static const uint CURSOR_HEIGHT     = 59;
 static const  int CURSOR_HOT_SPOT_X = 10;
 static const  int CURSOR_HOT_SPOT_Y = 35;
-static const uint PIXEL_FORMAT_ID   = WL_SHM_FORMAT_ARGB8888;
+static const uint PIXEL_FORMAT_ID   = wl_shm.FORMAT_ARGB8888;
 
 // ctx
 static wayland_ctx* ctx;

@@ -39,11 +39,12 @@ D_File_Writer {
 		// Protocol
 		auto protocol_name = protocol.name;
 		writefln ("// protocol %s", protocol_name);
+		writefln ("module wayland.protocol;",);
 		writefln ("");
 		foreach (iface; protocol.interfaces) {
 			// Interface
 			auto iface_name  = iface.name;
-			writefln ("module %s.%s;", protocol_name, iface_name);
+			writefln ("// module %s.%s;", protocol_name, iface_name);
 			writefln ("");
 			writefln ("extern (C):");
 			writefln ("");
