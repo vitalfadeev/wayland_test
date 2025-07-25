@@ -1,4 +1,4 @@
-module wayland_struct.wayland_struct;
+module wayland_struct.core;
 
 pragma (lib, "wayland-client");
 // libwayland-client0

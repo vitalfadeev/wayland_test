@@ -1,14 +1,24 @@
 module wayland_struct.display;
 
+import wayland_struct.protocol : wl_registry;
+import wayland_struct.protocol : wl_callback;
+import wayland_struct.util     : wl_interface;
+import wayland_struct.util     : wl_event_queue;
+import wayland_struct.util     : timespec;
+
+import wayland_struct.util     : wl_message;
+import wayland_struct.util     : wl_display;
+import wayland_struct.proxy    : wl_proxy;
+import wayland_struct.proxy    : wl_proxy_marshal_flags,wl_proxy_get_version;
+
+enum display_opcode_sync = 0;
+enum display_opcode_get_registry = 1;
+
 extern (C) {
-struct wl_display;
+//struct wl_display;
 
-struct wl_registry;
-struct wl_event_queue;
-struct wl_interface;
-struct timespec;
-
-wl_registry*    wl_display_get_registry (wl_display* wl_display);
+// wl_display_get_registry
+//wl_registry     wl_display_get_registry (wl_display* wl_display);
 // wl_display_bind
 // auto wl_display_bind (wl_display* wl_display_, uint name) { return wl_proxy_marshal_flags (wl_display_, opcode.bind, &new_id.interface, wl_proxy_get_version (wl_display_), 0, null, name);  }
 wl_display*     wl_display_connect (const (char*) name);
@@ -34,7 +44,7 @@ int             wl_display_read_events (wl_display* display);
 void            wl_display_disconnect (wl_display* display);
 }
 
-alias get_registry           = wl_display_get_registry;
+//alias get_registry           = wl_display_get_registry;
 //alias bind                   = wl_display_bind;
 alias create_queue           = wl_display_create_queue;
 alias create_queue_with_name = wl_display_create_queue_with_name;
@@ -55,3 +65,50 @@ alias get_protocol_error     = wl_display_get_protocol_error;
 alias flush                  = wl_display_flush;
 alias get_fd                 = wl_display_get_fd;
 alias set_max_buffer_size    = wl_display_set_max_buffer_size;
+
+
+//struct
+//wl_display {
+//  wl_proxy* _super;
+//  alias _super this;
+
+//  // Requests
+//  pragma (inline,true):
+//  auto sync () { return cast (wl_callback) wl_proxy_marshal_flags (_super, opcode.sync, &wl_callback.interface_, wl_proxy_get_version (_super), 0, null);  }
+//  auto get_registry () { return cast (wl_registry) wl_proxy_marshal_flags (_super, opcode.get_registry, &wl_registry.interface_, wl_proxy_get_version (_super), 0, null);  }
+
+//  // Events
+//  struct
+//  Listener {
+//    error_cb error;
+//    delete_id_cb delete_id;
+
+//    alias error_cb = void function (void* data, wl_display* _wl_display, void* object_id, uint code, const(char)* message);
+//    alias delete_id_cb = void function (void* data, wl_display* _wl_display, uint id);
+//  }
+
+//  // Enums
+//  enum
+//  error_ {
+//    invalid_object = 0,
+//    invalid_method = 1,
+//    no_memory = 2,
+//    implementation = 3,
+//  }
+
+//  // Opcodes
+//  enum
+//  opcode : uint {
+//    sync = 0,
+//    get_registry = 1,
+//  }
+
+//  // Interface
+//  static const wl_message[1] _requests  = [wl_message ()];
+//  static const wl_message[1] _events    = [wl_message ()];
+//  static const wl_interface interface_ = {
+//    "wl_display", 1,
+//    2, _requests.ptr,
+//    2, _events.ptr
+//  };
+//}

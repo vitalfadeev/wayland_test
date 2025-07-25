@@ -1,15 +1,18 @@
 module wayland_struct.proxy;
 
+public import wayland_struct.util : wl_proxy;
+import wayland_struct.util : wl_message;
+import wayland_struct.util : wl_interface;
+import wayland_struct.util : wl_fixed_t;
+import wayland_struct.util : wl_array;
+import wayland_struct.util : wl_argument;
+import wayland_struct.util : wl_event_queue;
+import wayland_struct.util : uint32_t;
+import wayland_struct.util : wl_dispatcher_func_t;
+import wayland_struct.util : wl_proxy_callback;
+
+
 extern (C) {
-struct wl_proxy;
-struct wl_interface;
-struct wl_argument;
-struct wl_message;
-struct wl_event_queue;
-alias wl_dispatcher_func_t = int function (const (void*), void*, uint, const (wl_message*), wl_argument*);
-
-alias uint32_t = uint;
-
 wl_proxy*       wl_proxy_create                              (wl_proxy* factory, const (wl_interface*) iface);
 void            wl_proxy_marshal                             (wl_proxy* p, uint opcode, ...);
 wl_proxy*       wl_proxy_marshal_constructor                 (wl_proxy* proxy, uint opcode, const (wl_interface*) iface, ...);
@@ -57,4 +60,4 @@ alias get_tag                             = wl_proxy_get_tag;
 alias get_class                           = wl_proxy_get_class;
 alias set_queue                           = wl_proxy_set_queue;
 alias wrapper_destroy                     = wl_proxy_wrapper_destroy;
-alias destroy                             = wl_proxy_destroy;
+//alias destroy                             = wl_proxy_destroy;

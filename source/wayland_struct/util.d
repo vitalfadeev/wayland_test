@@ -1,10 +1,37 @@
 module wayland_struct.util;
 
 extern (C):
-struct wl_object;
+//struct wl_object;
+struct wl_display;
+struct wl_event_queue;
+struct timespec;
 
 alias uint32_t   = uint;
 alias wl_fixed_t = int;
+alias new_id     = void*;
+alias wl_dispatcher_func_t = extern (C) int  function (const (void*), void*, uint, const (wl_message*), wl_argument*);
+alias wl_log_func_t        = extern (C) void function (const (char*), ...);
+alias wl_proxy_callback    = extern (C) void function ();
+
+struct 
+wl_proxy {
+    wl_object            object;
+    wl_display*          display;
+    wl_event_queue*      queue;
+    uint32_t             flags;
+    int                  refcount;
+    void*                user_data;
+    wl_dispatcher_func_t dispatcher;
+    uint32_t             version_;
+    const char**         tag;
+}
+
+struct 
+wl_object {
+        const wl_interface* interface_;
+        const void*         implementation;
+        uint32_t            id;
+}
 
 struct 
 wl_array {
@@ -49,8 +76,6 @@ wl_argument {
     int           h; // file descriptor
 }
 
-alias wl_dispatcher_func_t = int  function (const (void*), void*, uint, const (wl_message*), wl_argument*);
-alias wl_log_func_t        = void function (const (char*), ...);
 
 //extern __gshared wl_interface wl_display_interface;
 //extern __gshared wl_interface wl_registry_interface;
