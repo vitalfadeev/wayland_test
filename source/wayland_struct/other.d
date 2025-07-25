@@ -1,5 +1,6 @@
 module wayland_struct.other;
 
+version (NEVER):
 public import wayland.client;
 public import wayland.client.dy_loader;
 public import wayland.client.egl;
@@ -684,70 +685,4 @@ Touch_listener {
     }    
 }
 
-struct 
-Input {
-    int repeat_fd;
 
-    Keyboard keyboard;
-    Pointer  pointer;
-    Touch    touch;
-
-    //pointer_event pointer_event;
-    //touch_event   touch_event;
-    //xkb           xkb;
-
-    //xkb_keysym_t sym;
-    //uint         code;
-    //uint         modifiers;
-
-    //xkb_keysym_t repeat_sym;
-    //uint         repeat_key;
-
-    //int          repeat_rate_sec;
-    //int          repeat_rate_nsec;
-    //int          repeat_delay_sec;
-    //int          repeat_delay_nsec;
-
-    //struct 
-    //Notify {
-    //    key = void function (wl_keyboard_key_state state, xkb_keysym_t sym, uint code);
-    //}
-    //Notify notify;
-
-    int key_pending;
-}
-
-struct 
-wayland_ctx {
-    Display       display;
-    Registry      registry;
-    Seat          seat;
-    Compositor    compositor;
-    Surface       surface;
-    Shm           shm;
-    Shell         shell;
-    Shell_surface shell_surface;
-    Shm_pool      pool;
-    Buffer        buffer;
-
-    //.xdg_wm_base*   xdg_wm_base;
-
-    //.xdg_surface*   xdg_surface;
-    //.xdg_toplevel*  xdg_toplevel;
-    //.buffer[2]      buffers;
-    Input          input;
-
-    struct Frame_callback {
-        wl_callback* _wl_callback;
-        void function (void *, void *) user_callback;
-        void* data;
-    };
-    Frame_callback frame_callback;
-
-    int width, height;
-
-    void* user_ctx;
-};
-
-auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
-auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }

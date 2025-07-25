@@ -2,5 +2,4 @@ module wayland_struct;
 
 public import wayland_struct.util;
 public import wayland_struct.proxy;
-public import wayland_struct.wayland_struct;
-public import wayland_struct.other;
+public import wayland_struct.display;

@@ -25,6 +25,84 @@ on_button (uint button) {
 }
 
 
+struct
+Wayland {
+    pragma (inline,true):
+    wl_display*  display ()                  { return (wl_display_connect (null)); }
+    wl_display*  display (const char *name)  { return (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
+    wl_display*  display (int fd)            { return (wl_display_connect_to_fd (fd)); }
+    wayland_ctx* ctx ()                      { return new wayland_ctx (); }
+}
+
+struct 
+wayland_ctx {
+    wl_display*      display;
+    wl_registry*     registry;
+    wl_seat          seat;
+    wl_compositor    compositor;
+    wl_surface       surface;
+    wl_shm           shm;
+    wl_shell         shell;
+    wl_shell_surface shell_surface;
+    wl_shm_pool      pool;
+    wl_buffer        buffer;
+
+    //.xdg_wm_base*   xdg_wm_base;
+
+    //.xdg_surface*   xdg_surface;
+    //.xdg_toplevel*  xdg_toplevel;
+    //.buffer[2]      buffers;
+    Input          input;
+
+    struct Frame_callback {
+        wl_callback* _wl_callback;
+        void function (void *, void *) user_callback;
+        void* data;
+    };
+    Frame_callback frame_callback;
+
+    int width, height;
+
+    void* user_ctx;
+
+    struct 
+    Input {
+        int         repeat_fd;
+
+        wl_keyboard keyboard;
+        wl_pointer  pointer;
+        wl_touch    touch;
+
+        //pointer_event pointer_event;
+        //touch_event   touch_event;
+        //xkb           xkb;
+
+        //xkb_keysym_t sym;
+        //uint         code;
+        //uint         modifiers;
+
+        //xkb_keysym_t repeat_sym;
+        //uint         repeat_key;
+
+        //int          repeat_rate_sec;
+        //int          repeat_rate_nsec;
+        //int          repeat_delay_sec;
+        //int          repeat_delay_nsec;
+
+        //struct 
+        //Notify {
+        //    key = void function (wl_keyboard_key_state state, xkb_keysym_t sym, uint code);
+        //}
+        //Notify notify;
+
+        int key_pending;
+    }
+};
+
+auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
+auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }
+
+
 int
 main () {
     auto wayland  = Wayland ();
@@ -46,6 +124,7 @@ main () {
         printf ("Found shell\n");
     }
 
+version (NEVER) {
     auto surface       = ctx.compositor.create_surface ();
     auto shell_surface = ctx.shell.get_shell_surface (surface);
     shell_surface.set_toplevel ();
@@ -92,6 +171,7 @@ main () {
     //hello_free_memory_pool(pool);
     //close(image);
     //hello_cleanup_wayland();
+}
 
     // cleanup
     ctx.display.disconnect ();

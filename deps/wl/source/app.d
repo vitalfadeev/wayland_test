@@ -80,19 +80,17 @@ D_File_Writer {
 						}
 						else {                       // arg
 							auto arg_type = arg.type.to_d_type (arg);  // wl_surface* surface -> Wl_surface surface
-							arg_type = arg.interface_.length? arg_type: (arg_type~"*");
 							writef   ("%s%s %s", ((i > 0)? ", " : ""), arg_type, arg.name.to_d_name);
+							_args ~= ", " ~ arg.name;
 							i ++;
 						}
-
-						_args ~= ", " ~ arg.name;
 					}
 					writef   (") { ");
 					if (ret_type.length) {
 						if (ret_iface)  // cast (Wl_shell_surface) cast (wl_shell_surface*))
 						writef   ("return cast (%s) wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null%s);", ret_type, req.name, ret_type, _args);
 						else
-						writef   ("return           wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null%s);", ret_type, req.name, ret_type, _args);
+						writef   ("return           wl_proxy_marshal_flags (_super, opcode.%s, &%s.interface, wl_proxy_get_version (_super), 0, null%s);",           req.name, ret_type, _args);
 					}
 					else {
 						writef   ("                 wl_proxy_marshal_flags (_super, opcode.%s,          null, wl_proxy_get_version (_super), 0, null%s);", req.name, _args);
