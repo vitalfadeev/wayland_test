@@ -105,25 +105,25 @@ D_File_Writer {
 							i ++;
 						}
 					}
+					writef   (") { ");
 					string _ret;
 					string _fn = "wl_proxy_marshal";
 					string _opcode = req.name;
 					string _iface;
 					string _ver;
-					writef   (") { ");
 					if (ret_type.length) {
 						if (ret_iface) {  // cast (Wl_shell_surface) cast (wl_shell_surface*))
 							_ret   = format!"return cast (%s*)" (ret_type);
 							_fn   ~= "_constructor";
 							_iface = format!", &%s_interface" (ret_type);
+							_args = ", null"~_args;
 						}
 						else {
 							_ret   = format!"return cast (%s*)" ("wl_proxy");
 							_fn   ~= "_constructor";
 							_iface = ", &wl_proxy_interface";
+							_args = ", null"~_args;
 						}
-
-						_args = ", null"~_args;
 					}
 
 					//if (req.since && req.since != "0") {
@@ -132,7 +132,7 @@ D_File_Writer {
 					//}
 
 					writef   (
-						"%s %s (cast(wl_proxy*)&this, opcode.%s %s %s %s);", 
+						"%s %s (cast (wl_proxy*) &this, opcode.%s %s %s %s);", 
 						_ret, _fn, _opcode, _iface, _ver, _args);
 
 					writefln ("  }");
