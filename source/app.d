@@ -106,7 +106,7 @@ auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }
 
 void 
 global_cb (void* data, wl_registry* _wl_registry, uint name, const(char)* interface_, uint version_) {
-    //
+    writeln (interface_);
 }
 void
 global_remove_cb (void* data, wl_registry* _wl_registry, uint name) {
@@ -128,7 +128,7 @@ main () {
     ctx.registry = cast (wl_registry*) wl_proxy_marshal_flags (
         cast (wl_proxy*) ctx.display, 
         display_opcode_get_registry, 
-        &wl_registry.interface_, 
+        &wl_registry_interface, 
         wl_proxy_get_version (cast (wl_proxy*) (ctx.display)), 
         0, 
         null

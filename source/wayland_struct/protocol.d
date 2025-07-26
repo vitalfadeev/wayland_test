@@ -2,7 +2,9 @@
 module wayland_struct.protocol;
 
 import wayland_struct.proxy : wl_proxy;
-import wayland_struct.proxy : wl_proxy_marshal_flags;
+import wayland_struct.proxy : wl_proxy_marshal;
+import wayland_struct.proxy : wl_proxy_marshal_constructor;
+import wayland_struct.proxy : wl_proxy_marshal_constructor_versioned;
 import wayland_struct.proxy : wl_proxy_get_version;
 import wayland_struct.proxy : wl_proxy_add_listener;
 import wayland_struct.util  : wl_proxy_callback;;
@@ -11,67 +13,19 @@ import wayland_struct.util  : wl_interface;
 import wayland_struct.util  : wl_fixed_t;
 import wayland_struct.util  : wl_array;
 
-// module wayland.wl_display;
-
-//struct
-//wl_display {
-//  wl_proxy _super;
-//  alias _super this;
-
-//  // Requests
-//  pragma (inline,true):
-//  auto sync () { return cast (wl_callback*) wl_proxy_marshal_flags (&_super, opcode.sync, &wl_callback.interface_, wl_proxy_get_version (&_super), 0, null);  }
-//  auto get_registry () { return cast (wl_registry*) wl_proxy_marshal_flags (&_super, opcode.get_registry, &wl_registry.interface_, wl_proxy_get_version (&_super), 0, null);  }
-
-//  // Events
-//  struct
-//  Listener {
-//    error_cb error;
-//    delete_id_cb delete_id;
-
-//    alias error_cb = void function (void* data, wl_display* _wl_display, void* object_id, uint code, const(char)* message);
-//    alias delete_id_cb = void function (void* data, wl_display* _wl_display, uint id);
-//  }
-
-//  // Event listener
-//  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
-
-//  // Enums
-//  enum
-//  error_ {
-//    invalid_object = 0,
-//    invalid_method = 1,
-//    no_memory = 2,
-//    implementation = 3,
-//  }
-
-//  // Opcodes
-//  enum
-//  opcode : uint {
-//    sync = 0,
-//    get_registry = 1,
-//  }
-
-//  // Interface
-//  static const wl_message[1] _requests  = [wl_message ()];
-//  static const wl_message[1] _events    = [wl_message ()];
-//  static const wl_interface interface_ = {
-//    "wl_display", 1,
-//    2, _requests.ptr,
-//    2, _events.ptr
-//  };
-//}
-
 // module wayland.wl_registry;
 
 struct
 wl_registry {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_registry);
+  @disable this(ref wl_registry);
 
   // Requests
   pragma (inline,true):
-  auto bind (uint name) { return            wl_proxy_marshal_flags (&_super, opcode.bind, &interface_, wl_proxy_get_version (&_super), 0, null, name);  }
+  auto bind (uint name) { return cast (wl_proxy*) 
+    wl_proxy_marshal_constructor (
+      cast(wl_proxy*)&this, opcode.bind , &wl_proxy_interface  , null, name);  }
 
   // Events
   struct
@@ -84,30 +38,34 @@ wl_registry {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Opcodes
   enum
   opcode : uint {
     bind = 0,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_registry", 1,
-    1, _requests.ptr,
-    2, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[2] _wl_registry_request_bind_types = [null,null,];
+static const wl_interface*[3] _wl_registry_event_global_types = [null,null,null,];
+static const wl_interface*[1] _wl_registry_event_global_remove_types = [null,];
+static const wl_message[1] _wl_registry_requests  = [wl_message ("bind","un",_wl_registry_request_bind_types.ptr),];
+static const wl_message[2] _wl_registry_events    = [wl_message ("global","usu",_wl_registry_event_global_types.ptr),wl_message ("global_remove","u",_wl_registry_event_global_remove_types.ptr),];
+static const wl_interface wl_registry_interface = {
+    "wl_registry", 1,
+    1, _wl_registry_requests.ptr,
+    2, _wl_registry_events.ptr
+};
 
 // module wayland.wl_callback;
 
 struct
 wl_callback {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_callback);
+  @disable this(ref wl_callback);
 
   // Events
   struct
@@ -118,29 +76,31 @@ wl_callback {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_callback", 1,
-    0, _requests.ptr,
-    1, _events.ptr
-  };
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 }
+
+// Interface
+static const wl_interface*[1] _wl_callback_event_done_types = [null,];
+static const wl_message[0] _wl_callback_requests  = [];
+static const wl_message[1] _wl_callback_events    = [wl_message ("done","u",_wl_callback_event_done_types.ptr),];
+static const wl_interface wl_callback_interface = {
+    "wl_callback", 1,
+    0, _wl_callback_requests.ptr,
+    1, _wl_callback_events.ptr
+};
 
 // module wayland.wl_compositor;
 
 struct
 wl_compositor {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_compositor);
+  @disable this(ref wl_compositor);
 
   // Requests
   pragma (inline,true):
-  auto create_surface () { return cast (wl_surface*) wl_proxy_marshal_flags (&_super, opcode.create_surface, &wl_surface.interface_, wl_proxy_get_version (&_super), 0, null);  }
-  auto create_region () { return cast (wl_region*) wl_proxy_marshal_flags (&_super, opcode.create_region, &wl_region.interface_, wl_proxy_get_version (&_super), 0, null);  }
+  auto create_surface () { return cast (wl_surface*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.create_surface , &wl_surface_interface  , null);  }
+  auto create_region () { return cast (wl_region*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.create_region , &wl_region_interface  , null);  }
 
   // Opcodes
   enum
@@ -148,29 +108,32 @@ wl_compositor {
     create_surface = 0,
     create_region = 1,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_compositor", 6,
-    2, _requests.ptr,
-    0, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[1] _wl_compositor_request_create_surface_types = [null,];
+static const wl_interface*[1] _wl_compositor_request_create_region_types = [null,];
+static const wl_message[2] _wl_compositor_requests  = [wl_message ("create_surface","6n",_wl_compositor_request_create_surface_types.ptr),wl_message ("create_region","6n",_wl_compositor_request_create_region_types.ptr),];
+static const wl_message[0] _wl_compositor_events    = [];
+static const wl_interface wl_compositor_interface = {
+    "wl_compositor", 6,
+    2, _wl_compositor_requests.ptr,
+    0, _wl_compositor_events.ptr
+};
 
 // module wayland.wl_shm_pool;
 
 struct
 wl_shm_pool {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_shm_pool);
+  @disable this(ref wl_shm_pool);
 
   // Requests
   pragma (inline,true):
-  auto create_buffer (int offset, int width, int height, int stride, uint format) { return cast (wl_buffer*) wl_proxy_marshal_flags (&_super, opcode.create_buffer, &wl_buffer.interface_, wl_proxy_get_version (&_super), 0, null, offset, width, height, stride, format);  }
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto resize (int size) {                   wl_proxy_marshal_flags (&_super, opcode.resize,          null, wl_proxy_get_version (&_super), 0, null, size);  }
+  auto create_buffer (int offset, int width, int height, int stride, uint format) { return cast (wl_buffer*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.create_buffer , &wl_buffer_interface  , null, offset, width, height, stride, format);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto resize (int size) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.resize   , size);  }
 
   // Opcodes
   enum
@@ -179,28 +142,32 @@ wl_shm_pool {
     destroy = 1,
     resize = 2,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_shm_pool", 2,
-    3, _requests.ptr,
-    0, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[6] _wl_shm_pool_request_create_buffer_types = [null,null,null,null,null,null,];
+static const wl_interface*[0] _wl_shm_pool_request_destroy_types = [];
+static const wl_interface*[1] _wl_shm_pool_request_resize_types = [null,];
+static const wl_message[3] _wl_shm_pool_requests  = [wl_message ("create_buffer","2niiiiu",_wl_shm_pool_request_create_buffer_types.ptr),wl_message ("destroy","2",_wl_shm_pool_request_destroy_types.ptr),wl_message ("resize","2i",_wl_shm_pool_request_resize_types.ptr),];
+static const wl_message[0] _wl_shm_pool_events    = [];
+static const wl_interface wl_shm_pool_interface = {
+    "wl_shm_pool", 2,
+    3, _wl_shm_pool_requests.ptr,
+    0, _wl_shm_pool_events.ptr
+};
 
 // module wayland.wl_shm;
 
 struct
 wl_shm {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_shm);
+  @disable this(ref wl_shm);
 
   // Requests
   pragma (inline,true):
-  auto create_pool (int fd, int size) { return cast (wl_shm_pool*) wl_proxy_marshal_flags (&_super, opcode.create_pool, &wl_shm_pool.interface_, wl_proxy_get_version (&_super), 0, null, fd, size);  }
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto create_pool (int fd, int size) { return cast (wl_shm_pool*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.create_pool , &wl_shm_pool_interface  , null, fd, size);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -211,7 +178,7 @@ wl_shm {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -353,27 +320,31 @@ wl_shm {
     create_pool = 0,
     release = 1,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_shm", 2,
-    2, _requests.ptr,
-    1, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[3] _wl_shm_request_create_pool_types = [null,null,null,];
+static const wl_interface*[0] _wl_shm_request_release_types = [];
+static const wl_interface*[1] _wl_shm_event_format_types = [null,];
+static const wl_message[2] _wl_shm_requests  = [wl_message ("create_pool","2nhi",_wl_shm_request_create_pool_types.ptr),wl_message ("release","2",_wl_shm_request_release_types.ptr),];
+static const wl_message[1] _wl_shm_events    = [wl_message ("format","2u",_wl_shm_event_format_types.ptr),];
+static const wl_interface wl_shm_interface = {
+    "wl_shm", 2,
+    2, _wl_shm_requests.ptr,
+    1, _wl_shm_events.ptr
+};
 
 // module wayland.wl_buffer;
 
 struct
 wl_buffer {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_buffer);
+  @disable this(ref wl_buffer);
 
   // Requests
   pragma (inline,true):
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
 
   // Events
   struct
@@ -384,38 +355,41 @@ wl_buffer {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Opcodes
   enum
   opcode : uint {
     destroy = 0,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_buffer", 1,
-    1, _requests.ptr,
-    1, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_buffer_request_destroy_types = [];
+static const wl_interface*[0] _wl_buffer_event_release_types = [];
+static const wl_message[1] _wl_buffer_requests  = [wl_message ("destroy","",_wl_buffer_request_destroy_types.ptr),];
+static const wl_message[1] _wl_buffer_events    = [wl_message ("release","",_wl_buffer_event_release_types.ptr),];
+static const wl_interface wl_buffer_interface = {
+    "wl_buffer", 1,
+    1, _wl_buffer_requests.ptr,
+    1, _wl_buffer_events.ptr
+};
 
 // module wayland.wl_data_offer;
 
 struct
 wl_data_offer {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_data_offer);
+  @disable this(ref wl_data_offer);
 
   // Requests
   pragma (inline,true):
-  auto accept (uint serial, const(char)* mime_type) {                   wl_proxy_marshal_flags (&_super, opcode.accept,          null, wl_proxy_get_version (&_super), 0, null, serial, mime_type);  }
-  auto receive (const(char)* mime_type, int fd) {                   wl_proxy_marshal_flags (&_super, opcode.receive,          null, wl_proxy_get_version (&_super), 0, null, mime_type, fd);  }
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto finish () {                   wl_proxy_marshal_flags (&_super, opcode.finish,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_actions (uint dnd_actions, uint preferred_action) {                   wl_proxy_marshal_flags (&_super, opcode.set_actions,          null, wl_proxy_get_version (&_super), 0, null, dnd_actions, preferred_action);  }
+  auto accept (uint serial, const(char)* mime_type) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.accept   , serial, mime_type);  }
+  auto receive (const(char)* mime_type, int fd) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.receive   , mime_type, fd);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto finish () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.finish   );  }
+  auto set_actions (uint dnd_actions, uint preferred_action) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_actions   , dnd_actions, preferred_action);  }
 
   // Events
   struct
@@ -430,7 +404,7 @@ wl_data_offer {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -450,29 +424,38 @@ wl_data_offer {
     finish = 3,
     set_actions = 4,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_data_offer", 3,
-    5, _requests.ptr,
-    3, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[2] _wl_data_offer_request_accept_types = [null,null,];
+static const wl_interface*[2] _wl_data_offer_request_receive_types = [null,null,];
+static const wl_interface*[0] _wl_data_offer_request_destroy_types = [];
+static const wl_interface*[0] _wl_data_offer_request_finish_types = [];
+static const wl_interface*[2] _wl_data_offer_request_set_actions_types = [null,null,];
+static const wl_interface*[1] _wl_data_offer_event_offer_types = [null,];
+static const wl_interface*[1] _wl_data_offer_event_source_actions_types = [null,];
+static const wl_interface*[1] _wl_data_offer_event_action_types = [null,];
+static const wl_message[5] _wl_data_offer_requests  = [wl_message ("accept","3u?s",_wl_data_offer_request_accept_types.ptr),wl_message ("receive","3sh",_wl_data_offer_request_receive_types.ptr),wl_message ("destroy","3",_wl_data_offer_request_destroy_types.ptr),wl_message ("finish","3",_wl_data_offer_request_finish_types.ptr),wl_message ("set_actions","3uu",_wl_data_offer_request_set_actions_types.ptr),];
+static const wl_message[3] _wl_data_offer_events    = [wl_message ("offer","3s",_wl_data_offer_event_offer_types.ptr),wl_message ("source_actions","3u",_wl_data_offer_event_source_actions_types.ptr),wl_message ("action","3u",_wl_data_offer_event_action_types.ptr),];
+static const wl_interface wl_data_offer_interface = {
+    "wl_data_offer", 3,
+    5, _wl_data_offer_requests.ptr,
+    3, _wl_data_offer_events.ptr
+};
 
 // module wayland.wl_data_source;
 
 struct
 wl_data_source {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_data_source);
+  @disable this(ref wl_data_source);
 
   // Requests
   pragma (inline,true):
-  auto offer (const(char)* mime_type) {                   wl_proxy_marshal_flags (&_super, opcode.offer,          null, wl_proxy_get_version (&_super), 0, null, mime_type);  }
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_actions (uint dnd_actions) {                   wl_proxy_marshal_flags (&_super, opcode.set_actions,          null, wl_proxy_get_version (&_super), 0, null, dnd_actions);  }
+  auto offer (const(char)* mime_type) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.offer   , mime_type);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto set_actions (uint dnd_actions) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_actions   , dnd_actions);  }
 
   // Events
   struct
@@ -493,7 +476,7 @@ wl_data_source {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -509,29 +492,39 @@ wl_data_source {
     destroy = 1,
     set_actions = 2,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_data_source", 3,
-    3, _requests.ptr,
-    6, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[1] _wl_data_source_request_offer_types = [null,];
+static const wl_interface*[0] _wl_data_source_request_destroy_types = [];
+static const wl_interface*[1] _wl_data_source_request_set_actions_types = [null,];
+static const wl_interface*[1] _wl_data_source_event_target_types = [null,];
+static const wl_interface*[2] _wl_data_source_event_send_types = [null,null,];
+static const wl_interface*[0] _wl_data_source_event_cancelled_types = [];
+static const wl_interface*[0] _wl_data_source_event_dnd_drop_performed_types = [];
+static const wl_interface*[0] _wl_data_source_event_dnd_finished_types = [];
+static const wl_interface*[1] _wl_data_source_event_action_types = [null,];
+static const wl_message[3] _wl_data_source_requests  = [wl_message ("offer","3s",_wl_data_source_request_offer_types.ptr),wl_message ("destroy","3",_wl_data_source_request_destroy_types.ptr),wl_message ("set_actions","3u",_wl_data_source_request_set_actions_types.ptr),];
+static const wl_message[6] _wl_data_source_events    = [wl_message ("target","3?s",_wl_data_source_event_target_types.ptr),wl_message ("send","3sh",_wl_data_source_event_send_types.ptr),wl_message ("cancelled","3",_wl_data_source_event_cancelled_types.ptr),wl_message ("dnd_drop_performed","3",_wl_data_source_event_dnd_drop_performed_types.ptr),wl_message ("dnd_finished","3",_wl_data_source_event_dnd_finished_types.ptr),wl_message ("action","3u",_wl_data_source_event_action_types.ptr),];
+static const wl_interface wl_data_source_interface = {
+    "wl_data_source", 3,
+    3, _wl_data_source_requests.ptr,
+    6, _wl_data_source_events.ptr
+};
 
 // module wayland.wl_data_device;
 
 struct
 wl_data_device {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_data_device);
+  @disable this(ref wl_data_device);
 
   // Requests
   pragma (inline,true):
-  auto start_drag (void* source, void* origin, void* icon, uint serial) {                   wl_proxy_marshal_flags (&_super, opcode.start_drag,          null, wl_proxy_get_version (&_super), 0, null, source, origin, icon, serial);  }
-  auto set_selection (void* source, uint serial) {                   wl_proxy_marshal_flags (&_super, opcode.set_selection,          null, wl_proxy_get_version (&_super), 0, null, source, serial);  }
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto start_drag (void* source, void* origin, void* icon, uint serial) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.start_drag   , source, origin, icon, serial);  }
+  auto set_selection (void* source, uint serial) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_selection   , source, serial);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -552,7 +545,7 @@ wl_data_device {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -568,28 +561,38 @@ wl_data_device {
     set_selection = 1,
     release = 2,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_data_device", 3,
-    3, _requests.ptr,
-    6, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[4] _wl_data_device_request_start_drag_types = [&wl_data_source_interface,&wl_surface_interface,&wl_surface_interface,null,];
+static const wl_interface*[2] _wl_data_device_request_set_selection_types = [&wl_data_source_interface,null,];
+static const wl_interface*[0] _wl_data_device_request_release_types = [];
+static const wl_interface*[1] _wl_data_device_event_data_offer_types = [null,];
+static const wl_interface*[5] _wl_data_device_event_enter_types = [null,&wl_surface_interface,null,null,&wl_data_offer_interface,];
+static const wl_interface*[0] _wl_data_device_event_leave_types = [];
+static const wl_interface*[3] _wl_data_device_event_motion_types = [null,null,null,];
+static const wl_interface*[0] _wl_data_device_event_drop_types = [];
+static const wl_interface*[1] _wl_data_device_event_selection_types = [&wl_data_offer_interface,];
+static const wl_message[3] _wl_data_device_requests  = [wl_message ("start_drag","3?oo?ou",_wl_data_device_request_start_drag_types.ptr),wl_message ("set_selection","3?ou",_wl_data_device_request_set_selection_types.ptr),wl_message ("release","3",_wl_data_device_request_release_types.ptr),];
+static const wl_message[6] _wl_data_device_events    = [wl_message ("data_offer","3n",_wl_data_device_event_data_offer_types.ptr),wl_message ("enter","3uoff?o",_wl_data_device_event_enter_types.ptr),wl_message ("leave","3",_wl_data_device_event_leave_types.ptr),wl_message ("motion","3uff",_wl_data_device_event_motion_types.ptr),wl_message ("drop","3",_wl_data_device_event_drop_types.ptr),wl_message ("selection","3?o",_wl_data_device_event_selection_types.ptr),];
+static const wl_interface wl_data_device_interface = {
+    "wl_data_device", 3,
+    3, _wl_data_device_requests.ptr,
+    6, _wl_data_device_events.ptr
+};
 
 // module wayland.wl_data_device_manager;
 
 struct
 wl_data_device_manager {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_data_device_manager);
+  @disable this(ref wl_data_device_manager);
 
   // Requests
   pragma (inline,true):
-  auto create_data_source () { return cast (wl_data_source*) wl_proxy_marshal_flags (&_super, opcode.create_data_source, &wl_data_source.interface_, wl_proxy_get_version (&_super), 0, null);  }
-  auto get_data_device (void* seat) { return cast (wl_data_device*) wl_proxy_marshal_flags (&_super, opcode.get_data_device, &wl_data_device.interface_, wl_proxy_get_version (&_super), 0, null, seat);  }
+  auto create_data_source () { return cast (wl_data_source*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.create_data_source , &wl_data_source_interface  , null);  }
+  auto get_data_device (void* seat) { return cast (wl_data_device*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.get_data_device , &wl_data_device_interface  , null, seat);  }
 
   // Enums
   enum
@@ -606,27 +609,30 @@ wl_data_device_manager {
     create_data_source = 0,
     get_data_device = 1,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_data_device_manager", 3,
-    2, _requests.ptr,
-    0, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[1] _wl_data_device_manager_request_create_data_source_types = [null,];
+static const wl_interface*[2] _wl_data_device_manager_request_get_data_device_types = [null,&wl_seat_interface,];
+static const wl_message[2] _wl_data_device_manager_requests  = [wl_message ("create_data_source","3n",_wl_data_device_manager_request_create_data_source_types.ptr),wl_message ("get_data_device","3no",_wl_data_device_manager_request_get_data_device_types.ptr),];
+static const wl_message[0] _wl_data_device_manager_events    = [];
+static const wl_interface wl_data_device_manager_interface = {
+    "wl_data_device_manager", 3,
+    2, _wl_data_device_manager_requests.ptr,
+    0, _wl_data_device_manager_events.ptr
+};
 
 // module wayland.wl_shell;
 
 struct
 wl_shell {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_shell);
+  @disable this(ref wl_shell);
 
   // Requests
   pragma (inline,true):
-  auto get_shell_surface (void* surface) { return cast (wl_shell_surface*) wl_proxy_marshal_flags (&_super, opcode.get_shell_surface, &wl_shell_surface.interface_, wl_proxy_get_version (&_super), 0, null, surface);  }
+  auto get_shell_surface (void* surface) { return cast (wl_shell_surface*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.get_shell_surface , &wl_shell_surface_interface  , null, surface);  }
 
   // Enums
   enum
@@ -639,36 +645,38 @@ wl_shell {
   opcode : uint {
     get_shell_surface = 0,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_shell", 1,
-    1, _requests.ptr,
-    0, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[2] _wl_shell_request_get_shell_surface_types = [null,&wl_surface_interface,];
+static const wl_message[1] _wl_shell_requests  = [wl_message ("get_shell_surface","no",_wl_shell_request_get_shell_surface_types.ptr),];
+static const wl_message[0] _wl_shell_events    = [];
+static const wl_interface wl_shell_interface = {
+    "wl_shell", 1,
+    1, _wl_shell_requests.ptr,
+    0, _wl_shell_events.ptr
+};
 
 // module wayland.wl_shell_surface;
 
 struct
 wl_shell_surface {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_shell_surface);
+  @disable this(ref wl_shell_surface);
 
   // Requests
   pragma (inline,true):
-  auto pong (uint serial) {                   wl_proxy_marshal_flags (&_super, opcode.pong,          null, wl_proxy_get_version (&_super), 0, null, serial);  }
-  auto move (void* seat, uint serial) {                   wl_proxy_marshal_flags (&_super, opcode.move,          null, wl_proxy_get_version (&_super), 0, null, seat, serial);  }
-  auto resize (void* seat, uint serial, uint edges) {                   wl_proxy_marshal_flags (&_super, opcode.resize,          null, wl_proxy_get_version (&_super), 0, null, seat, serial, edges);  }
-  auto set_toplevel () {                   wl_proxy_marshal_flags (&_super, opcode.set_toplevel,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_transient (void* parent, int x, int y, uint flags) {                   wl_proxy_marshal_flags (&_super, opcode.set_transient,          null, wl_proxy_get_version (&_super), 0, null, parent, x, y, flags);  }
-  auto set_fullscreen (uint method, uint framerate, void* output) {                   wl_proxy_marshal_flags (&_super, opcode.set_fullscreen,          null, wl_proxy_get_version (&_super), 0, null, method, framerate, output);  }
-  auto set_popup (void* seat, uint serial, void* parent, int x, int y, uint flags) {                   wl_proxy_marshal_flags (&_super, opcode.set_popup,          null, wl_proxy_get_version (&_super), 0, null, seat, serial, parent, x, y, flags);  }
-  auto set_maximized (void* output) {                   wl_proxy_marshal_flags (&_super, opcode.set_maximized,          null, wl_proxy_get_version (&_super), 0, null, output);  }
-  auto set_title (const(char)* title) {                   wl_proxy_marshal_flags (&_super, opcode.set_title,          null, wl_proxy_get_version (&_super), 0, null, title);  }
-  auto set_class (const(char)* class_) {                   wl_proxy_marshal_flags (&_super, opcode.set_class,          null, wl_proxy_get_version (&_super), 0, null, class_);  }
+  auto pong (uint serial) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.pong   , serial);  }
+  auto move (void* seat, uint serial) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.move   , seat, serial);  }
+  auto resize (void* seat, uint serial, uint edges) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.resize   , seat, serial, edges);  }
+  auto set_toplevel () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_toplevel   );  }
+  auto set_transient (void* parent, int x, int y, uint flags) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_transient   , parent, x, y, flags);  }
+  auto set_fullscreen (uint method, uint framerate, void* output) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_fullscreen   , method, framerate, output);  }
+  auto set_popup (void* seat, uint serial, void* parent, int x, int y, uint flags) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_popup   , seat, serial, parent, x, y, flags);  }
+  auto set_maximized (void* output) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_maximized   , output);  }
+  auto set_title (const(char)* title) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_title   , title);  }
+  auto set_class (const(char)* class_) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_class   , class_);  }
 
   // Events
   struct
@@ -683,7 +691,7 @@ wl_shell_surface {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -724,37 +732,51 @@ wl_shell_surface {
     set_title = 8,
     set_class = 9,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_shell_surface", 1,
-    10, _requests.ptr,
-    3, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[1] _wl_shell_surface_request_pong_types = [null,];
+static const wl_interface*[2] _wl_shell_surface_request_move_types = [&wl_seat_interface,null,];
+static const wl_interface*[3] _wl_shell_surface_request_resize_types = [&wl_seat_interface,null,null,];
+static const wl_interface*[0] _wl_shell_surface_request_set_toplevel_types = [];
+static const wl_interface*[4] _wl_shell_surface_request_set_transient_types = [&wl_surface_interface,null,null,null,];
+static const wl_interface*[3] _wl_shell_surface_request_set_fullscreen_types = [null,null,&wl_output_interface,];
+static const wl_interface*[6] _wl_shell_surface_request_set_popup_types = [&wl_seat_interface,null,&wl_surface_interface,null,null,null,];
+static const wl_interface*[1] _wl_shell_surface_request_set_maximized_types = [&wl_output_interface,];
+static const wl_interface*[1] _wl_shell_surface_request_set_title_types = [null,];
+static const wl_interface*[1] _wl_shell_surface_request_set_class_types = [null,];
+static const wl_interface*[1] _wl_shell_surface_event_ping_types = [null,];
+static const wl_interface*[3] _wl_shell_surface_event_configure_types = [null,null,null,];
+static const wl_interface*[0] _wl_shell_surface_event_popup_done_types = [];
+static const wl_message[10] _wl_shell_surface_requests  = [wl_message ("pong","u",_wl_shell_surface_request_pong_types.ptr),wl_message ("move","ou",_wl_shell_surface_request_move_types.ptr),wl_message ("resize","ouu",_wl_shell_surface_request_resize_types.ptr),wl_message ("set_toplevel","",_wl_shell_surface_request_set_toplevel_types.ptr),wl_message ("set_transient","oiiu",_wl_shell_surface_request_set_transient_types.ptr),wl_message ("set_fullscreen","uu?o",_wl_shell_surface_request_set_fullscreen_types.ptr),wl_message ("set_popup","ouoiiu",_wl_shell_surface_request_set_popup_types.ptr),wl_message ("set_maximized","?o",_wl_shell_surface_request_set_maximized_types.ptr),wl_message ("set_title","s",_wl_shell_surface_request_set_title_types.ptr),wl_message ("set_class","s",_wl_shell_surface_request_set_class_types.ptr),];
+static const wl_message[3] _wl_shell_surface_events    = [wl_message ("ping","u",_wl_shell_surface_event_ping_types.ptr),wl_message ("configure","uii",_wl_shell_surface_event_configure_types.ptr),wl_message ("popup_done","",_wl_shell_surface_event_popup_done_types.ptr),];
+static const wl_interface wl_shell_surface_interface = {
+    "wl_shell_surface", 1,
+    10, _wl_shell_surface_requests.ptr,
+    3, _wl_shell_surface_events.ptr
+};
 
 // module wayland.wl_surface;
 
 struct
 wl_surface {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_surface);
+  @disable this(ref wl_surface);
 
   // Requests
   pragma (inline,true):
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto attach (void* buffer, int x, int y) {                   wl_proxy_marshal_flags (&_super, opcode.attach,          null, wl_proxy_get_version (&_super), 0, null, buffer, x, y);  }
-  auto damage (int x, int y, int width, int height) {                   wl_proxy_marshal_flags (&_super, opcode.damage,          null, wl_proxy_get_version (&_super), 0, null, x, y, width, height);  }
-  auto frame () { return cast (wl_callback*) wl_proxy_marshal_flags (&_super, opcode.frame, &wl_callback.interface_, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_opaque_region (void* region) {                   wl_proxy_marshal_flags (&_super, opcode.set_opaque_region,          null, wl_proxy_get_version (&_super), 0, null, region);  }
-  auto set_input_region (void* region) {                   wl_proxy_marshal_flags (&_super, opcode.set_input_region,          null, wl_proxy_get_version (&_super), 0, null, region);  }
-  auto commit () {                   wl_proxy_marshal_flags (&_super, opcode.commit,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_buffer_transform (int transform) {                   wl_proxy_marshal_flags (&_super, opcode.set_buffer_transform,          null, wl_proxy_get_version (&_super), 0, null, transform);  }
-  auto set_buffer_scale (int scale) {                   wl_proxy_marshal_flags (&_super, opcode.set_buffer_scale,          null, wl_proxy_get_version (&_super), 0, null, scale);  }
-  auto damage_buffer (int x, int y, int width, int height) {                   wl_proxy_marshal_flags (&_super, opcode.damage_buffer,          null, wl_proxy_get_version (&_super), 0, null, x, y, width, height);  }
-  auto offset (int x, int y) {                   wl_proxy_marshal_flags (&_super, opcode.offset,          null, wl_proxy_get_version (&_super), 0, null, x, y);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto attach (void* buffer, int x, int y) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.attach   , buffer, x, y);  }
+  auto damage (int x, int y, int width, int height) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.damage   , x, y, width, height);  }
+  auto frame () { return cast (wl_callback*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.frame , &wl_callback_interface  , null);  }
+  auto set_opaque_region (void* region) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_opaque_region   , region);  }
+  auto set_input_region (void* region) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_input_region   , region);  }
+  auto commit () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.commit   );  }
+  auto set_buffer_transform (int transform) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_buffer_transform   , transform);  }
+  auto set_buffer_scale (int scale) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_buffer_scale   , scale);  }
+  auto damage_buffer (int x, int y, int width, int height) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.damage_buffer   , x, y, width, height);  }
+  auto offset (int x, int y) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.offset   , x, y);  }
 
   // Events
   struct
@@ -771,7 +793,7 @@ wl_surface {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -798,30 +820,46 @@ wl_surface {
     damage_buffer = 9,
     offset = 10,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_surface", 6,
-    11, _requests.ptr,
-    4, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_surface_request_destroy_types = [];
+static const wl_interface*[3] _wl_surface_request_attach_types = [&wl_buffer_interface,null,null,];
+static const wl_interface*[4] _wl_surface_request_damage_types = [null,null,null,null,];
+static const wl_interface*[1] _wl_surface_request_frame_types = [null,];
+static const wl_interface*[1] _wl_surface_request_set_opaque_region_types = [&wl_region_interface,];
+static const wl_interface*[1] _wl_surface_request_set_input_region_types = [&wl_region_interface,];
+static const wl_interface*[0] _wl_surface_request_commit_types = [];
+static const wl_interface*[1] _wl_surface_request_set_buffer_transform_types = [null,];
+static const wl_interface*[1] _wl_surface_request_set_buffer_scale_types = [null,];
+static const wl_interface*[4] _wl_surface_request_damage_buffer_types = [null,null,null,null,];
+static const wl_interface*[2] _wl_surface_request_offset_types = [null,null,];
+static const wl_interface*[1] _wl_surface_event_enter_types = [&wl_output_interface,];
+static const wl_interface*[1] _wl_surface_event_leave_types = [&wl_output_interface,];
+static const wl_interface*[1] _wl_surface_event_preferred_buffer_scale_types = [null,];
+static const wl_interface*[1] _wl_surface_event_preferred_buffer_transform_types = [null,];
+static const wl_message[11] _wl_surface_requests  = [wl_message ("destroy","6",_wl_surface_request_destroy_types.ptr),wl_message ("attach","6?oii",_wl_surface_request_attach_types.ptr),wl_message ("damage","6iiii",_wl_surface_request_damage_types.ptr),wl_message ("frame","6n",_wl_surface_request_frame_types.ptr),wl_message ("set_opaque_region","6?o",_wl_surface_request_set_opaque_region_types.ptr),wl_message ("set_input_region","6?o",_wl_surface_request_set_input_region_types.ptr),wl_message ("commit","6",_wl_surface_request_commit_types.ptr),wl_message ("set_buffer_transform","6i",_wl_surface_request_set_buffer_transform_types.ptr),wl_message ("set_buffer_scale","6i",_wl_surface_request_set_buffer_scale_types.ptr),wl_message ("damage_buffer","6iiii",_wl_surface_request_damage_buffer_types.ptr),wl_message ("offset","6ii",_wl_surface_request_offset_types.ptr),];
+static const wl_message[4] _wl_surface_events    = [wl_message ("enter","6o",_wl_surface_event_enter_types.ptr),wl_message ("leave","6o",_wl_surface_event_leave_types.ptr),wl_message ("preferred_buffer_scale","6i",_wl_surface_event_preferred_buffer_scale_types.ptr),wl_message ("preferred_buffer_transform","6u",_wl_surface_event_preferred_buffer_transform_types.ptr),];
+static const wl_interface wl_surface_interface = {
+    "wl_surface", 6,
+    11, _wl_surface_requests.ptr,
+    4, _wl_surface_events.ptr
+};
 
 // module wayland.wl_seat;
 
 struct
 wl_seat {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_seat);
+  @disable this(ref wl_seat);
 
   // Requests
   pragma (inline,true):
-  auto get_pointer () { return cast (wl_pointer*) wl_proxy_marshal_flags (&_super, opcode.get_pointer, &wl_pointer.interface_, wl_proxy_get_version (&_super), 0, null);  }
-  auto get_keyboard () { return cast (wl_keyboard*) wl_proxy_marshal_flags (&_super, opcode.get_keyboard, &wl_keyboard.interface_, wl_proxy_get_version (&_super), 0, null);  }
-  auto get_touch () { return cast (wl_touch*) wl_proxy_marshal_flags (&_super, opcode.get_touch, &wl_touch.interface_, wl_proxy_get_version (&_super), 0, null);  }
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto get_pointer () { return cast (wl_pointer*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.get_pointer , &wl_pointer_interface  , null);  }
+  auto get_keyboard () { return cast (wl_keyboard*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.get_keyboard , &wl_keyboard_interface  , null);  }
+  auto get_touch () { return cast (wl_touch*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.get_touch , &wl_touch_interface  , null);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -834,7 +872,7 @@ wl_seat {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -856,28 +894,35 @@ wl_seat {
     get_touch = 2,
     release = 3,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_seat", 9,
-    4, _requests.ptr,
-    2, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[1] _wl_seat_request_get_pointer_types = [null,];
+static const wl_interface*[1] _wl_seat_request_get_keyboard_types = [null,];
+static const wl_interface*[1] _wl_seat_request_get_touch_types = [null,];
+static const wl_interface*[0] _wl_seat_request_release_types = [];
+static const wl_interface*[1] _wl_seat_event_capabilities_types = [null,];
+static const wl_interface*[1] _wl_seat_event_name_types = [null,];
+static const wl_message[4] _wl_seat_requests  = [wl_message ("get_pointer","9n",_wl_seat_request_get_pointer_types.ptr),wl_message ("get_keyboard","9n",_wl_seat_request_get_keyboard_types.ptr),wl_message ("get_touch","9n",_wl_seat_request_get_touch_types.ptr),wl_message ("release","9",_wl_seat_request_release_types.ptr),];
+static const wl_message[2] _wl_seat_events    = [wl_message ("capabilities","9u",_wl_seat_event_capabilities_types.ptr),wl_message ("name","9s",_wl_seat_event_name_types.ptr),];
+static const wl_interface wl_seat_interface = {
+    "wl_seat", 9,
+    4, _wl_seat_requests.ptr,
+    2, _wl_seat_events.ptr
+};
 
 // module wayland.wl_pointer;
 
 struct
 wl_pointer {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_pointer);
+  @disable this(ref wl_pointer);
 
   // Requests
   pragma (inline,true):
-  auto set_cursor (uint serial, void* surface, int hotspot_x, int hotspot_y) {                   wl_proxy_marshal_flags (&_super, opcode.set_cursor,          null, wl_proxy_get_version (&_super), 0, null, serial, surface, hotspot_x, hotspot_y);  }
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto set_cursor (uint serial, void* surface, int hotspot_x, int hotspot_y) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_cursor   , serial, surface, hotspot_x, hotspot_y);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -908,7 +953,7 @@ wl_pointer {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -944,27 +989,41 @@ wl_pointer {
     set_cursor = 0,
     release = 1,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_pointer", 9,
-    2, _requests.ptr,
-    11, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[4] _wl_pointer_request_set_cursor_types = [null,&wl_surface_interface,null,null,];
+static const wl_interface*[0] _wl_pointer_request_release_types = [];
+static const wl_interface*[4] _wl_pointer_event_enter_types = [null,&wl_surface_interface,null,null,];
+static const wl_interface*[2] _wl_pointer_event_leave_types = [null,&wl_surface_interface,];
+static const wl_interface*[3] _wl_pointer_event_motion_types = [null,null,null,];
+static const wl_interface*[4] _wl_pointer_event_button_types = [null,null,null,null,];
+static const wl_interface*[3] _wl_pointer_event_axis_types = [null,null,null,];
+static const wl_interface*[0] _wl_pointer_event_frame_types = [];
+static const wl_interface*[1] _wl_pointer_event_axis_source_types = [null,];
+static const wl_interface*[2] _wl_pointer_event_axis_stop_types = [null,null,];
+static const wl_interface*[2] _wl_pointer_event_axis_discrete_types = [null,null,];
+static const wl_interface*[2] _wl_pointer_event_axis_value120_types = [null,null,];
+static const wl_interface*[2] _wl_pointer_event_axis_relative_direction_types = [null,null,];
+static const wl_message[2] _wl_pointer_requests  = [wl_message ("set_cursor","9u?oii",_wl_pointer_request_set_cursor_types.ptr),wl_message ("release","9",_wl_pointer_request_release_types.ptr),];
+static const wl_message[11] _wl_pointer_events    = [wl_message ("enter","9uoff",_wl_pointer_event_enter_types.ptr),wl_message ("leave","9uo",_wl_pointer_event_leave_types.ptr),wl_message ("motion","9uff",_wl_pointer_event_motion_types.ptr),wl_message ("button","9uuuu",_wl_pointer_event_button_types.ptr),wl_message ("axis","9uuf",_wl_pointer_event_axis_types.ptr),wl_message ("frame","9",_wl_pointer_event_frame_types.ptr),wl_message ("axis_source","9u",_wl_pointer_event_axis_source_types.ptr),wl_message ("axis_stop","9uu",_wl_pointer_event_axis_stop_types.ptr),wl_message ("axis_discrete","9ui",_wl_pointer_event_axis_discrete_types.ptr),wl_message ("axis_value120","9ui",_wl_pointer_event_axis_value120_types.ptr),wl_message ("axis_relative_direction","9uu",_wl_pointer_event_axis_relative_direction_types.ptr),];
+static const wl_interface wl_pointer_interface = {
+    "wl_pointer", 9,
+    2, _wl_pointer_requests.ptr,
+    11, _wl_pointer_events.ptr
+};
 
 // module wayland.wl_keyboard;
 
 struct
 wl_keyboard {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_keyboard);
+  @disable this(ref wl_keyboard);
 
   // Requests
   pragma (inline,true):
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -985,7 +1044,7 @@ wl_keyboard {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -1004,27 +1063,35 @@ wl_keyboard {
   opcode : uint {
     release = 0,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_keyboard", 9,
-    1, _requests.ptr,
-    6, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_keyboard_request_release_types = [];
+static const wl_interface*[3] _wl_keyboard_event_keymap_types = [null,null,null,];
+static const wl_interface*[3] _wl_keyboard_event_enter_types = [null,&wl_surface_interface,null,];
+static const wl_interface*[2] _wl_keyboard_event_leave_types = [null,&wl_surface_interface,];
+static const wl_interface*[4] _wl_keyboard_event_key_types = [null,null,null,null,];
+static const wl_interface*[5] _wl_keyboard_event_modifiers_types = [null,null,null,null,null,];
+static const wl_interface*[2] _wl_keyboard_event_repeat_info_types = [null,null,];
+static const wl_message[1] _wl_keyboard_requests  = [wl_message ("release","9",_wl_keyboard_request_release_types.ptr),];
+static const wl_message[6] _wl_keyboard_events    = [wl_message ("keymap","9uhu",_wl_keyboard_event_keymap_types.ptr),wl_message ("enter","9uoa",_wl_keyboard_event_enter_types.ptr),wl_message ("leave","9uo",_wl_keyboard_event_leave_types.ptr),wl_message ("key","9uuuu",_wl_keyboard_event_key_types.ptr),wl_message ("modifiers","9uuuuu",_wl_keyboard_event_modifiers_types.ptr),wl_message ("repeat_info","9ii",_wl_keyboard_event_repeat_info_types.ptr),];
+static const wl_interface wl_keyboard_interface = {
+    "wl_keyboard", 9,
+    1, _wl_keyboard_requests.ptr,
+    6, _wl_keyboard_events.ptr
+};
 
 // module wayland.wl_touch;
 
 struct
 wl_touch {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_touch);
+  @disable this(ref wl_touch);
 
   // Requests
   pragma (inline,true):
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -1047,34 +1114,43 @@ wl_touch {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Opcodes
   enum
   opcode : uint {
     release = 0,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_touch", 9,
-    1, _requests.ptr,
-    7, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_touch_request_release_types = [];
+static const wl_interface*[6] _wl_touch_event_down_types = [null,null,&wl_surface_interface,null,null,null,];
+static const wl_interface*[3] _wl_touch_event_up_types = [null,null,null,];
+static const wl_interface*[4] _wl_touch_event_motion_types = [null,null,null,null,];
+static const wl_interface*[0] _wl_touch_event_frame_types = [];
+static const wl_interface*[0] _wl_touch_event_cancel_types = [];
+static const wl_interface*[3] _wl_touch_event_shape_types = [null,null,null,];
+static const wl_interface*[2] _wl_touch_event_orientation_types = [null,null,];
+static const wl_message[1] _wl_touch_requests  = [wl_message ("release","9",_wl_touch_request_release_types.ptr),];
+static const wl_message[7] _wl_touch_events    = [wl_message ("down","9uuoiff",_wl_touch_event_down_types.ptr),wl_message ("up","9uui",_wl_touch_event_up_types.ptr),wl_message ("motion","9uiff",_wl_touch_event_motion_types.ptr),wl_message ("frame","9",_wl_touch_event_frame_types.ptr),wl_message ("cancel","9",_wl_touch_event_cancel_types.ptr),wl_message ("shape","9iff",_wl_touch_event_shape_types.ptr),wl_message ("orientation","9if",_wl_touch_event_orientation_types.ptr),];
+static const wl_interface wl_touch_interface = {
+    "wl_touch", 9,
+    1, _wl_touch_requests.ptr,
+    7, _wl_touch_events.ptr
+};
 
 // module wayland.wl_output;
 
 struct
 wl_output {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_output);
+  @disable this(ref wl_output);
 
   // Requests
   pragma (inline,true):
-  auto release () {                   wl_proxy_marshal_flags (&_super, opcode.release,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto release () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.release   );  }
 
   // Events
   struct
@@ -1095,7 +1171,7 @@ wl_output {
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (&_super, cast (wl_proxy_callback*) &impl, data); }
+  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }
 
   // Enums
   enum
@@ -1129,29 +1205,37 @@ wl_output {
   opcode : uint {
     release = 0,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_output", 4,
-    1, _requests.ptr,
-    6, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_output_request_release_types = [];
+static const wl_interface*[8] _wl_output_event_geometry_types = [null,null,null,null,null,null,null,null,];
+static const wl_interface*[4] _wl_output_event_mode_types = [null,null,null,null,];
+static const wl_interface*[0] _wl_output_event_done_types = [];
+static const wl_interface*[1] _wl_output_event_scale_types = [null,];
+static const wl_interface*[1] _wl_output_event_name_types = [null,];
+static const wl_interface*[1] _wl_output_event_description_types = [null,];
+static const wl_message[1] _wl_output_requests  = [wl_message ("release","4",_wl_output_request_release_types.ptr),];
+static const wl_message[6] _wl_output_events    = [wl_message ("geometry","4iiiiissi",_wl_output_event_geometry_types.ptr),wl_message ("mode","4uiii",_wl_output_event_mode_types.ptr),wl_message ("done","4",_wl_output_event_done_types.ptr),wl_message ("scale","4i",_wl_output_event_scale_types.ptr),wl_message ("name","4s",_wl_output_event_name_types.ptr),wl_message ("description","4s",_wl_output_event_description_types.ptr),];
+static const wl_interface wl_output_interface = {
+    "wl_output", 4,
+    1, _wl_output_requests.ptr,
+    6, _wl_output_events.ptr
+};
 
 // module wayland.wl_region;
 
 struct
 wl_region {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_region);
+  @disable this(ref wl_region);
 
   // Requests
   pragma (inline,true):
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto add (int x, int y, int width, int height) {                   wl_proxy_marshal_flags (&_super, opcode.add,          null, wl_proxy_get_version (&_super), 0, null, x, y, width, height);  }
-  auto subtract (int x, int y, int width, int height) {                   wl_proxy_marshal_flags (&_super, opcode.subtract,          null, wl_proxy_get_version (&_super), 0, null, x, y, width, height);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto add (int x, int y, int width, int height) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.add   , x, y, width, height);  }
+  auto subtract (int x, int y, int width, int height) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.subtract   , x, y, width, height);  }
 
   // Opcodes
   enum
@@ -1160,28 +1244,32 @@ wl_region {
     add = 1,
     subtract = 2,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_region", 1,
-    3, _requests.ptr,
-    0, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_region_request_destroy_types = [];
+static const wl_interface*[4] _wl_region_request_add_types = [null,null,null,null,];
+static const wl_interface*[4] _wl_region_request_subtract_types = [null,null,null,null,];
+static const wl_message[3] _wl_region_requests  = [wl_message ("destroy","",_wl_region_request_destroy_types.ptr),wl_message ("add","iiii",_wl_region_request_add_types.ptr),wl_message ("subtract","iiii",_wl_region_request_subtract_types.ptr),];
+static const wl_message[0] _wl_region_events    = [];
+static const wl_interface wl_region_interface = {
+    "wl_region", 1,
+    3, _wl_region_requests.ptr,
+    0, _wl_region_events.ptr
+};
 
 // module wayland.wl_subcompositor;
 
 struct
 wl_subcompositor {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_subcompositor);
+  @disable this(ref wl_subcompositor);
 
   // Requests
   pragma (inline,true):
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto get_subsurface (void* surface, void* parent) { return cast (wl_subsurface*) wl_proxy_marshal_flags (&_super, opcode.get_subsurface, &wl_subsurface.interface_, wl_proxy_get_version (&_super), 0, null, surface, parent);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto get_subsurface (void* surface, void* parent) { return cast (wl_subsurface*) wl_proxy_marshal_constructor (cast(wl_proxy*)&this, opcode.get_subsurface , &wl_subsurface_interface  , null, surface, parent);  }
 
   // Enums
   enum
@@ -1196,32 +1284,35 @@ wl_subcompositor {
     destroy = 0,
     get_subsurface = 1,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_subcompositor", 1,
-    2, _requests.ptr,
-    0, _events.ptr
-  };
 }
+
+// Interface
+static const wl_interface*[0] _wl_subcompositor_request_destroy_types = [];
+static const wl_interface*[3] _wl_subcompositor_request_get_subsurface_types = [null,&wl_surface_interface,&wl_surface_interface,];
+static const wl_message[2] _wl_subcompositor_requests  = [wl_message ("destroy","",_wl_subcompositor_request_destroy_types.ptr),wl_message ("get_subsurface","noo",_wl_subcompositor_request_get_subsurface_types.ptr),];
+static const wl_message[0] _wl_subcompositor_events    = [];
+static const wl_interface wl_subcompositor_interface = {
+    "wl_subcompositor", 1,
+    2, _wl_subcompositor_requests.ptr,
+    0, _wl_subcompositor_events.ptr
+};
 
 // module wayland.wl_subsurface;
 
 struct
 wl_subsurface {
-  wl_proxy _super;
-  alias _super this;
+  @disable this();
+  @disable this(wl_subsurface);
+  @disable this(ref wl_subsurface);
 
   // Requests
   pragma (inline,true):
-  auto destroy () {                   wl_proxy_marshal_flags (&_super, opcode.destroy,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_position (int x, int y) {                   wl_proxy_marshal_flags (&_super, opcode.set_position,          null, wl_proxy_get_version (&_super), 0, null, x, y);  }
-  auto place_above (void* sibling) {                   wl_proxy_marshal_flags (&_super, opcode.place_above,          null, wl_proxy_get_version (&_super), 0, null, sibling);  }
-  auto place_below (void* sibling) {                   wl_proxy_marshal_flags (&_super, opcode.place_below,          null, wl_proxy_get_version (&_super), 0, null, sibling);  }
-  auto set_sync () {                   wl_proxy_marshal_flags (&_super, opcode.set_sync,          null, wl_proxy_get_version (&_super), 0, null);  }
-  auto set_desync () {                   wl_proxy_marshal_flags (&_super, opcode.set_desync,          null, wl_proxy_get_version (&_super), 0, null);  }
+  auto destroy () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.destroy   );  }
+  auto set_position (int x, int y) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_position   , x, y);  }
+  auto place_above (void* sibling) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.place_above   , sibling);  }
+  auto place_below (void* sibling) {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.place_below   , sibling);  }
+  auto set_sync () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_sync   );  }
+  auto set_desync () {  wl_proxy_marshal (cast(wl_proxy*)&this, opcode.set_desync   );  }
 
   // Enums
   enum
@@ -1239,14 +1330,28 @@ wl_subsurface {
     set_sync = 4,
     set_desync = 5,
   }
-
-  // Interface
-  static const wl_message[1] _requests  = [wl_message ()];
-  static const wl_message[1] _events    = [wl_message ()];
-  static const wl_interface interface_ = {
-    "wl_subsurface", 1,
-    6, _requests.ptr,
-    0, _events.ptr
-  };
 }
 
+// Interface
+static const wl_interface*[0] _wl_subsurface_request_destroy_types = [];
+static const wl_interface*[2] _wl_subsurface_request_set_position_types = [null,null,];
+static const wl_interface*[1] _wl_subsurface_request_place_above_types = [&wl_surface_interface,];
+static const wl_interface*[1] _wl_subsurface_request_place_below_types = [&wl_surface_interface,];
+static const wl_interface*[0] _wl_subsurface_request_set_sync_types = [];
+static const wl_interface*[0] _wl_subsurface_request_set_desync_types = [];
+static const wl_message[6] _wl_subsurface_requests  = [wl_message ("destroy","",_wl_subsurface_request_destroy_types.ptr),wl_message ("set_position","ii",_wl_subsurface_request_set_position_types.ptr),wl_message ("place_above","o",_wl_subsurface_request_place_above_types.ptr),wl_message ("place_below","o",_wl_subsurface_request_place_below_types.ptr),wl_message ("set_sync","",_wl_subsurface_request_set_sync_types.ptr),wl_message ("set_desync","",_wl_subsurface_request_set_desync_types.ptr),];
+static const wl_message[0] _wl_subsurface_events    = [];
+static const wl_interface wl_subsurface_interface = {
+    "wl_subsurface", 1,
+    6, _wl_subsurface_requests.ptr,
+    0, _wl_subsurface_events.ptr
+};
+
+// wl_proxy interface
+static const wl_message[6] _wl_proxy_interface_requests  = [];
+static const wl_message[0] _wl_proxy_interface_events    = [];
+static const wl_interface wl_proxy_interface = {
+    "wl_proxy", 1,
+    0, _wl_proxy_interface_requests.ptr,
+    0, _wl_proxy_interface_events.ptr
+};
