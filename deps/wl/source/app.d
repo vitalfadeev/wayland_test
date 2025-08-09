@@ -5,11 +5,18 @@ import std.conv;
 import dxml.dom;
 import std.range : empty;
 import std.algorithm.searching : canFind;
+import std : replicate;
 
 void 
-main () {
+main (string[] args) {
+	string file_name = "wayland.xml";
+	if (args.length > 1) {
+		file_name = args[1];
+		writeln (file_name);
+	}
+
 	// READ-WRITE
-	foreach (protocol; Reader ("wayland.xml"))
+	foreach (protocol; Reader (file_name))
 		D_File_Writer (protocol).write ();
 }
 
@@ -83,12 +90,28 @@ D_File_Writer {
 				writefln ("  pragma (inline,true):");
 				foreach (req; iface.requests) {
 					if (iface.name == "wl_registry" && req.name == "bind") {
-						writeln ("  auto bind (uint name) { ");
-						writeln ("    return cast (wl_proxy*)");
-						writeln ("      wl_proxy_marshal_constructor (");
-						writeln ("        cast (wl_proxy*) &this, opcode.bind, &wl_registry_interface, name");
-						writeln ("      );");
+						writeln ("  void*");
+						writeln ("  bind (uint name, const wl_interface* interface_, uint version_ ) {");
+						writeln ("  	return cast (void*) ");
+						writeln ("  		wl_proxy_marshal_flags (");
+						writeln ("  			cast (wl_proxy*) &this,");
+						writeln ("  	        opcode.bind, ");
+						writeln ("  	        interface_, ");
+						writeln ("  	        version_, ");
+						writeln ("  	        0, ");
+						writeln ("  	        name, ");
+						writeln ("  	        interface_.name, ");
+						writeln ("  	        version_, ");
+						writeln ("  	    	null");
+						writeln ("  		);");
 						writeln ("  }");
+
+						//writeln ("  auto bind (uint name) { ");
+						//writeln ("    return cast (wl_proxy*)");
+						//writeln ("      wl_proxy_marshal_constructor (");
+						//writeln ("        cast (wl_proxy*) &this, opcode.bind, &wl_registry_interface, name");
+						//writeln ("      );");
+						//writeln ("  }");
 						continue;
 					}
 
@@ -135,17 +158,28 @@ D_File_Writer {
 				writefln ("  // Events");
 				writefln ("  struct");
 				writefln ("  Listener {");
+				// max eve name length
+				size_t max_eve_length;
+				foreach (eve; iface.events) {
+					auto eve_name = eve.name.to_d_name;
+					max_eve_length = 
+						(eve_name.length > max_eve_length)?
+							eve_name.length:
+							max_eve_length;
+				}
 				// callbacks
 				foreach (eve; iface.events) {
-					auto eve_name = eve.name;
+					auto eve_name = eve.name.to_d_name;
+					string _filler = " ".replicate (max_eve_length - eve_name.length);
 					writefln (
-						"    %s_cb %s = &_%s_impl_default;", 
-						eve_name, eve_name, eve_name);
+						"    %s_cb%s %s%s = &_%s_impl_default;", 
+						eve_name, _filler,eve_name, _filler, eve_name);
 				}
 				writefln ("");
 				// alias
 				foreach (eve; iface.events) {
 					auto     eve_name = eve.name.to_d_name;
+					string  _filler = " ".replicate (max_eve_length - eve_name.length);
 					string[] eve_args;
 					foreach (arg; eve.args) {
 						eve_args ~= format!
@@ -153,8 +187,8 @@ D_File_Writer {
 							(arg.type.to_d_type (arg), arg.name.to_d_name);
 					}
 					writefln (
-						"    alias %s_cb = extern (C) void function (void* data, %s* _this /* args: */ %s%s);", 
-						eve_name, iface_name, (eve_args.length? ", ": ""), eve_args.join (", "));
+						"    alias %s_cb%s = extern (C) void function (void* data, %s* _this /* args: */ %s%s);", 
+						eve_name, _filler, iface_name, (eve_args.length? ", ": ""), eve_args.join (", "));
 				}
 				// impl default
 				foreach (eve; iface.events) {
@@ -268,8 +302,9 @@ D_File_Writer {
 			//   static wl_interface*[N] _wl_compositor_event_ENAME_types = [];
 
 			// objdump -T  libwayland-client.so  | grep _interface			
+			writefln ("// interface");
 			writefln ("extern (C) extern __gshared wl_interface %s_interface;", iface_name);
-			//writefln ("");
+			writefln ("");
 		}
 
 		// wl_proxy interface

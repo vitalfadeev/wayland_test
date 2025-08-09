@@ -51,7 +51,7 @@ wayland_ctx {
     //wl_shm_pool*      pool;
     //wl_buffer*        buffer;
 
-    //.xdg_wm_base*   xdg_wm_base;
+    xdg_wm_base*   xdg_wm_base;
 
     //.xdg_surface*   xdg_surface;
     //.xdg_toplevel*  xdg_toplevel;
@@ -123,8 +123,21 @@ wl_display_get_registry (wl_display* display) {
 
 extern (C)
 void 
-global_impl (void* data, wl_registry* _wl_registry, uint name, const(char)* interface_, uint version_) {
+global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
     printf ("%d: %s\n", name, interface_);
+    auto xdg_wm_base_interface_name = "xdg_wm_base";
+    if (strcmp (xdg_wm_base_interface_name.ptr, interface_) == 0) {
+        xdg_wm_base_interface;
+
+        (cast (wayland_ctx*) ctx).xdg_wm_base = 
+        cast (xdg_wm_base*) 
+            _this.bind (
+                name, 
+                //
+                xdg_wm_base_interface, 
+                version_
+            );
+    }
 }
 extern (C) 
 void 
@@ -168,8 +181,7 @@ main () {
     ctx.registry.destroy ();
     ctx.display.disconnect ();
 
-version (NEVER) {
-    if (!ctx.shell) {
+    if (ctx.shell is null) {
         printf ("Can't find shell\n");
         return EXIT_FAILURE;
     } 
@@ -178,6 +190,7 @@ version (NEVER) {
     }
 
 
+    version (NEVER) {
     auto surface       = ctx.compositor.create_surface ();
     auto shell_surface = ctx.shell.get_shell_surface (surface);
     shell_surface.set_toplevel ();

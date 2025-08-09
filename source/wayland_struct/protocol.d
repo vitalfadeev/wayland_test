@@ -23,20 +23,29 @@ wl_registry {
 
   // Requests
   pragma (inline,true):
-  auto bind (uint name) { 
-    return cast (wl_proxy*)
-      wl_proxy_marshal_constructor (
-        cast (wl_proxy*) &this, opcode.bind, &wl_registry_interface, name
-      );
+  void*
+  bind (uint name, const wl_interface* interface_, uint version_ ) {
+    return cast (void*) 
+        wl_proxy_marshal_flags (
+            cast (wl_proxy*) &this,
+            opcode.bind, 
+            interface_, 
+            version_, 
+            0, 
+            name, 
+            interface_.name, 
+            version_, 
+            null
+        );
   }
 
   // Events
   struct
   Listener {
-    global_cb global = &_global_impl_default;
+    global_cb        global        = &_global_impl_default;
     global_remove_cb global_remove = &_global_remove_impl_default;
 
-    alias global_cb = extern (C) void function (void* data, wl_registry* _this /* args: */ , uint name, const(char)* interface_, uint version_);
+    alias global_cb        = extern (C) void function (void* data, wl_registry* _this /* args: */ , uint name, const(char)* interface_, uint version_);
     alias global_remove_cb = extern (C) void function (void* data, wl_registry* _this /* args: */ , uint name);
 
     extern (C)
@@ -64,7 +73,9 @@ wl_registry {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_registry_interface;
+
 // module wayland.wl_callback;
 
 struct
@@ -92,7 +103,9 @@ wl_callback {
   auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_callback_interface;
+
 // module wayland.wl_compositor;
 
 struct
@@ -114,7 +127,9 @@ wl_compositor {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_compositor_interface;
+
 // module wayland.wl_shm_pool;
 
 struct
@@ -138,7 +153,9 @@ wl_shm_pool {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_shm_pool_interface;
+
 // module wayland.wl_shm;
 
 struct
@@ -312,7 +329,9 @@ wl_shm {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_shm_interface;
+
 // module wayland.wl_buffer;
 
 struct
@@ -350,7 +369,9 @@ wl_buffer {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_buffer_interface;
+
 // module wayland.wl_data_offer;
 
 struct
@@ -370,13 +391,13 @@ wl_data_offer {
   // Events
   struct
   Listener {
-    offer_cb offer = &_offer_impl_default;
+    offer_cb          offer          = &_offer_impl_default;
     source_actions_cb source_actions = &_source_actions_impl_default;
-    action_cb action = &_action_impl_default;
+    action_cb         action         = &_action_impl_default;
 
-    alias offer_cb = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , const(char)* mime_type);
+    alias offer_cb          = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , const(char)* mime_type);
     alias source_actions_cb = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , uint source_actions);
-    alias action_cb = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , uint dnd_action);
+    alias action_cb         = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , uint dnd_action);
 
     extern (C)
     static
@@ -423,7 +444,9 @@ wl_data_offer {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_data_offer_interface;
+
 // module wayland.wl_data_source;
 
 struct
@@ -441,19 +464,19 @@ wl_data_source {
   // Events
   struct
   Listener {
-    target_cb target = &_target_impl_default;
-    send_cb send = &_send_impl_default;
-    cancelled_cb cancelled = &_cancelled_impl_default;
+    target_cb             target             = &_target_impl_default;
+    send_cb               send               = &_send_impl_default;
+    cancelled_cb          cancelled          = &_cancelled_impl_default;
     dnd_drop_performed_cb dnd_drop_performed = &_dnd_drop_performed_impl_default;
-    dnd_finished_cb dnd_finished = &_dnd_finished_impl_default;
-    action_cb action = &_action_impl_default;
+    dnd_finished_cb       dnd_finished       = &_dnd_finished_impl_default;
+    action_cb             action             = &_action_impl_default;
 
-    alias target_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type);
-    alias send_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type, int fd);
-    alias cancelled_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
+    alias target_cb             = extern (C) void function (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type);
+    alias send_cb               = extern (C) void function (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type, int fd);
+    alias cancelled_cb          = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
     alias dnd_drop_performed_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
-    alias dnd_finished_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
-    alias action_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ , uint dnd_action);
+    alias dnd_finished_cb       = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
+    alias action_cb             = extern (C) void function (void* data, wl_data_source* _this /* args: */ , uint dnd_action);
 
     extern (C)
     static
@@ -517,7 +540,9 @@ wl_data_source {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_data_source_interface;
+
 // module wayland.wl_data_device;
 
 struct
@@ -536,18 +561,18 @@ wl_data_device {
   struct
   Listener {
     data_offer_cb data_offer = &_data_offer_impl_default;
-    enter_cb enter = &_enter_impl_default;
-    leave_cb leave = &_leave_impl_default;
-    motion_cb motion = &_motion_impl_default;
-    drop_cb drop = &_drop_impl_default;
-    selection_cb selection = &_selection_impl_default;
+    enter_cb      enter      = &_enter_impl_default;
+    leave_cb      leave      = &_leave_impl_default;
+    motion_cb     motion     = &_motion_impl_default;
+    drop_cb       drop       = &_drop_impl_default;
+    selection_cb  selection  = &_selection_impl_default;
 
     alias data_offer_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ , wl_data_offer id);
-    alias enter_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ , uint serial, void* surface, wl_fixed_t x, wl_fixed_t y, void* id);
-    alias leave_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ );
-    alias motion_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ , uint time, wl_fixed_t x, wl_fixed_t y);
-    alias drop_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ );
-    alias selection_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ , void* id);
+    alias enter_cb      = extern (C) void function (void* data, wl_data_device* _this /* args: */ , uint serial, void* surface, wl_fixed_t x, wl_fixed_t y, void* id);
+    alias leave_cb      = extern (C) void function (void* data, wl_data_device* _this /* args: */ );
+    alias motion_cb     = extern (C) void function (void* data, wl_data_device* _this /* args: */ , uint time, wl_fixed_t x, wl_fixed_t y);
+    alias drop_cb       = extern (C) void function (void* data, wl_data_device* _this /* args: */ );
+    alias selection_cb  = extern (C) void function (void* data, wl_data_device* _this /* args: */ , void* id);
 
     extern (C)
     static
@@ -611,7 +636,9 @@ wl_data_device {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_data_device_interface;
+
 // module wayland.wl_data_device_manager;
 
 struct
@@ -642,7 +669,9 @@ wl_data_device_manager {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_data_device_manager_interface;
+
 // module wayland.wl_shell;
 
 struct
@@ -668,7 +697,9 @@ wl_shell {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_shell_interface;
+
 // module wayland.wl_shell_surface;
 
 struct
@@ -693,12 +724,12 @@ wl_shell_surface {
   // Events
   struct
   Listener {
-    ping_cb ping = &_ping_impl_default;
-    configure_cb configure = &_configure_impl_default;
+    ping_cb       ping       = &_ping_impl_default;
+    configure_cb  configure  = &_configure_impl_default;
     popup_done_cb popup_done = &_popup_done_impl_default;
 
-    alias ping_cb = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ , uint serial);
-    alias configure_cb = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ , uint edges, int width, int height);
+    alias ping_cb       = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ , uint serial);
+    alias configure_cb  = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ , uint edges, int width, int height);
     alias popup_done_cb = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ );
 
     extern (C)
@@ -767,7 +798,9 @@ wl_shell_surface {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_shell_surface_interface;
+
 // module wayland.wl_surface;
 
 struct
@@ -793,14 +826,14 @@ wl_surface {
   // Events
   struct
   Listener {
-    enter_cb enter = &_enter_impl_default;
-    leave_cb leave = &_leave_impl_default;
-    preferred_buffer_scale_cb preferred_buffer_scale = &_preferred_buffer_scale_impl_default;
+    enter_cb                      enter                      = &_enter_impl_default;
+    leave_cb                      leave                      = &_leave_impl_default;
+    preferred_buffer_scale_cb     preferred_buffer_scale     = &_preferred_buffer_scale_impl_default;
     preferred_buffer_transform_cb preferred_buffer_transform = &_preferred_buffer_transform_impl_default;
 
-    alias enter_cb = extern (C) void function (void* data, wl_surface* _this /* args: */ , void* output);
-    alias leave_cb = extern (C) void function (void* data, wl_surface* _this /* args: */ , void* output);
-    alias preferred_buffer_scale_cb = extern (C) void function (void* data, wl_surface* _this /* args: */ , int factor);
+    alias enter_cb                      = extern (C) void function (void* data, wl_surface* _this /* args: */ , void* output);
+    alias leave_cb                      = extern (C) void function (void* data, wl_surface* _this /* args: */ , void* output);
+    alias preferred_buffer_scale_cb     = extern (C) void function (void* data, wl_surface* _this /* args: */ , int factor);
     alias preferred_buffer_transform_cb = extern (C) void function (void* data, wl_surface* _this /* args: */ , uint transform);
 
     extern (C)
@@ -862,7 +895,9 @@ wl_surface {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_surface_interface;
+
 // module wayland.wl_seat;
 
 struct
@@ -882,10 +917,10 @@ wl_seat {
   struct
   Listener {
     capabilities_cb capabilities = &_capabilities_impl_default;
-    name_cb name = &_name_impl_default;
+    name_cb         name         = &_name_impl_default;
 
     alias capabilities_cb = extern (C) void function (void* data, wl_seat* _this /* args: */ , uint capabilities);
-    alias name_cb = extern (C) void function (void* data, wl_seat* _this /* args: */ , const(char)* name);
+    alias name_cb         = extern (C) void function (void* data, wl_seat* _this /* args: */ , const(char)* name);
 
     extern (C)
     static
@@ -927,7 +962,9 @@ wl_seat {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_seat_interface;
+
 // module wayland.wl_pointer;
 
 struct
@@ -944,28 +981,28 @@ wl_pointer {
   // Events
   struct
   Listener {
-    enter_cb enter = &_enter_impl_default;
-    leave_cb leave = &_leave_impl_default;
-    motion_cb motion = &_motion_impl_default;
-    button_cb button = &_button_impl_default;
-    axis_cb axis = &_axis_impl_default;
-    frame_cb frame = &_frame_impl_default;
-    axis_source_cb axis_source = &_axis_source_impl_default;
-    axis_stop_cb axis_stop = &_axis_stop_impl_default;
-    axis_discrete_cb axis_discrete = &_axis_discrete_impl_default;
-    axis_value120_cb axis_value120 = &_axis_value120_impl_default;
+    enter_cb                   enter                   = &_enter_impl_default;
+    leave_cb                   leave                   = &_leave_impl_default;
+    motion_cb                  motion                  = &_motion_impl_default;
+    button_cb                  button                  = &_button_impl_default;
+    axis_cb                    axis                    = &_axis_impl_default;
+    frame_cb                   frame                   = &_frame_impl_default;
+    axis_source_cb             axis_source             = &_axis_source_impl_default;
+    axis_stop_cb               axis_stop               = &_axis_stop_impl_default;
+    axis_discrete_cb           axis_discrete           = &_axis_discrete_impl_default;
+    axis_value120_cb           axis_value120           = &_axis_value120_impl_default;
     axis_relative_direction_cb axis_relative_direction = &_axis_relative_direction_impl_default;
 
-    alias enter_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface, wl_fixed_t surface_x, wl_fixed_t surface_y);
-    alias leave_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface);
-    alias motion_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y);
-    alias button_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state);
-    alias axis_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value);
-    alias frame_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ );
-    alias axis_source_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis_source);
-    alias axis_stop_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, uint axis);
-    alias axis_discrete_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, int discrete);
-    alias axis_value120_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, int value120);
+    alias enter_cb                   = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface, wl_fixed_t surface_x, wl_fixed_t surface_y);
+    alias leave_cb                   = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface);
+    alias motion_cb                  = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y);
+    alias button_cb                  = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state);
+    alias axis_cb                    = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value);
+    alias frame_cb                   = extern (C) void function (void* data, wl_pointer* _this /* args: */ );
+    alias axis_source_cb             = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis_source);
+    alias axis_stop_cb               = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, uint axis);
+    alias axis_discrete_cb           = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, int discrete);
+    alias axis_value120_cb           = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, int value120);
     alias axis_relative_direction_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, uint direction);
 
     extern (C)
@@ -1085,7 +1122,9 @@ wl_pointer {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_pointer_interface;
+
 // module wayland.wl_keyboard;
 
 struct
@@ -1101,18 +1140,18 @@ wl_keyboard {
   // Events
   struct
   Listener {
-    keymap_cb keymap = &_keymap_impl_default;
-    enter_cb enter = &_enter_impl_default;
-    leave_cb leave = &_leave_impl_default;
-    key_cb key = &_key_impl_default;
-    modifiers_cb modifiers = &_modifiers_impl_default;
+    keymap_cb      keymap      = &_keymap_impl_default;
+    enter_cb       enter       = &_enter_impl_default;
+    leave_cb       leave       = &_leave_impl_default;
+    key_cb         key         = &_key_impl_default;
+    modifiers_cb   modifiers   = &_modifiers_impl_default;
     repeat_info_cb repeat_info = &_repeat_info_impl_default;
 
-    alias keymap_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint format, int fd, uint size);
-    alias enter_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface, wl_array* keys);
-    alias leave_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface);
-    alias key_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state);
-    alias modifiers_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group);
+    alias keymap_cb      = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint format, int fd, uint size);
+    alias enter_cb       = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface, wl_array* keys);
+    alias leave_cb       = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface);
+    alias key_cb         = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state);
+    alias modifiers_cb   = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group);
     alias repeat_info_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , int rate, int delay);
 
     extern (C)
@@ -1180,7 +1219,9 @@ wl_keyboard {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_keyboard_interface;
+
 // module wayland.wl_touch;
 
 struct
@@ -1196,20 +1237,20 @@ wl_touch {
   // Events
   struct
   Listener {
-    down_cb down = &_down_impl_default;
-    up_cb up = &_up_impl_default;
-    motion_cb motion = &_motion_impl_default;
-    frame_cb frame = &_frame_impl_default;
-    cancel_cb cancel = &_cancel_impl_default;
-    shape_cb shape = &_shape_impl_default;
+    down_cb        down        = &_down_impl_default;
+    up_cb          up          = &_up_impl_default;
+    motion_cb      motion      = &_motion_impl_default;
+    frame_cb       frame       = &_frame_impl_default;
+    cancel_cb      cancel      = &_cancel_impl_default;
+    shape_cb       shape       = &_shape_impl_default;
     orientation_cb orientation = &_orientation_impl_default;
 
-    alias down_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint serial, uint time, void* surface, int id, wl_fixed_t x, wl_fixed_t y);
-    alias up_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint serial, uint time, int id);
-    alias motion_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y);
-    alias frame_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ );
-    alias cancel_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ );
-    alias shape_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor);
+    alias down_cb        = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint serial, uint time, void* surface, int id, wl_fixed_t x, wl_fixed_t y);
+    alias up_cb          = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint serial, uint time, int id);
+    alias motion_cb      = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y);
+    alias frame_cb       = extern (C) void function (void* data, wl_touch* _this /* args: */ );
+    alias cancel_cb      = extern (C) void function (void* data, wl_touch* _this /* args: */ );
+    alias shape_cb       = extern (C) void function (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor);
     alias orientation_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation);
 
     extern (C)
@@ -1272,7 +1313,9 @@ wl_touch {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_touch_interface;
+
 // module wayland.wl_output;
 
 struct
@@ -1288,18 +1331,18 @@ wl_output {
   // Events
   struct
   Listener {
-    geometry_cb geometry = &_geometry_impl_default;
-    mode_cb mode = &_mode_impl_default;
-    done_cb done = &_done_impl_default;
-    scale_cb scale = &_scale_impl_default;
-    name_cb name = &_name_impl_default;
+    geometry_cb    geometry    = &_geometry_impl_default;
+    mode_cb        mode        = &_mode_impl_default;
+    done_cb        done        = &_done_impl_default;
+    scale_cb       scale       = &_scale_impl_default;
+    name_cb        name        = &_name_impl_default;
     description_cb description = &_description_impl_default;
 
-    alias geometry_cb = extern (C) void function (void* data, wl_output* _this /* args: */ , int x, int y, int physical_width, int physical_height, int subpixel, const(char)* make, const(char)* model, int transform);
-    alias mode_cb = extern (C) void function (void* data, wl_output* _this /* args: */ , uint flags, int width, int height, int refresh);
-    alias done_cb = extern (C) void function (void* data, wl_output* _this /* args: */ );
-    alias scale_cb = extern (C) void function (void* data, wl_output* _this /* args: */ , int factor);
-    alias name_cb = extern (C) void function (void* data, wl_output* _this /* args: */ , const(char)* name);
+    alias geometry_cb    = extern (C) void function (void* data, wl_output* _this /* args: */ , int x, int y, int physical_width, int physical_height, int subpixel, const(char)* make, const(char)* model, int transform);
+    alias mode_cb        = extern (C) void function (void* data, wl_output* _this /* args: */ , uint flags, int width, int height, int refresh);
+    alias done_cb        = extern (C) void function (void* data, wl_output* _this /* args: */ );
+    alias scale_cb       = extern (C) void function (void* data, wl_output* _this /* args: */ , int factor);
+    alias name_cb        = extern (C) void function (void* data, wl_output* _this /* args: */ , const(char)* name);
     alias description_cb = extern (C) void function (void* data, wl_output* _this /* args: */ , const(char)* description);
 
     extern (C)
@@ -1382,7 +1425,9 @@ wl_output {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_output_interface;
+
 // module wayland.wl_region;
 
 struct
@@ -1406,7 +1451,9 @@ wl_region {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_region_interface;
+
 // module wayland.wl_subcompositor;
 
 struct
@@ -1435,7 +1482,9 @@ wl_subcompositor {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_subcompositor_interface;
+
 // module wayland.wl_subsurface;
 
 struct
@@ -1471,4 +1520,6 @@ wl_subsurface {
   }
 }
 
+// interface
 extern (C) extern __gshared wl_interface wl_subsurface_interface;
+
