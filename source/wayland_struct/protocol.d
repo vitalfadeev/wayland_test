@@ -47,26 +47,26 @@ wl_registry {
     global_cb        global        = &_global_impl_default;
     global_remove_cb global_remove = &_global_remove_impl_default;
 
-    alias global_cb        = extern (C) void function (void* data, wl_registry* _this /* args: */ , uint name, const(char)* interface_, uint version_);
-    alias global_remove_cb = extern (C) void function (void* data, wl_registry* _this /* args: */ , uint name);
+    alias global_cb        = extern (C) void function (void* ctx, wl_registry* _this /* args: */ , uint name, const(char)* interface_, uint version_);
+    alias global_remove_cb = extern (C) void function (void* ctx, wl_registry* _this /* args: */ , uint name);
 
     extern (C)
     static
     void
-    _global_impl_default (void* data, wl_registry* _this /* args: */ , uint name, const(char)* interface_, uint version_) {
+    _global_impl_default (void* ctx, wl_registry* _this /* args: */ , uint name, const(char)* interface_, uint version_) {
         // 
     }
 
     extern (C)
     static
     void
-    _global_remove_impl_default (void* data, wl_registry* _this /* args: */ , uint name) {
+    _global_remove_impl_default (void* ctx, wl_registry* _this /* args: */ , uint name) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Opcodes
   enum
@@ -91,18 +91,18 @@ wl_callback {
   Listener {
     done_cb done = &_done_impl_default;
 
-    alias done_cb = extern (C) void function (void* data, wl_callback* _this /* args: */ , uint callback_data);
+    alias done_cb = extern (C) void function (void* ctx, wl_callback* _this /* args: */ , uint callback_data);
 
     extern (C)
     static
     void
-    _done_impl_default (void* data, wl_callback* _this /* args: */ , uint callback_data) {
+    _done_impl_default (void* ctx, wl_callback* _this /* args: */ , uint callback_data) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 }
 
 // interface
@@ -142,7 +142,7 @@ wl_shm_pool {
 
   // Requests
   pragma (inline,true):
-  auto create_buffer (int offset,int width,int height,int stride,uint format) { return cast (wl_buffer*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_buffer, /* ret interface: */ &wl_buffer_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,offset,width,height,stride,format); }
+  auto create_buffer (int offset, int width, int height, int stride, uint format) { return cast (wl_buffer*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_buffer, /* ret interface: */ &wl_buffer_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,offset,width,height,stride,format); }
   auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
   auto resize (int size) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.resize, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , size); }
 
@@ -168,7 +168,7 @@ wl_shm {
 
   // Requests
   pragma (inline,true):
-  auto create_pool (int fd,int size) { return cast (wl_shm_pool*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_pool, /* ret interface: */ &wl_shm_pool_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,fd,size); }
+  auto create_pool (int fd, int size) { return cast (wl_shm_pool*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_pool, /* ret interface: */ &wl_shm_pool_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,fd,size); }
   auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
@@ -176,18 +176,18 @@ wl_shm {
   Listener {
     format_cb format = &_format_impl_default;
 
-    alias format_cb = extern (C) void function (void* data, wl_shm* _this /* args: */ , uint format);
+    alias format_cb = extern (C) void function (void* ctx, wl_shm* _this /* args: */ , uint format);
 
     extern (C)
     static
     void
-    _format_impl_default (void* data, wl_shm* _this /* args: */ , uint format) {
+    _format_impl_default (void* ctx, wl_shm* _this /* args: */ , uint format) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -351,18 +351,18 @@ wl_buffer {
   Listener {
     release_cb release = &_release_impl_default;
 
-    alias release_cb = extern (C) void function (void* data, wl_buffer* _this /* args: */ );
+    alias release_cb = extern (C) void function (void* ctx, wl_buffer* _this /* args: */ );
 
     extern (C)
     static
     void
-    _release_impl_default (void* data, wl_buffer* _this /* args: */ ) {
+    _release_impl_default (void* ctx, wl_buffer* _this /* args: */ ) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Opcodes
   enum
@@ -384,11 +384,11 @@ wl_data_offer {
 
   // Requests
   pragma (inline,true):
-  auto accept (uint serial,const(char)* mime_type) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.accept, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial,mime_type); }
-  auto receive (const(char)* mime_type,int fd) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.receive, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , mime_type,fd); }
+  auto accept (uint serial, const(char)* mime_type) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.accept, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial,mime_type); }
+  auto receive (const(char)* mime_type, int fd) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.receive, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , mime_type,fd); }
   auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
   auto finish () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.finish, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
-  auto set_actions (uint dnd_actions,uint preferred_action) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_actions, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , dnd_actions,preferred_action); }
+  auto set_actions (uint dnd_actions, uint preferred_action) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_actions, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , dnd_actions,preferred_action); }
 
   // Events
   struct
@@ -397,34 +397,34 @@ wl_data_offer {
     source_actions_cb source_actions = &_source_actions_impl_default;
     action_cb         action         = &_action_impl_default;
 
-    alias offer_cb          = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , const(char)* mime_type);
-    alias source_actions_cb = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , uint source_actions);
-    alias action_cb         = extern (C) void function (void* data, wl_data_offer* _this /* args: */ , uint dnd_action);
+    alias offer_cb          = extern (C) void function (void* ctx, wl_data_offer* _this /* args: */ , const(char)* mime_type);
+    alias source_actions_cb = extern (C) void function (void* ctx, wl_data_offer* _this /* args: */ , uint source_actions);
+    alias action_cb         = extern (C) void function (void* ctx, wl_data_offer* _this /* args: */ , uint dnd_action);
 
     extern (C)
     static
     void
-    _offer_impl_default (void* data, wl_data_offer* _this /* args: */ , const(char)* mime_type) {
+    _offer_impl_default (void* ctx, wl_data_offer* _this /* args: */ , const(char)* mime_type) {
         // 
     }
 
     extern (C)
     static
     void
-    _source_actions_impl_default (void* data, wl_data_offer* _this /* args: */ , uint source_actions) {
+    _source_actions_impl_default (void* ctx, wl_data_offer* _this /* args: */ , uint source_actions) {
         // 
     }
 
     extern (C)
     static
     void
-    _action_impl_default (void* data, wl_data_offer* _this /* args: */ , uint dnd_action) {
+    _action_impl_default (void* ctx, wl_data_offer* _this /* args: */ , uint dnd_action) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -473,58 +473,58 @@ wl_data_source {
     dnd_finished_cb       dnd_finished       = &_dnd_finished_impl_default;
     action_cb             action             = &_action_impl_default;
 
-    alias target_cb             = extern (C) void function (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type);
-    alias send_cb               = extern (C) void function (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type, int fd);
-    alias cancelled_cb          = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
-    alias dnd_drop_performed_cb = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
-    alias dnd_finished_cb       = extern (C) void function (void* data, wl_data_source* _this /* args: */ );
-    alias action_cb             = extern (C) void function (void* data, wl_data_source* _this /* args: */ , uint dnd_action);
+    alias target_cb             = extern (C) void function (void* ctx, wl_data_source* _this /* args: */ , const(char)* mime_type);
+    alias send_cb               = extern (C) void function (void* ctx, wl_data_source* _this /* args: */ , const(char)* mime_type, int fd);
+    alias cancelled_cb          = extern (C) void function (void* ctx, wl_data_source* _this /* args: */ );
+    alias dnd_drop_performed_cb = extern (C) void function (void* ctx, wl_data_source* _this /* args: */ );
+    alias dnd_finished_cb       = extern (C) void function (void* ctx, wl_data_source* _this /* args: */ );
+    alias action_cb             = extern (C) void function (void* ctx, wl_data_source* _this /* args: */ , uint dnd_action);
 
     extern (C)
     static
     void
-    _target_impl_default (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type) {
+    _target_impl_default (void* ctx, wl_data_source* _this /* args: */ , const(char)* mime_type) {
         // 
     }
 
     extern (C)
     static
     void
-    _send_impl_default (void* data, wl_data_source* _this /* args: */ , const(char)* mime_type, int fd) {
+    _send_impl_default (void* ctx, wl_data_source* _this /* args: */ , const(char)* mime_type, int fd) {
         // 
     }
 
     extern (C)
     static
     void
-    _cancelled_impl_default (void* data, wl_data_source* _this /* args: */ ) {
+    _cancelled_impl_default (void* ctx, wl_data_source* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _dnd_drop_performed_impl_default (void* data, wl_data_source* _this /* args: */ ) {
+    _dnd_drop_performed_impl_default (void* ctx, wl_data_source* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _dnd_finished_impl_default (void* data, wl_data_source* _this /* args: */ ) {
+    _dnd_finished_impl_default (void* ctx, wl_data_source* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _action_impl_default (void* data, wl_data_source* _this /* args: */ , uint dnd_action) {
+    _action_impl_default (void* ctx, wl_data_source* _this /* args: */ , uint dnd_action) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -555,8 +555,8 @@ wl_data_device {
 
   // Requests
   pragma (inline,true):
-  auto start_drag (void* source,void* origin,void* icon,uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.start_drag, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , source,origin,icon,serial); }
-  auto set_selection (void* source,uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_selection, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , source,serial); }
+  auto start_drag (wl_data_source* source, wl_surface* origin, wl_surface* icon, uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.start_drag, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , source,origin,icon,serial); }
+  auto set_selection (wl_data_source* source, uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_selection, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , source,serial); }
   auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
@@ -569,58 +569,58 @@ wl_data_device {
     drop_cb       drop       = &_drop_impl_default;
     selection_cb  selection  = &_selection_impl_default;
 
-    alias data_offer_cb = extern (C) void function (void* data, wl_data_device* _this /* args: */ , wl_data_offer id);
-    alias enter_cb      = extern (C) void function (void* data, wl_data_device* _this /* args: */ , uint serial, void* surface, wl_fixed_t x, wl_fixed_t y, void* id);
-    alias leave_cb      = extern (C) void function (void* data, wl_data_device* _this /* args: */ );
-    alias motion_cb     = extern (C) void function (void* data, wl_data_device* _this /* args: */ , uint time, wl_fixed_t x, wl_fixed_t y);
-    alias drop_cb       = extern (C) void function (void* data, wl_data_device* _this /* args: */ );
-    alias selection_cb  = extern (C) void function (void* data, wl_data_device* _this /* args: */ , void* id);
+    alias data_offer_cb = extern (C) void function (void* ctx, wl_data_device* _this /* args: */ , wl_data_offer id);
+    alias enter_cb      = extern (C) void function (void* ctx, wl_data_device* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t x, wl_fixed_t y, wl_data_offer* id);
+    alias leave_cb      = extern (C) void function (void* ctx, wl_data_device* _this /* args: */ );
+    alias motion_cb     = extern (C) void function (void* ctx, wl_data_device* _this /* args: */ , uint time, wl_fixed_t x, wl_fixed_t y);
+    alias drop_cb       = extern (C) void function (void* ctx, wl_data_device* _this /* args: */ );
+    alias selection_cb  = extern (C) void function (void* ctx, wl_data_device* _this /* args: */ , wl_data_offer* id);
 
     extern (C)
     static
     void
-    _data_offer_impl_default (void* data, wl_data_device* _this /* args: */ , wl_data_offer id) {
+    _data_offer_impl_default (void* ctx, wl_data_device* _this /* args: */ , wl_data_offer id) {
         // 
     }
 
     extern (C)
     static
     void
-    _enter_impl_default (void* data, wl_data_device* _this /* args: */ , uint serial, void* surface, wl_fixed_t x, wl_fixed_t y, void* id) {
+    _enter_impl_default (void* ctx, wl_data_device* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t x, wl_fixed_t y, wl_data_offer* id) {
         // 
     }
 
     extern (C)
     static
     void
-    _leave_impl_default (void* data, wl_data_device* _this /* args: */ ) {
+    _leave_impl_default (void* ctx, wl_data_device* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _motion_impl_default (void* data, wl_data_device* _this /* args: */ , uint time, wl_fixed_t x, wl_fixed_t y) {
+    _motion_impl_default (void* ctx, wl_data_device* _this /* args: */ , uint time, wl_fixed_t x, wl_fixed_t y) {
         // 
     }
 
     extern (C)
     static
     void
-    _drop_impl_default (void* data, wl_data_device* _this /* args: */ ) {
+    _drop_impl_default (void* ctx, wl_data_device* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _selection_impl_default (void* data, wl_data_device* _this /* args: */ , void* id) {
+    _selection_impl_default (void* ctx, wl_data_device* _this /* args: */ , wl_data_offer* id) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -652,7 +652,7 @@ wl_data_device_manager {
   // Requests
   pragma (inline,true):
   auto create_data_source () { return cast (wl_data_source*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_data_source, /* ret interface: */ &wl_data_source_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
-  auto get_data_device (void* seat) { return cast (wl_data_device*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_data_device, /* ret interface: */ &wl_data_device_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,seat); }
+  auto get_data_device (wl_seat* seat) { return cast (wl_data_device*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_data_device, /* ret interface: */ &wl_data_device_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,seat); }
 
   // Enums
   enum
@@ -684,7 +684,7 @@ wl_shell {
 
   // Requests
   pragma (inline,true):
-  auto get_shell_surface (void* surface) { return cast (wl_shell_surface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_shell_surface, /* ret interface: */ &wl_shell_surface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,surface); }
+  auto get_shell_surface (wl_surface* surface) { return cast (wl_shell_surface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_shell_surface, /* ret interface: */ &wl_shell_surface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,surface); }
 
   // Enums
   enum
@@ -713,13 +713,13 @@ wl_shell_surface {
   // Requests
   pragma (inline,true):
   auto pong (uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.pong, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial); }
-  auto move (void* seat,uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.move, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial); }
-  auto resize (void* seat,uint serial,uint edges) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.resize, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial,edges); }
+  auto move (wl_seat* seat, uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.move, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial); }
+  auto resize (wl_seat* seat, uint serial, uint edges) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.resize, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial,edges); }
   auto set_toplevel () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_toplevel, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
-  auto set_transient (void* parent,int x,int y,uint flags) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_transient, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , parent,x,y,flags); }
-  auto set_fullscreen (uint method,uint framerate,void* output) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_fullscreen, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , method,framerate,output); }
-  auto set_popup (void* seat,uint serial,void* parent,int x,int y,uint flags) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_popup, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial,parent,x,y,flags); }
-  auto set_maximized (void* output) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_maximized, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , output); }
+  auto set_transient (wl_surface* parent, int x, int y, uint flags) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_transient, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , parent,x,y,flags); }
+  auto set_fullscreen (uint method, uint framerate, wl_output* output) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_fullscreen, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , method,framerate,output); }
+  auto set_popup (wl_seat* seat, uint serial, wl_surface* parent, int x, int y, uint flags) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_popup, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial,parent,x,y,flags); }
+  auto set_maximized (wl_output* output) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_maximized, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , output); }
   auto set_title (const(char)* title) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_title, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , title); }
   auto set_class (const(char)* class_) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_class, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , class_); }
 
@@ -730,34 +730,34 @@ wl_shell_surface {
     configure_cb  configure  = &_configure_impl_default;
     popup_done_cb popup_done = &_popup_done_impl_default;
 
-    alias ping_cb       = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ , uint serial);
-    alias configure_cb  = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ , uint edges, int width, int height);
-    alias popup_done_cb = extern (C) void function (void* data, wl_shell_surface* _this /* args: */ );
+    alias ping_cb       = extern (C) void function (void* ctx, wl_shell_surface* _this /* args: */ , uint serial);
+    alias configure_cb  = extern (C) void function (void* ctx, wl_shell_surface* _this /* args: */ , uint edges, int width, int height);
+    alias popup_done_cb = extern (C) void function (void* ctx, wl_shell_surface* _this /* args: */ );
 
     extern (C)
     static
     void
-    _ping_impl_default (void* data, wl_shell_surface* _this /* args: */ , uint serial) {
+    _ping_impl_default (void* ctx, wl_shell_surface* _this /* args: */ , uint serial) {
         // 
     }
 
     extern (C)
     static
     void
-    _configure_impl_default (void* data, wl_shell_surface* _this /* args: */ , uint edges, int width, int height) {
+    _configure_impl_default (void* ctx, wl_shell_surface* _this /* args: */ , uint edges, int width, int height) {
         // 
     }
 
     extern (C)
     static
     void
-    _popup_done_impl_default (void* data, wl_shell_surface* _this /* args: */ ) {
+    _popup_done_impl_default (void* ctx, wl_shell_surface* _this /* args: */ ) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -814,16 +814,16 @@ wl_surface {
   // Requests
   pragma (inline,true):
   auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
-  auto attach (void* buffer,int x,int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.attach, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , buffer,x,y); }
-  auto damage (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.damage, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto attach (wl_buffer* buffer, int x, int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.attach, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , buffer,x,y); }
+  auto damage (int x, int y, int width, int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.damage, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
   auto frame () { return cast (wl_callback*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.frame, /* ret interface: */ &wl_callback_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
-  auto set_opaque_region (void* region) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_opaque_region, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , region); }
-  auto set_input_region (void* region) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_input_region, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , region); }
+  auto set_opaque_region (wl_region* region) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_opaque_region, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , region); }
+  auto set_input_region (wl_region* region) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_input_region, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , region); }
   auto commit () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.commit, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
   auto set_buffer_transform (int transform) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_buffer_transform, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , transform); }
   auto set_buffer_scale (int scale) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_buffer_scale, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , scale); }
-  auto damage_buffer (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.damage_buffer, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
-  auto offset (int x,int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.offset, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y); }
+  auto damage_buffer (int x, int y, int width, int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.damage_buffer, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto offset (int x, int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.offset, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y); }
 
   // Events
   struct
@@ -833,42 +833,42 @@ wl_surface {
     preferred_buffer_scale_cb     preferred_buffer_scale     = &_preferred_buffer_scale_impl_default;
     preferred_buffer_transform_cb preferred_buffer_transform = &_preferred_buffer_transform_impl_default;
 
-    alias enter_cb                      = extern (C) void function (void* data, wl_surface* _this /* args: */ , void* output);
-    alias leave_cb                      = extern (C) void function (void* data, wl_surface* _this /* args: */ , void* output);
-    alias preferred_buffer_scale_cb     = extern (C) void function (void* data, wl_surface* _this /* args: */ , int factor);
-    alias preferred_buffer_transform_cb = extern (C) void function (void* data, wl_surface* _this /* args: */ , uint transform);
+    alias enter_cb                      = extern (C) void function (void* ctx, wl_surface* _this /* args: */ , wl_output* output);
+    alias leave_cb                      = extern (C) void function (void* ctx, wl_surface* _this /* args: */ , wl_output* output);
+    alias preferred_buffer_scale_cb     = extern (C) void function (void* ctx, wl_surface* _this /* args: */ , int factor);
+    alias preferred_buffer_transform_cb = extern (C) void function (void* ctx, wl_surface* _this /* args: */ , uint transform);
 
     extern (C)
     static
     void
-    _enter_impl_default (void* data, wl_surface* _this /* args: */ , void* output) {
+    _enter_impl_default (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
         // 
     }
 
     extern (C)
     static
     void
-    _leave_impl_default (void* data, wl_surface* _this /* args: */ , void* output) {
+    _leave_impl_default (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
         // 
     }
 
     extern (C)
     static
     void
-    _preferred_buffer_scale_impl_default (void* data, wl_surface* _this /* args: */ , int factor) {
+    _preferred_buffer_scale_impl_default (void* ctx, wl_surface* _this /* args: */ , int factor) {
         // 
     }
 
     extern (C)
     static
     void
-    _preferred_buffer_transform_impl_default (void* data, wl_surface* _this /* args: */ , uint transform) {
+    _preferred_buffer_transform_impl_default (void* ctx, wl_surface* _this /* args: */ , uint transform) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -921,26 +921,26 @@ wl_seat {
     capabilities_cb capabilities = &_capabilities_impl_default;
     name_cb         name         = &_name_impl_default;
 
-    alias capabilities_cb = extern (C) void function (void* data, wl_seat* _this /* args: */ , uint capabilities);
-    alias name_cb         = extern (C) void function (void* data, wl_seat* _this /* args: */ , const(char)* name);
+    alias capabilities_cb = extern (C) void function (void* ctx, wl_seat* _this /* args: */ , uint capabilities);
+    alias name_cb         = extern (C) void function (void* ctx, wl_seat* _this /* args: */ , const(char)* name);
 
     extern (C)
     static
     void
-    _capabilities_impl_default (void* data, wl_seat* _this /* args: */ , uint capabilities) {
+    _capabilities_impl_default (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
         // 
     }
 
     extern (C)
     static
     void
-    _name_impl_default (void* data, wl_seat* _this /* args: */ , const(char)* name) {
+    _name_impl_default (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -977,7 +977,7 @@ wl_pointer {
 
   // Requests
   pragma (inline,true):
-  auto set_cursor (uint serial,void* surface,int hotspot_x,int hotspot_y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_cursor, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial,surface,hotspot_x,hotspot_y); }
+  auto set_cursor (uint serial, wl_surface* surface, int hotspot_x, int hotspot_y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_cursor, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial,surface,hotspot_x,hotspot_y); }
   auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
@@ -995,98 +995,98 @@ wl_pointer {
     axis_value120_cb           axis_value120           = &_axis_value120_impl_default;
     axis_relative_direction_cb axis_relative_direction = &_axis_relative_direction_impl_default;
 
-    alias enter_cb                   = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface, wl_fixed_t surface_x, wl_fixed_t surface_y);
-    alias leave_cb                   = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface);
-    alias motion_cb                  = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y);
-    alias button_cb                  = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state);
-    alias axis_cb                    = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value);
-    alias frame_cb                   = extern (C) void function (void* data, wl_pointer* _this /* args: */ );
-    alias axis_source_cb             = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis_source);
-    alias axis_stop_cb               = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint time, uint axis);
-    alias axis_discrete_cb           = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, int discrete);
-    alias axis_value120_cb           = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, int value120);
-    alias axis_relative_direction_cb = extern (C) void function (void* data, wl_pointer* _this /* args: */ , uint axis, uint direction);
+    alias enter_cb                   = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t surface_x, wl_fixed_t surface_y);
+    alias leave_cb                   = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface);
+    alias motion_cb                  = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y);
+    alias button_cb                  = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state);
+    alias axis_cb                    = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value);
+    alias frame_cb                   = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ );
+    alias axis_source_cb             = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint axis_source);
+    alias axis_stop_cb               = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis);
+    alias axis_discrete_cb           = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint axis, int discrete);
+    alias axis_value120_cb           = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint axis, int value120);
+    alias axis_relative_direction_cb = extern (C) void function (void* ctx, wl_pointer* _this /* args: */ , uint axis, uint direction);
 
     extern (C)
     static
     void
-    _enter_impl_default (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+    _enter_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t surface_x, wl_fixed_t surface_y) {
         // 
     }
 
     extern (C)
     static
     void
-    _leave_impl_default (void* data, wl_pointer* _this /* args: */ , uint serial, void* surface) {
+    _leave_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface) {
         // 
     }
 
     extern (C)
     static
     void
-    _motion_impl_default (void* data, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+    _motion_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
         // 
     }
 
     extern (C)
     static
     void
-    _button_impl_default (void* data, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
+    _button_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
         // 
     }
 
     extern (C)
     static
     void
-    _axis_impl_default (void* data, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value) {
+    _axis_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value) {
         // 
     }
 
     extern (C)
     static
     void
-    _frame_impl_default (void* data, wl_pointer* _this /* args: */ ) {
+    _frame_impl_default (void* ctx, wl_pointer* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _axis_source_impl_default (void* data, wl_pointer* _this /* args: */ , uint axis_source) {
+    _axis_source_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint axis_source) {
         // 
     }
 
     extern (C)
     static
     void
-    _axis_stop_impl_default (void* data, wl_pointer* _this /* args: */ , uint time, uint axis) {
+    _axis_stop_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis) {
         // 
     }
 
     extern (C)
     static
     void
-    _axis_discrete_impl_default (void* data, wl_pointer* _this /* args: */ , uint axis, int discrete) {
+    _axis_discrete_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint axis, int discrete) {
         // 
     }
 
     extern (C)
     static
     void
-    _axis_value120_impl_default (void* data, wl_pointer* _this /* args: */ , uint axis, int value120) {
+    _axis_value120_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint axis, int value120) {
         // 
     }
 
     extern (C)
     static
     void
-    _axis_relative_direction_impl_default (void* data, wl_pointer* _this /* args: */ , uint axis, uint direction) {
+    _axis_relative_direction_impl_default (void* ctx, wl_pointer* _this /* args: */ , uint axis, uint direction) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -1149,58 +1149,58 @@ wl_keyboard {
     modifiers_cb   modifiers   = &_modifiers_impl_default;
     repeat_info_cb repeat_info = &_repeat_info_impl_default;
 
-    alias keymap_cb      = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint format, int fd, uint size);
-    alias enter_cb       = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface, wl_array* keys);
-    alias leave_cb       = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface);
-    alias key_cb         = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state);
-    alias modifiers_cb   = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group);
-    alias repeat_info_cb = extern (C) void function (void* data, wl_keyboard* _this /* args: */ , int rate, int delay);
+    alias keymap_cb      = extern (C) void function (void* ctx, wl_keyboard* _this /* args: */ , uint format, int fd, uint size);
+    alias enter_cb       = extern (C) void function (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface, wl_array* keys);
+    alias leave_cb       = extern (C) void function (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface);
+    alias key_cb         = extern (C) void function (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state);
+    alias modifiers_cb   = extern (C) void function (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group);
+    alias repeat_info_cb = extern (C) void function (void* ctx, wl_keyboard* _this /* args: */ , int rate, int delay);
 
     extern (C)
     static
     void
-    _keymap_impl_default (void* data, wl_keyboard* _this /* args: */ , uint format, int fd, uint size) {
+    _keymap_impl_default (void* ctx, wl_keyboard* _this /* args: */ , uint format, int fd, uint size) {
         // 
     }
 
     extern (C)
     static
     void
-    _enter_impl_default (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface, wl_array* keys) {
+    _enter_impl_default (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface, wl_array* keys) {
         // 
     }
 
     extern (C)
     static
     void
-    _leave_impl_default (void* data, wl_keyboard* _this /* args: */ , uint serial, void* surface) {
+    _leave_impl_default (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface) {
         // 
     }
 
     extern (C)
     static
     void
-    _key_impl_default (void* data, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
+    _key_impl_default (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
         // 
     }
 
     extern (C)
     static
     void
-    _modifiers_impl_default (void* data, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group) {
+    _modifiers_impl_default (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group) {
         // 
     }
 
     extern (C)
     static
     void
-    _repeat_info_impl_default (void* data, wl_keyboard* _this /* args: */ , int rate, int delay) {
+    _repeat_info_impl_default (void* ctx, wl_keyboard* _this /* args: */ , int rate, int delay) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -1247,66 +1247,66 @@ wl_touch {
     shape_cb       shape       = &_shape_impl_default;
     orientation_cb orientation = &_orientation_impl_default;
 
-    alias down_cb        = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint serial, uint time, void* surface, int id, wl_fixed_t x, wl_fixed_t y);
-    alias up_cb          = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint serial, uint time, int id);
-    alias motion_cb      = extern (C) void function (void* data, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y);
-    alias frame_cb       = extern (C) void function (void* data, wl_touch* _this /* args: */ );
-    alias cancel_cb      = extern (C) void function (void* data, wl_touch* _this /* args: */ );
-    alias shape_cb       = extern (C) void function (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor);
-    alias orientation_cb = extern (C) void function (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation);
+    alias down_cb        = extern (C) void function (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, wl_surface* surface, int id, wl_fixed_t x, wl_fixed_t y);
+    alias up_cb          = extern (C) void function (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, int id);
+    alias motion_cb      = extern (C) void function (void* ctx, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y);
+    alias frame_cb       = extern (C) void function (void* ctx, wl_touch* _this /* args: */ );
+    alias cancel_cb      = extern (C) void function (void* ctx, wl_touch* _this /* args: */ );
+    alias shape_cb       = extern (C) void function (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor);
+    alias orientation_cb = extern (C) void function (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation);
 
     extern (C)
     static
     void
-    _down_impl_default (void* data, wl_touch* _this /* args: */ , uint serial, uint time, void* surface, int id, wl_fixed_t x, wl_fixed_t y) {
+    _down_impl_default (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, wl_surface* surface, int id, wl_fixed_t x, wl_fixed_t y) {
         // 
     }
 
     extern (C)
     static
     void
-    _up_impl_default (void* data, wl_touch* _this /* args: */ , uint serial, uint time, int id) {
+    _up_impl_default (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, int id) {
         // 
     }
 
     extern (C)
     static
     void
-    _motion_impl_default (void* data, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y) {
+    _motion_impl_default (void* ctx, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y) {
         // 
     }
 
     extern (C)
     static
     void
-    _frame_impl_default (void* data, wl_touch* _this /* args: */ ) {
+    _frame_impl_default (void* ctx, wl_touch* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _cancel_impl_default (void* data, wl_touch* _this /* args: */ ) {
+    _cancel_impl_default (void* ctx, wl_touch* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _shape_impl_default (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor) {
+    _shape_impl_default (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor) {
         // 
     }
 
     extern (C)
     static
     void
-    _orientation_impl_default (void* data, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation) {
+    _orientation_impl_default (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Opcodes
   enum
@@ -1340,58 +1340,58 @@ wl_output {
     name_cb        name        = &_name_impl_default;
     description_cb description = &_description_impl_default;
 
-    alias geometry_cb    = extern (C) void function (void* data, wl_output* _this /* args: */ , int x, int y, int physical_width, int physical_height, int subpixel, const(char)* make, const(char)* model, int transform);
-    alias mode_cb        = extern (C) void function (void* data, wl_output* _this /* args: */ , uint flags, int width, int height, int refresh);
-    alias done_cb        = extern (C) void function (void* data, wl_output* _this /* args: */ );
-    alias scale_cb       = extern (C) void function (void* data, wl_output* _this /* args: */ , int factor);
-    alias name_cb        = extern (C) void function (void* data, wl_output* _this /* args: */ , const(char)* name);
-    alias description_cb = extern (C) void function (void* data, wl_output* _this /* args: */ , const(char)* description);
+    alias geometry_cb    = extern (C) void function (void* ctx, wl_output* _this /* args: */ , int x, int y, int physical_width, int physical_height, int subpixel, const(char)* make, const(char)* model, int transform);
+    alias mode_cb        = extern (C) void function (void* ctx, wl_output* _this /* args: */ , uint flags, int width, int height, int refresh);
+    alias done_cb        = extern (C) void function (void* ctx, wl_output* _this /* args: */ );
+    alias scale_cb       = extern (C) void function (void* ctx, wl_output* _this /* args: */ , int factor);
+    alias name_cb        = extern (C) void function (void* ctx, wl_output* _this /* args: */ , const(char)* name);
+    alias description_cb = extern (C) void function (void* ctx, wl_output* _this /* args: */ , const(char)* description);
 
     extern (C)
     static
     void
-    _geometry_impl_default (void* data, wl_output* _this /* args: */ , int x, int y, int physical_width, int physical_height, int subpixel, const(char)* make, const(char)* model, int transform) {
+    _geometry_impl_default (void* ctx, wl_output* _this /* args: */ , int x, int y, int physical_width, int physical_height, int subpixel, const(char)* make, const(char)* model, int transform) {
         // 
     }
 
     extern (C)
     static
     void
-    _mode_impl_default (void* data, wl_output* _this /* args: */ , uint flags, int width, int height, int refresh) {
+    _mode_impl_default (void* ctx, wl_output* _this /* args: */ , uint flags, int width, int height, int refresh) {
         // 
     }
 
     extern (C)
     static
     void
-    _done_impl_default (void* data, wl_output* _this /* args: */ ) {
+    _done_impl_default (void* ctx, wl_output* _this /* args: */ ) {
         // 
     }
 
     extern (C)
     static
     void
-    _scale_impl_default (void* data, wl_output* _this /* args: */ , int factor) {
+    _scale_impl_default (void* ctx, wl_output* _this /* args: */ , int factor) {
         // 
     }
 
     extern (C)
     static
     void
-    _name_impl_default (void* data, wl_output* _this /* args: */ , const(char)* name) {
+    _name_impl_default (void* ctx, wl_output* _this /* args: */ , const(char)* name) {
         // 
     }
 
     extern (C)
     static
     void
-    _description_impl_default (void* data, wl_output* _this /* args: */ , const(char)* description) {
+    _description_impl_default (void* ctx, wl_output* _this /* args: */ , const(char)* description) {
         // 
     }
   }
 
   // Event listener
-  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }
+  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 
   // Enums
   enum
@@ -1441,8 +1441,8 @@ wl_region {
   // Requests
   pragma (inline,true):
   auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
-  auto add (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.add, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
-  auto subtract (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.subtract, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto add (int x, int y, int width, int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.add, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto subtract (int x, int y, int width, int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.subtract, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
 
   // Opcodes
   enum
@@ -1467,7 +1467,7 @@ wl_subcompositor {
   // Requests
   pragma (inline,true):
   auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
-  auto get_subsurface (void* surface,void* parent) { return cast (wl_subsurface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_subsurface, /* ret interface: */ &wl_subsurface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,surface,parent); }
+  auto get_subsurface (wl_surface* surface, wl_surface* parent) { return cast (wl_subsurface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_subsurface, /* ret interface: */ &wl_subsurface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,surface,parent); }
 
   // Enums
   enum
@@ -1498,9 +1498,9 @@ wl_subsurface {
   // Requests
   pragma (inline,true):
   auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
-  auto set_position (int x,int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_position, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y); }
-  auto place_above (void* sibling) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.place_above, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , sibling); }
-  auto place_below (void* sibling) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.place_below, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , sibling); }
+  auto set_position (int x, int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_position, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y); }
+  auto place_above (wl_surface* sibling) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.place_above, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , sibling); }
+  auto place_below (wl_surface* sibling) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.place_below, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , sibling); }
   auto set_sync () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_sync, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
   auto set_desync () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_desync, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
 

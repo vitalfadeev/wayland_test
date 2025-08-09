@@ -149,7 +149,7 @@ D_File_Writer {
 					
 					writefln (
 						"  auto %s (%s) { %s %s (cast (wl_proxy*) &this, opcode.%s, /* ret interface: */ %s, /* version: */ %s, /* flags: */ %s /* request args: */ %s%s); }", 
-						req.name, req_args.join (","), _ret, _fn, _opcode, _iface, _ver, _flags, (proxy_args.length? ", ": ""), proxy_args.join (","));
+						req.name, req_args.join (", "), _ret, _fn, _opcode, _iface, _ver, _flags, (proxy_args.length? ", ": ""), proxy_args.join (","));
 				}
 			}
 
@@ -188,7 +188,7 @@ D_File_Writer {
 							(arg.type.to_d_type (arg), arg.name.to_d_name);
 					}
 					writefln (
-						"    alias %s_cb%s = extern (C) void function (void* data, %s* _this /* args: */ %s%s);", 
+						"    alias %s_cb%s = extern (C) void function (void* ctx, %s* _this /* args: */ %s%s);", 
 						eve_name, _filler, iface_name, (eve_args.length? ", ": ""), eve_args.join (", "));
 				}
 				// impl default
@@ -204,7 +204,7 @@ D_File_Writer {
 					writefln ("    extern (C)");
 					writefln ("    static");
 					writefln ("    void");
-					writefln ("    _%s_impl_default (void* data, %s* _this /* args: */ %s%s) {", 
+					writefln ("    _%s_impl_default (void* ctx, %s* _this /* args: */ %s%s) {", 
 							eve_name, iface_name, (eve_args.length? ", ": ""), eve_args.join (", "));
 					writefln ("        // ");
 					writefln ("    }");
@@ -217,7 +217,7 @@ D_File_Writer {
 			if (iface.events.length) {
 				writefln ("");
 				writefln ("  // Event listener");
-				writefln ("  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }");
+				writefln ("  auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }");
 			}
 
 			// Enum
@@ -366,9 +366,9 @@ to_d_type (string a, Arg arg) {
 			t = "wl_proxy";
 	}
 
-	if (t == "object") {
+	if (a == "object") {
 		if (arg.interface_.length)
-			t = arg.interface_;  // wl_surface
+			t = arg.interface_~"*";  // wl_surface
 	}
 	
 	return t;
@@ -905,10 +905,10 @@ _struct_cb () {
 	printf (
 		"
 		extern (D) int
-		%s_add_listener (%s* %s, const (%s_listener)* listener, void* data) {
+		%s_add_listener (%s* %s, const (%s_listener)* listener, void* ctx) {
 			alias Callback = extern (C) void function ();
 
-			return wl_proxy_add_listener (cast (wl_proxy*) %s, cast (Callback*) listener, data);
+			return wl_proxy_add_listener (cast (wl_proxy*) %s, cast (Callback*) listener, ctx);
 		}
 		",
 		(_wl_name, _wl_name, _wl_name, _wl_name, _wl_name)

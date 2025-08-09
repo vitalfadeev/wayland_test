@@ -1,6 +1,7 @@
 module wayland_struct.proxy;
 
-public import wayland_struct.util : wl_proxy;
+public 
+import wayland_struct.util : wl_proxy;
 import wayland_struct.util : wl_message;
 import wayland_struct.util : wl_interface;
 import wayland_struct.util : wl_fixed_t;
