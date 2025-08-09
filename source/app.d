@@ -143,12 +143,38 @@ global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, 
     auto wl_seat_interface_name = "wl_seat";
     if (strcmp (wl_seat_interface_name.ptr, interface_) == 0) {
         (cast (wayland_ctx*) ctx).seat = cast (wl_seat*) _this.bind (name, &wl_seat_interface, version_);
+        (cast (wayland_ctx*) ctx).seat.add_listener (
+            new wl_seat.Listener (  // is a vector of function pointers. 
+                &capabilities_impl,
+                &name_impl,
+            ),
+            ctx);  // wl_proxy.add_listener
     }
 }
 extern (C) 
 void 
 global_remove_impl (void* data, wl_registry* _wl_registry, uint name) {
     //
+}
+
+extern (C)
+static
+void
+capabilities_impl (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
+    if (capabilities & wl_seat.capability_.keyboard)
+        printf ("seat.cap: keyboard\n");
+    if (capabilities & wl_seat.capability_.pointer) {
+        printf ("seat.cap: pointer\n");
+        auto pointer = (cast (wayland_ctx*) ctx).seat.get_pointer ();
+        printf ("pointer: \n");
+    }
+}
+
+extern (C)
+static
+void
+name_impl (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
+    printf ("seat.name: %s\n", name);
 }
 
 
@@ -184,8 +210,6 @@ main () {
     writeln (2);
     ctx.display.roundtrip ();
     writeln (3);
-    ctx.registry.destroy ();
-    ctx.display.disconnect ();
 
     //if (ctx.shell is null) {
     //    printf ("Can't find shell\n");
@@ -203,9 +227,18 @@ main () {
         printf ("Found seat\n");
     }
 
-    auto pointer = ctx.seat.get_pointer ();
+    //
+    while (!done) {
+        if (ctx.display.dispatch () < 0) {
+            printf ("loop: dispatch 1\n");
+            perror ("Main loop error");
+            done = true;
+        }
+    }
 
 
+    ctx.registry.destroy ();
+    ctx.display.disconnect ();
 
     version (NEVER) {
     auto surface       = ctx.compositor.create_surface ();
