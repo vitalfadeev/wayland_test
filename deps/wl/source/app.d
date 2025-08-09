@@ -117,15 +117,16 @@ D_File_Writer {
 					// , offset, width, height, stride, format
 					string[] proxy_args;
 					foreach (arg; req.args) {
+						auto arg_name = arg.name.to_d_name;
 						if (arg.type == "new_id") {  // return new _proxy | _object
 							ret_type  = (arg.interface_.length)? arg.interface_: "wl_proxy";
-							ret_name  = arg.name.to_d_name;
-							proxy_args ~= format!"%s" ("null");
+							ret_name  = arg_name;
+							proxy_args ~= "null";
 						}
 						else {                       // arg
 							auto arg_type = arg.type.to_d_type (arg);  // wl_surface* surface -> Wl_surface surface
-							req_args   ~= format!"%s %s" (arg_type, arg.name.to_d_name);
-							proxy_args ~= format!"%s" (arg.name.to_d_name);
+							req_args   ~= format!"%s %s" (arg_type, arg_name);
+							proxy_args ~= arg_name;
 						}
 					}
 
