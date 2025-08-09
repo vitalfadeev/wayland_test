@@ -11,6 +11,8 @@ import wayland_struct.util : uint32_t;
 import wayland_struct.util : wl_dispatcher_func_t;
 import wayland_struct.util : wl_proxy_callback;
 
+enum WL_MARSHAL_FLAG_DESTROY = (1 << 0);
+
 
 extern (C) {
 wl_proxy*       wl_proxy_create                              (wl_proxy* factory, const (wl_interface*) iface);

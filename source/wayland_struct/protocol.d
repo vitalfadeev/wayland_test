@@ -5,8 +5,10 @@ import wayland_struct.proxy : wl_proxy;
 import wayland_struct.proxy : wl_proxy_marshal;
 import wayland_struct.proxy : wl_proxy_marshal_constructor;
 import wayland_struct.proxy : wl_proxy_marshal_constructor_versioned;
+import wayland_struct.proxy : wl_proxy_marshal_flags;
 import wayland_struct.proxy : wl_proxy_get_version;
 import wayland_struct.proxy : wl_proxy_add_listener;
+import wayland_struct.proxy : WL_MARSHAL_FLAG_DESTROY;
 import wayland_struct.util  : wl_proxy_callback;;
 import wayland_struct.util  : wl_message;
 import wayland_struct.util  : wl_interface;
@@ -116,8 +118,8 @@ wl_compositor {
 
   // Requests
   pragma (inline,true):
-  auto create_surface () { return cast (wl_surface*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.create_surface /* ret interface: */ , &wl_surface_interface /* request args: */ ); }
-  auto create_region () { return cast (wl_region*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.create_region /* ret interface: */ , &wl_region_interface /* request args: */ ); }
+  auto create_surface () { return cast (wl_surface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_surface, /* ret interface: */ &wl_surface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
+  auto create_region () { return cast (wl_region*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_region, /* ret interface: */ &wl_region_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
 
   // Opcodes
   enum
@@ -140,9 +142,9 @@ wl_shm_pool {
 
   // Requests
   pragma (inline,true):
-  auto create_buffer (int offset,int width,int height,int stride,uint format) { return cast (wl_buffer*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.create_buffer /* ret interface: */ , &wl_buffer_interface /* request args: */ , offset,width,height,stride,format); }
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto resize (int size) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.resize /* ret interface: */  /* request args: */ , size); }
+  auto create_buffer (int offset,int width,int height,int stride,uint format) { return cast (wl_buffer*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_buffer, /* ret interface: */ &wl_buffer_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,offset,width,height,stride,format); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto resize (int size) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.resize, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , size); }
 
   // Opcodes
   enum
@@ -166,8 +168,8 @@ wl_shm {
 
   // Requests
   pragma (inline,true):
-  auto create_pool (int fd,int size) { return cast (wl_shm_pool*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.create_pool /* ret interface: */ , &wl_shm_pool_interface /* request args: */ , fd,size); }
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto create_pool (int fd,int size) { return cast (wl_shm_pool*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_pool, /* ret interface: */ &wl_shm_pool_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,fd,size); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -342,7 +344,7 @@ wl_buffer {
 
   // Requests
   pragma (inline,true):
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -382,11 +384,11 @@ wl_data_offer {
 
   // Requests
   pragma (inline,true):
-  auto accept (uint serial,const(char)* mime_type) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.accept /* ret interface: */  /* request args: */ , serial,mime_type); }
-  auto receive (const(char)* mime_type,int fd) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.receive /* ret interface: */  /* request args: */ , mime_type,fd); }
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto finish () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.finish /* ret interface: */  /* request args: */ ); }
-  auto set_actions (uint dnd_actions,uint preferred_action) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_actions /* ret interface: */  /* request args: */ , dnd_actions,preferred_action); }
+  auto accept (uint serial,const(char)* mime_type) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.accept, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial,mime_type); }
+  auto receive (const(char)* mime_type,int fd) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.receive, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , mime_type,fd); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto finish () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.finish, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
+  auto set_actions (uint dnd_actions,uint preferred_action) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_actions, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , dnd_actions,preferred_action); }
 
   // Events
   struct
@@ -457,9 +459,9 @@ wl_data_source {
 
   // Requests
   pragma (inline,true):
-  auto offer (const(char)* mime_type) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.offer /* ret interface: */  /* request args: */ , mime_type); }
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto set_actions (uint dnd_actions) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_actions /* ret interface: */  /* request args: */ , dnd_actions); }
+  auto offer (const(char)* mime_type) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.offer, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , mime_type); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto set_actions (uint dnd_actions) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_actions, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , dnd_actions); }
 
   // Events
   struct
@@ -553,9 +555,9 @@ wl_data_device {
 
   // Requests
   pragma (inline,true):
-  auto start_drag (void* source,void* origin,void* icon,uint serial) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.start_drag /* ret interface: */  /* request args: */ , source,origin,icon,serial); }
-  auto set_selection (void* source,uint serial) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_selection /* ret interface: */  /* request args: */ , source,serial); }
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto start_drag (void* source,void* origin,void* icon,uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.start_drag, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , source,origin,icon,serial); }
+  auto set_selection (void* source,uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_selection, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , source,serial); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -649,8 +651,8 @@ wl_data_device_manager {
 
   // Requests
   pragma (inline,true):
-  auto create_data_source () { return cast (wl_data_source*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.create_data_source /* ret interface: */ , &wl_data_source_interface /* request args: */ ); }
-  auto get_data_device (void* seat) { return cast (wl_data_device*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.get_data_device /* ret interface: */ , &wl_data_device_interface /* request args: */ , seat); }
+  auto create_data_source () { return cast (wl_data_source*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.create_data_source, /* ret interface: */ &wl_data_source_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
+  auto get_data_device (void* seat) { return cast (wl_data_device*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_data_device, /* ret interface: */ &wl_data_device_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,seat); }
 
   // Enums
   enum
@@ -682,7 +684,7 @@ wl_shell {
 
   // Requests
   pragma (inline,true):
-  auto get_shell_surface (void* surface) { return cast (wl_shell_surface*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.get_shell_surface /* ret interface: */ , &wl_shell_surface_interface /* request args: */ , surface); }
+  auto get_shell_surface (void* surface) { return cast (wl_shell_surface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_shell_surface, /* ret interface: */ &wl_shell_surface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,surface); }
 
   // Enums
   enum
@@ -710,16 +712,16 @@ wl_shell_surface {
 
   // Requests
   pragma (inline,true):
-  auto pong (uint serial) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.pong /* ret interface: */  /* request args: */ , serial); }
-  auto move (void* seat,uint serial) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.move /* ret interface: */  /* request args: */ , seat,serial); }
-  auto resize (void* seat,uint serial,uint edges) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.resize /* ret interface: */  /* request args: */ , seat,serial,edges); }
-  auto set_toplevel () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_toplevel /* ret interface: */  /* request args: */ ); }
-  auto set_transient (void* parent,int x,int y,uint flags) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_transient /* ret interface: */  /* request args: */ , parent,x,y,flags); }
-  auto set_fullscreen (uint method,uint framerate,void* output) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_fullscreen /* ret interface: */  /* request args: */ , method,framerate,output); }
-  auto set_popup (void* seat,uint serial,void* parent,int x,int y,uint flags) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_popup /* ret interface: */  /* request args: */ , seat,serial,parent,x,y,flags); }
-  auto set_maximized (void* output) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_maximized /* ret interface: */  /* request args: */ , output); }
-  auto set_title (const(char)* title) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_title /* ret interface: */  /* request args: */ , title); }
-  auto set_class (const(char)* class_) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_class /* ret interface: */  /* request args: */ , class_); }
+  auto pong (uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.pong, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial); }
+  auto move (void* seat,uint serial) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.move, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial); }
+  auto resize (void* seat,uint serial,uint edges) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.resize, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial,edges); }
+  auto set_toplevel () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_toplevel, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
+  auto set_transient (void* parent,int x,int y,uint flags) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_transient, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , parent,x,y,flags); }
+  auto set_fullscreen (uint method,uint framerate,void* output) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_fullscreen, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , method,framerate,output); }
+  auto set_popup (void* seat,uint serial,void* parent,int x,int y,uint flags) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_popup, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , seat,serial,parent,x,y,flags); }
+  auto set_maximized (void* output) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_maximized, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , output); }
+  auto set_title (const(char)* title) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_title, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , title); }
+  auto set_class (const(char)* class_) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_class, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , class_); }
 
   // Events
   struct
@@ -811,17 +813,17 @@ wl_surface {
 
   // Requests
   pragma (inline,true):
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto attach (void* buffer,int x,int y) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.attach /* ret interface: */  /* request args: */ , buffer,x,y); }
-  auto damage (int x,int y,int width,int height) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.damage /* ret interface: */  /* request args: */ , x,y,width,height); }
-  auto frame () { return cast (wl_callback*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.frame /* ret interface: */ , &wl_callback_interface /* request args: */ ); }
-  auto set_opaque_region (void* region) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_opaque_region /* ret interface: */  /* request args: */ , region); }
-  auto set_input_region (void* region) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_input_region /* ret interface: */  /* request args: */ , region); }
-  auto commit () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.commit /* ret interface: */  /* request args: */ ); }
-  auto set_buffer_transform (int transform) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_buffer_transform /* ret interface: */  /* request args: */ , transform); }
-  auto set_buffer_scale (int scale) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_buffer_scale /* ret interface: */  /* request args: */ , scale); }
-  auto damage_buffer (int x,int y,int width,int height) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.damage_buffer /* ret interface: */  /* request args: */ , x,y,width,height); }
-  auto offset (int x,int y) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.offset /* ret interface: */  /* request args: */ , x,y); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto attach (void* buffer,int x,int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.attach, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , buffer,x,y); }
+  auto damage (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.damage, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto frame () { return cast (wl_callback*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.frame, /* ret interface: */ &wl_callback_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
+  auto set_opaque_region (void* region) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_opaque_region, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , region); }
+  auto set_input_region (void* region) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_input_region, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , region); }
+  auto commit () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.commit, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
+  auto set_buffer_transform (int transform) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_buffer_transform, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , transform); }
+  auto set_buffer_scale (int scale) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_buffer_scale, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , scale); }
+  auto damage_buffer (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.damage_buffer, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto offset (int x,int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.offset, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y); }
 
   // Events
   struct
@@ -908,10 +910,10 @@ wl_seat {
 
   // Requests
   pragma (inline,true):
-  auto get_pointer () { return cast (wl_pointer*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.get_pointer /* ret interface: */ , &wl_pointer_interface /* request args: */ ); }
-  auto get_keyboard () { return cast (wl_keyboard*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.get_keyboard /* ret interface: */ , &wl_keyboard_interface /* request args: */ ); }
-  auto get_touch () { return cast (wl_touch*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.get_touch /* ret interface: */ , &wl_touch_interface /* request args: */ ); }
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto get_pointer () { return cast (wl_pointer*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_pointer, /* ret interface: */ &wl_pointer_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
+  auto get_keyboard () { return cast (wl_keyboard*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_keyboard, /* ret interface: */ &wl_keyboard_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
+  auto get_touch () { return cast (wl_touch*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_touch, /* ret interface: */ &wl_touch_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -975,8 +977,8 @@ wl_pointer {
 
   // Requests
   pragma (inline,true):
-  auto set_cursor (uint serial,void* surface,int hotspot_x,int hotspot_y) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_cursor /* ret interface: */  /* request args: */ , serial,surface,hotspot_x,hotspot_y); }
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto set_cursor (uint serial,void* surface,int hotspot_x,int hotspot_y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_cursor, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , serial,surface,hotspot_x,hotspot_y); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -1135,7 +1137,7 @@ wl_keyboard {
 
   // Requests
   pragma (inline,true):
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -1232,7 +1234,7 @@ wl_touch {
 
   // Requests
   pragma (inline,true):
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -1326,7 +1328,7 @@ wl_output {
 
   // Requests
   pragma (inline,true):
-  auto release () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.release /* ret interface: */  /* request args: */ ); }
+  auto release () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.release, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
 
   // Events
   struct
@@ -1438,9 +1440,9 @@ wl_region {
 
   // Requests
   pragma (inline,true):
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto add (int x,int y,int width,int height) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.add /* ret interface: */  /* request args: */ , x,y,width,height); }
-  auto subtract (int x,int y,int width,int height) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.subtract /* ret interface: */  /* request args: */ , x,y,width,height); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto add (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.add, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
+  auto subtract (int x,int y,int width,int height) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.subtract, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y,width,height); }
 
   // Opcodes
   enum
@@ -1464,8 +1466,8 @@ wl_subcompositor {
 
   // Requests
   pragma (inline,true):
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto get_subsurface (void* surface,void* parent) { return cast (wl_subsurface*) wl_proxy_marshal_constructor (cast (wl_proxy*) &this, opcode.get_subsurface /* ret interface: */ , &wl_subsurface_interface /* request args: */ , surface,parent); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto get_subsurface (void* surface,void* parent) { return cast (wl_subsurface*) wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.get_subsurface, /* ret interface: */ &wl_subsurface_interface, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , null,surface,parent); }
 
   // Enums
   enum
@@ -1495,12 +1497,12 @@ wl_subsurface {
 
   // Requests
   pragma (inline,true):
-  auto destroy () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.destroy /* ret interface: */  /* request args: */ ); }
-  auto set_position (int x,int y) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_position /* ret interface: */  /* request args: */ , x,y); }
-  auto place_above (void* sibling) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.place_above /* ret interface: */  /* request args: */ , sibling); }
-  auto place_below (void* sibling) {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.place_below /* ret interface: */  /* request args: */ , sibling); }
-  auto set_sync () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_sync /* ret interface: */  /* request args: */ ); }
-  auto set_desync () {  wl_proxy_marshal (cast (wl_proxy*) &this, opcode.set_desync /* ret interface: */  /* request args: */ ); }
+  auto destroy () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.destroy, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ WL_MARSHAL_FLAG_DESTROY /* request args: */ ); }
+  auto set_position (int x,int y) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_position, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , x,y); }
+  auto place_above (void* sibling) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.place_above, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , sibling); }
+  auto place_below (void* sibling) {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.place_below, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ , sibling); }
+  auto set_sync () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_sync, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
+  auto set_desync () {  wl_proxy_marshal_flags (cast (wl_proxy*) &this, opcode.set_desync, /* ret interface: */ null, /* version: */ wl_proxy_get_version (cast (wl_proxy *) &this), /* flags: */ 0 /* request args: */ ); }
 
   // Enums
   enum

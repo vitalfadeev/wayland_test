@@ -12,7 +12,6 @@ main (string[] args) {
 	string file_name = "wayland.xml";
 	if (args.length > 1) {
 		file_name = args[1];
-		writeln (file_name);
 	}
 
 	// READ-WRITE
@@ -52,8 +51,10 @@ D_File_Writer {
 		writefln ("import wayland_struct.proxy : wl_proxy_marshal;");
 		writefln ("import wayland_struct.proxy : wl_proxy_marshal_constructor;");
 		writefln ("import wayland_struct.proxy : wl_proxy_marshal_constructor_versioned;");
+		writefln ("import wayland_struct.proxy : wl_proxy_marshal_flags;");
 		writefln ("import wayland_struct.proxy : wl_proxy_get_version;");
 		writefln ("import wayland_struct.proxy : wl_proxy_add_listener;");
+		writefln ("import wayland_struct.proxy : WL_MARSHAL_FLAG_DESTROY;");
 		writefln ("import wayland_struct.util  : wl_proxy_callback;;");
 		writefln ("import wayland_struct.util  : wl_message;");
 		writefln ("import wayland_struct.util  : wl_interface;");
@@ -105,13 +106,6 @@ D_File_Writer {
 						writeln ("  	    	null");
 						writeln ("  		);");
 						writeln ("  }");
-
-						//writeln ("  auto bind (uint name) { ");
-						//writeln ("    return cast (wl_proxy*)");
-						//writeln ("      wl_proxy_marshal_constructor (");
-						//writeln ("        cast (wl_proxy*) &this, opcode.bind, &wl_registry_interface, name");
-						//writeln ("      );");
-						//writeln ("  }");
 						continue;
 					}
 
@@ -126,6 +120,7 @@ D_File_Writer {
 						if (arg.type == "new_id") {  // return new _proxy | _object
 							ret_type  = (arg.interface_.length)? arg.interface_: "wl_proxy";
 							ret_name  = arg.name.to_d_name;
+							proxy_args ~= format!"%s" ("null");
 						}
 						else {                       // arg
 							auto arg_type = arg.type.to_d_type (arg);  // wl_surface* surface -> Wl_surface surface
@@ -136,19 +131,24 @@ D_File_Writer {
 
 					// request () { ... }
 					string _ret;
-					string _fn = "wl_proxy_marshal";
+					//string _fn = "wl_proxy_marshal";
+					string _fn = "wl_proxy_marshal_flags";
 					string _opcode = req.name;
-					string _iface;
-					string _ver;
+					string _iface = "null";
+					string _ver = format!"wl_proxy_get_version (cast (wl_proxy *) &this)" ();
+					string _flags = "0";
 					if (ret_type.length) {
 						_ret   = format!"return cast (%s*)" (ret_type);
-						_fn    = "wl_proxy_marshal_constructor";
-						_iface = format!", &%s_interface" (ret_type);
+						//_fn    = "wl_proxy_marshal_constructor";
+						_fn    = "wl_proxy_marshal_flags";
+						_iface = format!"&%s_interface" (ret_type);
 					}
+					if (req.type == "destructor")
+						_flags = "WL_MARSHAL_FLAG_DESTROY";
 					
 					writefln (
-						"  auto %s (%s) { %s %s (cast (wl_proxy*) &this, opcode.%s /* ret interface: */ %s /* request args: */ %s%s); }", 
-						req.name, req_args.join (","), _ret, _fn, _opcode, _iface, (proxy_args.length? ", ": ""), proxy_args.join (","));
+						"  auto %s (%s) { %s %s (cast (wl_proxy*) &this, opcode.%s, /* ret interface: */ %s, /* version: */ %s, /* flags: */ %s /* request args: */ %s%s); }", 
+						req.name, req_args.join (","), _ret, _fn, _opcode, _iface, _ver, _flags, (proxy_args.length? ", ": ""), proxy_args.join (","));
 				}
 			}
 

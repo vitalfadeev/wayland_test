@@ -51,7 +51,7 @@ wayland_ctx {
     //wl_shm_pool*      pool;
     //wl_buffer*        buffer;
 
-    xdg_wm_base*   xdg_wm_base;
+    //xdg_wm_base*   xdg_wm_base;
 
     //.xdg_surface*   xdg_surface;
     //.xdg_toplevel*  xdg_toplevel;
@@ -125,19 +125,19 @@ extern (C)
 void 
 global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
     printf ("%d: %s\n", name, interface_);
-    auto xdg_wm_base_interface_name = "xdg_wm_base";
-    if (strcmp (xdg_wm_base_interface_name.ptr, interface_) == 0) {
-        xdg_wm_base_interface;
+    //auto xdg_wm_base_interface_name = "xdg_wm_base";
+    //if (strcmp (xdg_wm_base_interface_name.ptr, interface_) == 0) {
+    //    xdg_wm_base_interface;
 
-        (cast (wayland_ctx*) ctx).xdg_wm_base = 
-        cast (xdg_wm_base*) 
-            _this.bind (
-                name, 
-                //
-                xdg_wm_base_interface, 
-                version_
-            );
-    }
+    //    (cast (wayland_ctx*) ctx).xdg_wm_base = 
+    //    cast (xdg_wm_base*) 
+    //        _this.bind (
+    //            name, 
+    //            //
+    //            xdg_wm_base_interface, 
+    //            version_
+    //        );
+    //}
 }
 extern (C) 
 void 
@@ -181,13 +181,13 @@ main () {
     ctx.registry.destroy ();
     ctx.display.disconnect ();
 
-    if (ctx.shell is null) {
-        printf ("Can't find shell\n");
-        return EXIT_FAILURE;
-    } 
-    else {
-        printf ("Found shell\n");
-    }
+    //if (ctx.shell is null) {
+    //    printf ("Can't find shell\n");
+    //    return EXIT_FAILURE;
+    //} 
+    //else {
+    //    printf ("Found shell\n");
+    //}
 
 
     version (NEVER) {
