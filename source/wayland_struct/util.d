@@ -50,12 +50,17 @@ wl_argument {
     int           h; // file descriptor
 }
 
+//struct 
+//wl_object {
+//    wl_interface* interface;
+//    void*         implementation;
+//    uint32_t      id;
+//};
+
 //wl_interface 
 //foo_interface = wl_interface (
 //    "foo", 1,
 //    2, foo_requests,
 //    1, foo_events
 //);
-
-
 

@@ -22,7 +22,7 @@ void            wl_proxy_marshal_array                       (wl_proxy* p, uint 
 wl_proxy*       wl_proxy_marshal_array_constructor           (wl_proxy* proxy, uint opcode, wl_argument* args, const (wl_interface*) iface);
 wl_proxy*       wl_proxy_marshal_array_flags                 (wl_proxy* proxy, uint32_t opcode, const wl_interface* interface_, uint32_t version_, uint32_t flags, wl_argument* args);
 wl_proxy*       wl_proxy_marshal_array_constructor_versioned (wl_proxy* proxy, uint32_t opcode, wl_argument* args, const wl_interface* interface_, uint32_t version_);
-int             wl_proxy_add_listener                        (wl_proxy* proxy, void function()* implementation, void* data);
+int             wl_proxy_add_listener                        (wl_proxy* proxy, wl_proxy_callback*, void* data);
 const (void*)   wl_proxy_get_listener                        (wl_proxy* proxy);
 int             wl_proxy_add_dispatcher                      (wl_proxy* proxy, wl_dispatcher_func_t dispatcher_func, const (void*)  dispatcher_data, void* data);
 void            wl_proxy_set_user_data                       (wl_proxy* proxy, void* user_data);

@@ -6,7 +6,20 @@
 	"copyright": "Copyright © 2025, vf",
 	"description": "A minimal D application.",
 	"license": "proprietary",
-	"dependencies"   : {
-    	"wayland-client-d"   : { "path":"deps/wayland-client-d" }
-	},
+	"configurations": [
+		{
+			"name": "static",
+			"libs": ["wayland-client"],
+			"targetType": "executable",
+			"versions": [],
+		},
+		{
+			"name": "dynamic",
+			"dependencies": {
+				"derelict-util" : { "path":"deps/derelict-util" }
+			},
+			"targetType": "executable",
+			"versions": ["Dynamic"]
+		}
+	],
 }

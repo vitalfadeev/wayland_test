@@ -82,60 +82,50 @@ D_File_Writer {
 				writefln ("  // Requests");
 				writefln ("  pragma (inline,true):");
 				foreach (req; iface.requests) {
-					auto ret_type  = "";  // check arg.type == "new_id" && check|get arg.interface_ 
-					auto ret_name  = "";
-					auto ret_iface = false;
-					// new_id
+					if (iface.name == "wl_registry" && req.name == "bind") {
+						writeln ("  auto bind (uint name) { ");
+						writeln ("    return cast (wl_proxy*)");
+						writeln ("      wl_proxy_marshal_constructor (");
+						writeln ("        cast (wl_proxy*) &this, opcode.bind, &wl_registry_interface, name");
+						writeln ("      );");
+						writeln ("  }");
+						continue;
+					}
 
+					string   ret_type  = "";  // check arg.type == "new_id" && check|get arg.interface_ 
+					string   ret_name  = "";
+					string[] req_args;
+
+					// request (...)
 					// , offset, width, height, stride, format
-					string _args;
-
-					writef   ("  auto %s (", req.name);
-					size_t i;
+					string[] proxy_args;
 					foreach (arg; req.args) {
-						if (arg.type == "new_id") {  // ret
-							ret_type  = arg.type.to_d_type (arg);
+						if (arg.type == "new_id") {  // return new _proxy | _object
+							ret_type  = (arg.interface_.length)? arg.interface_: "wl_proxy";
 							ret_name  = arg.name.to_d_name;
-							ret_iface = (arg.interface_.length)? true : false;
 						}
 						else {                       // arg
 							auto arg_type = arg.type.to_d_type (arg);  // wl_surface* surface -> Wl_surface surface
-							writef   ("%s%s %s", ((i > 0)? ", " : ""), arg_type, arg.name.to_d_name);
-							_args ~= ", " ~ arg.name;
-							i ++;
+							req_args   ~= format!"%s %s" (arg_type, arg.name.to_d_name);
+							proxy_args ~= format!"%s" (arg.name.to_d_name);
 						}
 					}
-					writef   (") { ");
+
+					// request () { ... }
 					string _ret;
 					string _fn = "wl_proxy_marshal";
 					string _opcode = req.name;
 					string _iface;
 					string _ver;
 					if (ret_type.length) {
-						if (ret_iface) {  // cast (Wl_shell_surface) cast (wl_shell_surface*))
-							_ret   = format!"return cast (%s*)" (ret_type);
-							_fn   ~= "_constructor";
-							_iface = format!", &%s_interface" (ret_type);
-							_args = ", null"~_args;
-						}
-						else {
-							_ret   = format!"return cast (%s*)" ("wl_proxy");
-							_fn   ~= "_constructor";
-							_iface = ", &wl_proxy_interface";
-							_args = ", null"~_args;
-						}
+						_ret   = format!"return cast (%s*)" (ret_type);
+						_fn    = "wl_proxy_marshal_constructor";
+						_iface = format!", &%s_interface" (ret_type);
 					}
-
-					//if (req.since && req.since != "0") {
-					//	_fn ~= "_versioned";
-					//	_ver = format!", %s" (req.since);
-					//}
-
-					writef   (
-						"%s %s (cast (wl_proxy*) &this, opcode.%s %s %s %s);", 
-						_ret, _fn, _opcode, _iface, _ver, _args);
-
-					writefln ("  }");
+					
+					writefln (
+						"  auto %s (%s) { %s %s (cast (wl_proxy*) &this, opcode.%s /* ret interface: */ %s /* request args: */ %s%s); }", 
+						req.name, req_args.join (","), _ret, _fn, _opcode, _iface, (proxy_args.length? ", ": ""), proxy_args.join (","));
 				}
 			}
 
@@ -148,20 +138,43 @@ D_File_Writer {
 				// callbacks
 				foreach (eve; iface.events) {
 					auto eve_name = eve.name;
-					writefln ("    %s_cb %s;", eve_name, eve_name);
+					writefln (
+						"    %s_cb %s = &_%s_impl_default;", 
+						eve_name, eve_name, eve_name);
 				}
 				writefln ("");
 				// alias
 				foreach (eve; iface.events) {
-					auto eve_name = eve.name;
-					writef   ("    alias %s_cb = void function (", eve_name);
-					writef   (     "void* data, %s* _%s", iface_name, iface_name);
-					foreach (i,arg; eve.args) {
-						writef   (", ");
-						writef   ("%s %s", arg.type.to_d_type (arg), arg.name.to_d_name);
+					auto     eve_name = eve.name.to_d_name;
+					string[] eve_args;
+					foreach (arg; eve.args) {
+						eve_args ~= format!
+							"%s %s" 
+							(arg.type.to_d_type (arg), arg.name.to_d_name);
 					}
-					writefln (");");
+					writefln (
+						"    alias %s_cb = extern (C) void function (void* data, %s* _this /* args: */ %s%s);", 
+						eve_name, iface_name, (eve_args.length? ", ": ""), eve_args.join (", "));
 				}
+				// impl default
+				foreach (eve; iface.events) {
+					auto     eve_name = eve.name.to_d_name;
+					string[] eve_args;
+					foreach (arg; eve.args) {
+						eve_args ~= format!
+							"%s %s" 
+							(arg.type.to_d_type (arg), arg.name.to_d_name);
+					}
+					writefln ("");
+					writefln ("    extern (C)");
+					writefln ("    static");
+					writefln ("    void");
+					writefln ("    _%s_impl_default (void* data, %s* _this /* args: */ %s%s) {", 
+							eve_name, iface_name, (eve_args.length? ", ": ""), eve_args.join (", "));
+					writefln ("        // ");
+					writefln ("    }");
+				}
+
 				writefln ("  }"); // struct listener
 			}
 
@@ -169,7 +182,7 @@ D_File_Writer {
 			if (iface.events.length) {
 				writefln ("");
 				writefln ("  // Event listener");
-				writefln ("  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) &impl, data); }");
+				writefln ("  auto add_listener (Listener* impl, void* data) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, data); }");
 			}
 
 			// Enum
@@ -202,72 +215,72 @@ D_File_Writer {
 			writefln ("");
 
 			// Interface
-			//static const wl_message[1] _requests  = [wl_message ("bind","u",null)];
-			//static const wl_message[2] _events    = [wl_message ("global","",null), wl_message ("global_remove","",null)];
-			writefln ("// Interface");
-			string s1; //  = "wl_message (\"bind\",\"u\",null)";
-			foreach (req; iface.requests) {
-				string r_types;
-				foreach (arg; req.args) {
-					string arg_type;
-					if (arg.type == "object")
-						arg_type = format!"&%s_interface" (arg.interface_);
-					else
-						arg_type = "null";
-					r_types ~= (arg_type ~ ",");
-				}
-				string _types_name = format!"_%s_request_%s_types" (iface_name,req.name);
-				writefln ("static const wl_interface*[%d] %s = [%s];", req.args.length, _types_name, r_types);
+			//writefln ("// Interface");
+			//string s1; //  = "wl_message (\"bind\",\"u\",null)";
+			//foreach (req; iface.requests) {
+			//	string r_types;
+			//	foreach (arg; req.args) {
+			//		string arg_type;
+			//		if (arg.type == "object")
+			//			arg_type = format!"&%s_interface" (arg.interface_);
+			//		else
+			//			arg_type = "null";
+			//		r_types ~= (arg_type ~ ",");
+			//	}
+			//	string _types_name = format!"_%s_request_%s_types" (iface_name,req.name);
+			//	writefln ("static const wl_interface*[%d] %s = [%s];", req.args.length, _types_name, r_types);
 
-				//
-				s1 ~= format!
-					"wl_message (\"%s\",\"%s\",%s.ptr)," 
-					(/* name */ req.name, /* signature */ req.args.to_iface_args (iface.version_), _types_name);
-			}
+			//	//
+			//	s1 ~= format!
+			//		"wl_message (\"%s\",\"%s\",%s.ptr)," 
+			//		(/* name */ req.name, /* signature */ req.args.to_iface_args (iface.version_), _types_name);
+			//}
 
-			string s2; //  = "wl_message (\"global\",\"\",null), wl_message (\"global_remove\",\"\",null)";
-			foreach (i,eve; iface.events) {
-				string e_types;
-				foreach (arg; eve.args) {
-					string arg_type;
-					if (arg.type == "object")
-						arg_type = format!"&%s_interface" (arg.interface_);
-					else
-						arg_type = "null";
-					e_types ~= (arg_type ~ ",");
-				}
-				string _types_name = format!"_%s_event_%s_types" (iface_name,eve.name);
-				writefln ("static const wl_interface*[%d] %s = [%s];", eve.args.length, _types_name, e_types);
+			//string s2; //  = "wl_message (\"global\",\"\",null), wl_message (\"global_remove\",\"\",null)";
+			//foreach (i,eve; iface.events) {
+			//	string e_types;
+			//	foreach (arg; eve.args) {
+			//		string arg_type;
+			//		if (arg.type == "object")
+			//			arg_type = format!"&%s_interface" (arg.interface_);
+			//		else
+			//			arg_type = "null";
+			//		e_types ~= (arg_type ~ ",");
+			//	}
+			//	string _types_name = format!"_%s_event_%s_types" (iface_name,eve.name);
+			//	writefln ("static const wl_interface*[%d] %s = [%s];", eve.args.length, _types_name, e_types);
 
-				//
-				s2 ~= format!
-					"wl_message (\"%s\",\"%s\",%s.ptr)," 
-					(/* name */ eve.name, /* signature */ eve.args.to_iface_args (iface.version_), _types_name);
-			}
+			//	//
+			//	s2 ~= format!
+			//		"wl_message (\"%s\",\"%s\",%s.ptr)," 
+			//		(/* name */ eve.name, /* signature */ eve.args.to_iface_args (iface.version_), _types_name);
+			//}
+			//writefln ("static const wl_message[%d] _%s_requests  = [%s];", iface.requests.length, iface_name, s1);
+			//writefln ("static const wl_message[%d] _%s_events    = [%s];", iface.events.length, iface_name, s2);
+			//writefln ("static const wl_interface %s_interface = {", iface_name);
+			//writefln ("  	\"%s\", %d,", iface_name, iface.version_.to!int);
+			//writefln ("  	%d, _%s_requests.ptr,", iface.requests.length, iface_name);
+			//writefln ("  	%d, _%s_events.ptr",    iface.events.length, iface_name);
+			//writefln ("};");
+			//writefln ("");
+
 			// foreach (i,eve; iface.events)
 			//   static wl_interface*[N] _wl_compositor_event_ENAME_types = [];
-			writefln ("static const wl_message[%d] _%s_requests  = [%s];", iface.requests.length, iface_name, s1);
-			writefln ("static const wl_message[%d] _%s_events    = [%s];", iface.events.length, iface_name, s2);
-			writefln ("static const wl_interface %s_interface = {", iface_name);
-			writefln ("  	\"%s\", %d,", iface_name, iface.version_.to!int);
-			writefln ("  	%d, _%s_requests.ptr,", iface.requests.length, iface_name);
-			writefln ("  	%d, _%s_events.ptr",    iface.events.length, iface_name);
-			writefln ("};");
-			writefln ("");
 
-			//writefln ("extern (C) __gshared wl_interface %s_interface;", iface_name);
+			// objdump -T  libwayland-client.so  | grep _interface			
+			writefln ("extern (C) extern __gshared wl_interface %s_interface;", iface_name);
 			//writefln ("");
 		}
 
 		// wl_proxy interface
-		writefln ("// wl_proxy interface");
-		writefln ("static const wl_message[6] _wl_proxy_interface_requests  = [];");
-		writefln ("static const wl_message[0] _wl_proxy_interface_events    = [];");
-		writefln ("static const wl_interface wl_proxy_interface = {");
-	    writefln ("    \"wl_proxy\", 1,");
-	    writefln ("    0, _wl_proxy_interface_requests.ptr,");
-	    writefln ("    0, _wl_proxy_interface_events.ptr");
-		writefln ("};");
+		//writefln ("// wl_proxy interface");
+		//writefln ("static const wl_message[6] _wl_proxy_interface_requests  = [];");
+		//writefln ("static const wl_message[0] _wl_proxy_interface_events    = [];");
+		//writefln ("static const wl_interface wl_proxy_interface = {");
+	    //writefln ("    \"wl_proxy\", 1,");
+	    //writefln ("    0, _wl_proxy_interface_requests.ptr,");
+	    //writefln ("    0, _wl_proxy_interface_events.ptr");
+		//writefln ("};");
 	
 	}
 }
