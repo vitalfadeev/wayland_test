@@ -77,7 +77,7 @@ wl_registry {
 
 static const wl_interface*[2] wl_registry_bind_requiest_interfaces = [null,null];
 static const wl_message[1] wl_registry_requests = [
-  wl_message ("bind", "un", wl_registry_bind_requiest_interfaces.ptr),
+  wl_message ("bind", "usun", wl_registry_bind_requiest_interfaces.ptr),
 ];
 static const wl_interface*[3] wl_registry_global_event_interfaces = [null,null,null];
 static const wl_interface*[1] wl_registry_global_remove_event_interfaces = [null];

@@ -258,6 +258,9 @@ D_File_Writer {
 				writefln ("static const wl_interface*[%d] %s_%s_requiest_interfaces = %s;", req.args.length, iface_name, req.name, req.interface_types_array);
 				writefln ("static const wl_message[%d] %s_requests = [", iface.requests.length, iface_name);
 				foreach (req; iface.requests)
+				if (iface.name == "wl_registry" && req.name == "bind")
+				writefln ("  wl_message (\"%s\", \"%s\", %s_%s_requiest_interfaces.ptr),", req.name, "usun",               iface_name, req.name);
+				else
 				writefln ("  wl_message (\"%s\", \"%s\", %s_%s_requiest_interfaces.ptr),", req.name, req.serialized_types, iface_name, req.name);
 				writefln ("];");
 
