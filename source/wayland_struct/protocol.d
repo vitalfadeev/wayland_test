@@ -75,9 +75,21 @@ wl_registry {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_registry_interface;
-
+static const wl_interface*[2] wl_registry_bind_requiest_interfaces = [null,null];
+static const wl_message[1] wl_registry_requests = [
+  wl_message ("bind", "un", wl_registry_bind_requiest_interfaces.ptr),
+];
+static const wl_interface*[3] wl_registry_global_event_interfaces = [null,null,null];
+static const wl_interface*[1] wl_registry_global_remove_event_interfaces = [null];
+static const wl_message[2] wl_registry_events = [
+  wl_message ("global", "usu", wl_registry_global_event_interfaces.ptr),
+  wl_message ("global_remove", "u", wl_registry_global_remove_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_registry_interface = {
+  "wl_registry", 1,
+  wl_registry_requests.length, wl_registry_requests.ptr,
+  wl_registry_events.length,   wl_registry_events.ptr,
+};
 // module wayland.wl_callback;
 
 struct
@@ -105,9 +117,17 @@ wl_callback {
   auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_callback_interface;
-
+static const wl_message[0] wl_callback_requests = [
+];
+static const wl_interface*[1] wl_callback_done_event_interfaces = [null];
+static const wl_message[1] wl_callback_events = [
+  wl_message ("done", "u", wl_callback_done_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_callback_interface = {
+  "wl_callback", 1,
+  wl_callback_requests.length, wl_callback_requests.ptr,
+  wl_callback_events.length,   wl_callback_events.ptr,
+};
 // module wayland.wl_compositor;
 
 struct
@@ -129,9 +149,19 @@ wl_compositor {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_compositor_interface;
-
+static const wl_interface*[1] wl_compositor_create_surface_requiest_interfaces = [&wl_surface_interface];
+static const wl_interface*[1] wl_compositor_create_region_requiest_interfaces = [&wl_region_interface];
+static const wl_message[2] wl_compositor_requests = [
+  wl_message ("create_surface", "n", wl_compositor_create_surface_requiest_interfaces.ptr),
+  wl_message ("create_region", "n", wl_compositor_create_region_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_compositor_events = [
+];
+extern (C) static const wl_interface wl_compositor_interface = {
+  "wl_compositor", 6,
+  wl_compositor_requests.length, wl_compositor_requests.ptr,
+  wl_compositor_events.length,   wl_compositor_events.ptr,
+};
 // module wayland.wl_shm_pool;
 
 struct
@@ -155,9 +185,21 @@ wl_shm_pool {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_shm_pool_interface;
-
+static const wl_interface*[6] wl_shm_pool_create_buffer_requiest_interfaces = [&wl_buffer_interface,null,null,null,null,null];
+static const wl_interface*[0] wl_shm_pool_destroy_requiest_interfaces = [];
+static const wl_interface*[1] wl_shm_pool_resize_requiest_interfaces = [null];
+static const wl_message[3] wl_shm_pool_requests = [
+  wl_message ("create_buffer", "niiiiu", wl_shm_pool_create_buffer_requiest_interfaces.ptr),
+  wl_message ("destroy", "", wl_shm_pool_destroy_requiest_interfaces.ptr),
+  wl_message ("resize", "i", wl_shm_pool_resize_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_shm_pool_events = [
+];
+extern (C) static const wl_interface wl_shm_pool_interface = {
+  "wl_shm_pool", 2,
+  wl_shm_pool_requests.length, wl_shm_pool_requests.ptr,
+  wl_shm_pool_events.length,   wl_shm_pool_events.ptr,
+};
 // module wayland.wl_shm;
 
 struct
@@ -331,9 +373,21 @@ wl_shm {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_shm_interface;
-
+static const wl_interface*[3] wl_shm_create_pool_requiest_interfaces = [&wl_shm_pool_interface,null,null];
+static const wl_interface*[0] wl_shm_release_requiest_interfaces = [];
+static const wl_message[2] wl_shm_requests = [
+  wl_message ("create_pool", "nhi", wl_shm_create_pool_requiest_interfaces.ptr),
+  wl_message ("release", "2", wl_shm_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_shm_format_event_interfaces = [null];
+static const wl_message[1] wl_shm_events = [
+  wl_message ("format", "u", wl_shm_format_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_shm_interface = {
+  "wl_shm", 2,
+  wl_shm_requests.length, wl_shm_requests.ptr,
+  wl_shm_events.length,   wl_shm_events.ptr,
+};
 // module wayland.wl_buffer;
 
 struct
@@ -371,9 +425,19 @@ wl_buffer {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_buffer_interface;
-
+static const wl_interface*[0] wl_buffer_destroy_requiest_interfaces = [];
+static const wl_message[1] wl_buffer_requests = [
+  wl_message ("destroy", "", wl_buffer_destroy_requiest_interfaces.ptr),
+];
+static const wl_interface*[0] wl_buffer_release_event_interfaces = [];
+static const wl_message[1] wl_buffer_events = [
+  wl_message ("release", "", wl_buffer_release_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_buffer_interface = {
+  "wl_buffer", 1,
+  wl_buffer_requests.length, wl_buffer_requests.ptr,
+  wl_buffer_events.length,   wl_buffer_events.ptr,
+};
 // module wayland.wl_data_offer;
 
 struct
@@ -446,9 +510,31 @@ wl_data_offer {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_data_offer_interface;
-
+static const wl_interface*[2] wl_data_offer_accept_requiest_interfaces = [null,null];
+static const wl_interface*[2] wl_data_offer_receive_requiest_interfaces = [null,null];
+static const wl_interface*[0] wl_data_offer_destroy_requiest_interfaces = [];
+static const wl_interface*[0] wl_data_offer_finish_requiest_interfaces = [];
+static const wl_interface*[2] wl_data_offer_set_actions_requiest_interfaces = [null,null];
+static const wl_message[5] wl_data_offer_requests = [
+  wl_message ("accept", "u?s", wl_data_offer_accept_requiest_interfaces.ptr),
+  wl_message ("receive", "sh", wl_data_offer_receive_requiest_interfaces.ptr),
+  wl_message ("destroy", "", wl_data_offer_destroy_requiest_interfaces.ptr),
+  wl_message ("finish", "3", wl_data_offer_finish_requiest_interfaces.ptr),
+  wl_message ("set_actions", "3uu", wl_data_offer_set_actions_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_data_offer_offer_event_interfaces = [null];
+static const wl_interface*[1] wl_data_offer_source_actions_event_interfaces = [null];
+static const wl_interface*[1] wl_data_offer_action_event_interfaces = [null];
+static const wl_message[3] wl_data_offer_events = [
+  wl_message ("offer", "s", wl_data_offer_offer_event_interfaces.ptr),
+  wl_message ("source_actions", "3u", wl_data_offer_source_actions_event_interfaces.ptr),
+  wl_message ("action", "3u", wl_data_offer_action_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_data_offer_interface = {
+  "wl_data_offer", 3,
+  wl_data_offer_requests.length, wl_data_offer_requests.ptr,
+  wl_data_offer_events.length,   wl_data_offer_events.ptr,
+};
 // module wayland.wl_data_source;
 
 struct
@@ -542,9 +628,33 @@ wl_data_source {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_data_source_interface;
-
+static const wl_interface*[1] wl_data_source_offer_requiest_interfaces = [null];
+static const wl_interface*[0] wl_data_source_destroy_requiest_interfaces = [];
+static const wl_interface*[1] wl_data_source_set_actions_requiest_interfaces = [null];
+static const wl_message[3] wl_data_source_requests = [
+  wl_message ("offer", "s", wl_data_source_offer_requiest_interfaces.ptr),
+  wl_message ("destroy", "", wl_data_source_destroy_requiest_interfaces.ptr),
+  wl_message ("set_actions", "3u", wl_data_source_set_actions_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_data_source_target_event_interfaces = [null];
+static const wl_interface*[2] wl_data_source_send_event_interfaces = [null,null];
+static const wl_interface*[0] wl_data_source_cancelled_event_interfaces = [];
+static const wl_interface*[0] wl_data_source_dnd_drop_performed_event_interfaces = [];
+static const wl_interface*[0] wl_data_source_dnd_finished_event_interfaces = [];
+static const wl_interface*[1] wl_data_source_action_event_interfaces = [null];
+static const wl_message[6] wl_data_source_events = [
+  wl_message ("target", "?s", wl_data_source_target_event_interfaces.ptr),
+  wl_message ("send", "sh", wl_data_source_send_event_interfaces.ptr),
+  wl_message ("cancelled", "", wl_data_source_cancelled_event_interfaces.ptr),
+  wl_message ("dnd_drop_performed", "3", wl_data_source_dnd_drop_performed_event_interfaces.ptr),
+  wl_message ("dnd_finished", "3", wl_data_source_dnd_finished_event_interfaces.ptr),
+  wl_message ("action", "3u", wl_data_source_action_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_data_source_interface = {
+  "wl_data_source", 3,
+  wl_data_source_requests.length, wl_data_source_requests.ptr,
+  wl_data_source_events.length,   wl_data_source_events.ptr,
+};
 // module wayland.wl_data_device;
 
 struct
@@ -638,9 +748,33 @@ wl_data_device {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_data_device_interface;
-
+static const wl_interface*[4] wl_data_device_start_drag_requiest_interfaces = [&wl_data_source_interface,&wl_surface_interface,&wl_surface_interface,null];
+static const wl_interface*[2] wl_data_device_set_selection_requiest_interfaces = [&wl_data_source_interface,null];
+static const wl_interface*[0] wl_data_device_release_requiest_interfaces = [];
+static const wl_message[3] wl_data_device_requests = [
+  wl_message ("start_drag", "?oo?ou", wl_data_device_start_drag_requiest_interfaces.ptr),
+  wl_message ("set_selection", "?ou", wl_data_device_set_selection_requiest_interfaces.ptr),
+  wl_message ("release", "2", wl_data_device_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_data_device_data_offer_event_interfaces = [&wl_data_offer_interface];
+static const wl_interface*[5] wl_data_device_enter_event_interfaces = [null,&wl_surface_interface,null,null,&wl_data_offer_interface];
+static const wl_interface*[0] wl_data_device_leave_event_interfaces = [];
+static const wl_interface*[3] wl_data_device_motion_event_interfaces = [null,null,null];
+static const wl_interface*[0] wl_data_device_drop_event_interfaces = [];
+static const wl_interface*[1] wl_data_device_selection_event_interfaces = [&wl_data_offer_interface];
+static const wl_message[6] wl_data_device_events = [
+  wl_message ("data_offer", "n", wl_data_device_data_offer_event_interfaces.ptr),
+  wl_message ("enter", "uoff?o", wl_data_device_enter_event_interfaces.ptr),
+  wl_message ("leave", "", wl_data_device_leave_event_interfaces.ptr),
+  wl_message ("motion", "uff", wl_data_device_motion_event_interfaces.ptr),
+  wl_message ("drop", "", wl_data_device_drop_event_interfaces.ptr),
+  wl_message ("selection", "?o", wl_data_device_selection_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_data_device_interface = {
+  "wl_data_device", 3,
+  wl_data_device_requests.length, wl_data_device_requests.ptr,
+  wl_data_device_events.length,   wl_data_device_events.ptr,
+};
 // module wayland.wl_data_device_manager;
 
 struct
@@ -671,9 +805,19 @@ wl_data_device_manager {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_data_device_manager_interface;
-
+static const wl_interface*[1] wl_data_device_manager_create_data_source_requiest_interfaces = [&wl_data_source_interface];
+static const wl_interface*[2] wl_data_device_manager_get_data_device_requiest_interfaces = [&wl_data_device_interface,&wl_seat_interface];
+static const wl_message[2] wl_data_device_manager_requests = [
+  wl_message ("create_data_source", "n", wl_data_device_manager_create_data_source_requiest_interfaces.ptr),
+  wl_message ("get_data_device", "no", wl_data_device_manager_get_data_device_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_data_device_manager_events = [
+];
+extern (C) static const wl_interface wl_data_device_manager_interface = {
+  "wl_data_device_manager", 3,
+  wl_data_device_manager_requests.length, wl_data_device_manager_requests.ptr,
+  wl_data_device_manager_events.length,   wl_data_device_manager_events.ptr,
+};
 // module wayland.wl_shell;
 
 struct
@@ -699,9 +843,17 @@ wl_shell {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_shell_interface;
-
+static const wl_interface*[2] wl_shell_get_shell_surface_requiest_interfaces = [&wl_shell_surface_interface,&wl_surface_interface];
+static const wl_message[1] wl_shell_requests = [
+  wl_message ("get_shell_surface", "no", wl_shell_get_shell_surface_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_shell_events = [
+];
+extern (C) static const wl_interface wl_shell_interface = {
+  "wl_shell", 1,
+  wl_shell_requests.length, wl_shell_requests.ptr,
+  wl_shell_events.length,   wl_shell_events.ptr,
+};
 // module wayland.wl_shell_surface;
 
 struct
@@ -800,9 +952,41 @@ wl_shell_surface {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_shell_surface_interface;
-
+static const wl_interface*[1] wl_shell_surface_pong_requiest_interfaces = [null];
+static const wl_interface*[2] wl_shell_surface_move_requiest_interfaces = [&wl_seat_interface,null];
+static const wl_interface*[3] wl_shell_surface_resize_requiest_interfaces = [&wl_seat_interface,null,null];
+static const wl_interface*[0] wl_shell_surface_set_toplevel_requiest_interfaces = [];
+static const wl_interface*[4] wl_shell_surface_set_transient_requiest_interfaces = [&wl_surface_interface,null,null,null];
+static const wl_interface*[3] wl_shell_surface_set_fullscreen_requiest_interfaces = [null,null,&wl_output_interface];
+static const wl_interface*[6] wl_shell_surface_set_popup_requiest_interfaces = [&wl_seat_interface,null,&wl_surface_interface,null,null,null];
+static const wl_interface*[1] wl_shell_surface_set_maximized_requiest_interfaces = [&wl_output_interface];
+static const wl_interface*[1] wl_shell_surface_set_title_requiest_interfaces = [null];
+static const wl_interface*[1] wl_shell_surface_set_class_requiest_interfaces = [null];
+static const wl_message[10] wl_shell_surface_requests = [
+  wl_message ("pong", "u", wl_shell_surface_pong_requiest_interfaces.ptr),
+  wl_message ("move", "ou", wl_shell_surface_move_requiest_interfaces.ptr),
+  wl_message ("resize", "ouu", wl_shell_surface_resize_requiest_interfaces.ptr),
+  wl_message ("set_toplevel", "", wl_shell_surface_set_toplevel_requiest_interfaces.ptr),
+  wl_message ("set_transient", "oiiu", wl_shell_surface_set_transient_requiest_interfaces.ptr),
+  wl_message ("set_fullscreen", "uu?o", wl_shell_surface_set_fullscreen_requiest_interfaces.ptr),
+  wl_message ("set_popup", "ouoiiu", wl_shell_surface_set_popup_requiest_interfaces.ptr),
+  wl_message ("set_maximized", "?o", wl_shell_surface_set_maximized_requiest_interfaces.ptr),
+  wl_message ("set_title", "s", wl_shell_surface_set_title_requiest_interfaces.ptr),
+  wl_message ("set_class", "s", wl_shell_surface_set_class_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_shell_surface_ping_event_interfaces = [null];
+static const wl_interface*[3] wl_shell_surface_configure_event_interfaces = [null,null,null];
+static const wl_interface*[0] wl_shell_surface_popup_done_event_interfaces = [];
+static const wl_message[3] wl_shell_surface_events = [
+  wl_message ("ping", "u", wl_shell_surface_ping_event_interfaces.ptr),
+  wl_message ("configure", "uii", wl_shell_surface_configure_event_interfaces.ptr),
+  wl_message ("popup_done", "", wl_shell_surface_popup_done_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_shell_surface_interface = {
+  "wl_shell_surface", 1,
+  wl_shell_surface_requests.length, wl_shell_surface_requests.ptr,
+  wl_shell_surface_events.length,   wl_shell_surface_events.ptr,
+};
 // module wayland.wl_surface;
 
 struct
@@ -897,9 +1081,45 @@ wl_surface {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_surface_interface;
-
+static const wl_interface*[0] wl_surface_destroy_requiest_interfaces = [];
+static const wl_interface*[3] wl_surface_attach_requiest_interfaces = [&wl_buffer_interface,null,null];
+static const wl_interface*[4] wl_surface_damage_requiest_interfaces = [null,null,null,null];
+static const wl_interface*[1] wl_surface_frame_requiest_interfaces = [&wl_callback_interface];
+static const wl_interface*[1] wl_surface_set_opaque_region_requiest_interfaces = [&wl_region_interface];
+static const wl_interface*[1] wl_surface_set_input_region_requiest_interfaces = [&wl_region_interface];
+static const wl_interface*[0] wl_surface_commit_requiest_interfaces = [];
+static const wl_interface*[1] wl_surface_set_buffer_transform_requiest_interfaces = [null];
+static const wl_interface*[1] wl_surface_set_buffer_scale_requiest_interfaces = [null];
+static const wl_interface*[4] wl_surface_damage_buffer_requiest_interfaces = [null,null,null,null];
+static const wl_interface*[2] wl_surface_offset_requiest_interfaces = [null,null];
+static const wl_message[11] wl_surface_requests = [
+  wl_message ("destroy", "", wl_surface_destroy_requiest_interfaces.ptr),
+  wl_message ("attach", "?oii", wl_surface_attach_requiest_interfaces.ptr),
+  wl_message ("damage", "iiii", wl_surface_damage_requiest_interfaces.ptr),
+  wl_message ("frame", "n", wl_surface_frame_requiest_interfaces.ptr),
+  wl_message ("set_opaque_region", "?o", wl_surface_set_opaque_region_requiest_interfaces.ptr),
+  wl_message ("set_input_region", "?o", wl_surface_set_input_region_requiest_interfaces.ptr),
+  wl_message ("commit", "", wl_surface_commit_requiest_interfaces.ptr),
+  wl_message ("set_buffer_transform", "2i", wl_surface_set_buffer_transform_requiest_interfaces.ptr),
+  wl_message ("set_buffer_scale", "3i", wl_surface_set_buffer_scale_requiest_interfaces.ptr),
+  wl_message ("damage_buffer", "4iiii", wl_surface_damage_buffer_requiest_interfaces.ptr),
+  wl_message ("offset", "5ii", wl_surface_offset_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_surface_enter_event_interfaces = [&wl_output_interface];
+static const wl_interface*[1] wl_surface_leave_event_interfaces = [&wl_output_interface];
+static const wl_interface*[1] wl_surface_preferred_buffer_scale_event_interfaces = [null];
+static const wl_interface*[1] wl_surface_preferred_buffer_transform_event_interfaces = [null];
+static const wl_message[4] wl_surface_events = [
+  wl_message ("enter", "o", wl_surface_enter_event_interfaces.ptr),
+  wl_message ("leave", "o", wl_surface_leave_event_interfaces.ptr),
+  wl_message ("preferred_buffer_scale", "6i", wl_surface_preferred_buffer_scale_event_interfaces.ptr),
+  wl_message ("preferred_buffer_transform", "6u", wl_surface_preferred_buffer_transform_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_surface_interface = {
+  "wl_surface", 6,
+  wl_surface_requests.length, wl_surface_requests.ptr,
+  wl_surface_events.length,   wl_surface_events.ptr,
+};
 // module wayland.wl_seat;
 
 struct
@@ -964,9 +1184,27 @@ wl_seat {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_seat_interface;
-
+static const wl_interface*[1] wl_seat_get_pointer_requiest_interfaces = [&wl_pointer_interface];
+static const wl_interface*[1] wl_seat_get_keyboard_requiest_interfaces = [&wl_keyboard_interface];
+static const wl_interface*[1] wl_seat_get_touch_requiest_interfaces = [&wl_touch_interface];
+static const wl_interface*[0] wl_seat_release_requiest_interfaces = [];
+static const wl_message[4] wl_seat_requests = [
+  wl_message ("get_pointer", "n", wl_seat_get_pointer_requiest_interfaces.ptr),
+  wl_message ("get_keyboard", "n", wl_seat_get_keyboard_requiest_interfaces.ptr),
+  wl_message ("get_touch", "n", wl_seat_get_touch_requiest_interfaces.ptr),
+  wl_message ("release", "5", wl_seat_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[1] wl_seat_capabilities_event_interfaces = [null];
+static const wl_interface*[1] wl_seat_name_event_interfaces = [null];
+static const wl_message[2] wl_seat_events = [
+  wl_message ("capabilities", "u", wl_seat_capabilities_event_interfaces.ptr),
+  wl_message ("name", "2s", wl_seat_name_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_seat_interface = {
+  "wl_seat", 9,
+  wl_seat_requests.length, wl_seat_requests.ptr,
+  wl_seat_events.length,   wl_seat_events.ptr,
+};
 // module wayland.wl_pointer;
 
 struct
@@ -1124,9 +1362,41 @@ wl_pointer {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_pointer_interface;
-
+static const wl_interface*[4] wl_pointer_set_cursor_requiest_interfaces = [null,&wl_surface_interface,null,null];
+static const wl_interface*[0] wl_pointer_release_requiest_interfaces = [];
+static const wl_message[2] wl_pointer_requests = [
+  wl_message ("set_cursor", "u?oii", wl_pointer_set_cursor_requiest_interfaces.ptr),
+  wl_message ("release", "3", wl_pointer_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[4] wl_pointer_enter_event_interfaces = [null,&wl_surface_interface,null,null];
+static const wl_interface*[2] wl_pointer_leave_event_interfaces = [null,&wl_surface_interface];
+static const wl_interface*[3] wl_pointer_motion_event_interfaces = [null,null,null];
+static const wl_interface*[4] wl_pointer_button_event_interfaces = [null,null,null,null];
+static const wl_interface*[3] wl_pointer_axis_event_interfaces = [null,null,null];
+static const wl_interface*[0] wl_pointer_frame_event_interfaces = [];
+static const wl_interface*[1] wl_pointer_axis_source_event_interfaces = [null];
+static const wl_interface*[2] wl_pointer_axis_stop_event_interfaces = [null,null];
+static const wl_interface*[2] wl_pointer_axis_discrete_event_interfaces = [null,null];
+static const wl_interface*[2] wl_pointer_axis_value120_event_interfaces = [null,null];
+static const wl_interface*[2] wl_pointer_axis_relative_direction_event_interfaces = [null,null];
+static const wl_message[11] wl_pointer_events = [
+  wl_message ("enter", "uoff", wl_pointer_enter_event_interfaces.ptr),
+  wl_message ("leave", "uo", wl_pointer_leave_event_interfaces.ptr),
+  wl_message ("motion", "uff", wl_pointer_motion_event_interfaces.ptr),
+  wl_message ("button", "uuuu", wl_pointer_button_event_interfaces.ptr),
+  wl_message ("axis", "uuf", wl_pointer_axis_event_interfaces.ptr),
+  wl_message ("frame", "5", wl_pointer_frame_event_interfaces.ptr),
+  wl_message ("axis_source", "5u", wl_pointer_axis_source_event_interfaces.ptr),
+  wl_message ("axis_stop", "5uu", wl_pointer_axis_stop_event_interfaces.ptr),
+  wl_message ("axis_discrete", "5ui", wl_pointer_axis_discrete_event_interfaces.ptr),
+  wl_message ("axis_value120", "8ui", wl_pointer_axis_value120_event_interfaces.ptr),
+  wl_message ("axis_relative_direction", "9uu", wl_pointer_axis_relative_direction_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_pointer_interface = {
+  "wl_pointer", 9,
+  wl_pointer_requests.length, wl_pointer_requests.ptr,
+  wl_pointer_events.length,   wl_pointer_events.ptr,
+};
 // module wayland.wl_keyboard;
 
 struct
@@ -1221,9 +1491,29 @@ wl_keyboard {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_keyboard_interface;
-
+static const wl_interface*[0] wl_keyboard_release_requiest_interfaces = [];
+static const wl_message[1] wl_keyboard_requests = [
+  wl_message ("release", "3", wl_keyboard_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[3] wl_keyboard_keymap_event_interfaces = [null,null,null];
+static const wl_interface*[3] wl_keyboard_enter_event_interfaces = [null,&wl_surface_interface,null];
+static const wl_interface*[2] wl_keyboard_leave_event_interfaces = [null,&wl_surface_interface];
+static const wl_interface*[4] wl_keyboard_key_event_interfaces = [null,null,null,null];
+static const wl_interface*[5] wl_keyboard_modifiers_event_interfaces = [null,null,null,null,null];
+static const wl_interface*[2] wl_keyboard_repeat_info_event_interfaces = [null,null];
+static const wl_message[6] wl_keyboard_events = [
+  wl_message ("keymap", "uhu", wl_keyboard_keymap_event_interfaces.ptr),
+  wl_message ("enter", "uoa", wl_keyboard_enter_event_interfaces.ptr),
+  wl_message ("leave", "uo", wl_keyboard_leave_event_interfaces.ptr),
+  wl_message ("key", "uuuu", wl_keyboard_key_event_interfaces.ptr),
+  wl_message ("modifiers", "uuuuu", wl_keyboard_modifiers_event_interfaces.ptr),
+  wl_message ("repeat_info", "4ii", wl_keyboard_repeat_info_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_keyboard_interface = {
+  "wl_keyboard", 9,
+  wl_keyboard_requests.length, wl_keyboard_requests.ptr,
+  wl_keyboard_events.length,   wl_keyboard_events.ptr,
+};
 // module wayland.wl_touch;
 
 struct
@@ -1315,9 +1605,31 @@ wl_touch {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_touch_interface;
-
+static const wl_interface*[0] wl_touch_release_requiest_interfaces = [];
+static const wl_message[1] wl_touch_requests = [
+  wl_message ("release", "3", wl_touch_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[6] wl_touch_down_event_interfaces = [null,null,&wl_surface_interface,null,null,null];
+static const wl_interface*[3] wl_touch_up_event_interfaces = [null,null,null];
+static const wl_interface*[4] wl_touch_motion_event_interfaces = [null,null,null,null];
+static const wl_interface*[0] wl_touch_frame_event_interfaces = [];
+static const wl_interface*[0] wl_touch_cancel_event_interfaces = [];
+static const wl_interface*[3] wl_touch_shape_event_interfaces = [null,null,null];
+static const wl_interface*[2] wl_touch_orientation_event_interfaces = [null,null];
+static const wl_message[7] wl_touch_events = [
+  wl_message ("down", "uuoiff", wl_touch_down_event_interfaces.ptr),
+  wl_message ("up", "uui", wl_touch_up_event_interfaces.ptr),
+  wl_message ("motion", "uiff", wl_touch_motion_event_interfaces.ptr),
+  wl_message ("frame", "", wl_touch_frame_event_interfaces.ptr),
+  wl_message ("cancel", "", wl_touch_cancel_event_interfaces.ptr),
+  wl_message ("shape", "6iff", wl_touch_shape_event_interfaces.ptr),
+  wl_message ("orientation", "6if", wl_touch_orientation_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_touch_interface = {
+  "wl_touch", 9,
+  wl_touch_requests.length, wl_touch_requests.ptr,
+  wl_touch_events.length,   wl_touch_events.ptr,
+};
 // module wayland.wl_output;
 
 struct
@@ -1427,9 +1739,29 @@ wl_output {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_output_interface;
-
+static const wl_interface*[0] wl_output_release_requiest_interfaces = [];
+static const wl_message[1] wl_output_requests = [
+  wl_message ("release", "3", wl_output_release_requiest_interfaces.ptr),
+];
+static const wl_interface*[8] wl_output_geometry_event_interfaces = [null,null,null,null,null,null,null,null];
+static const wl_interface*[4] wl_output_mode_event_interfaces = [null,null,null,null];
+static const wl_interface*[0] wl_output_done_event_interfaces = [];
+static const wl_interface*[1] wl_output_scale_event_interfaces = [null];
+static const wl_interface*[1] wl_output_name_event_interfaces = [null];
+static const wl_interface*[1] wl_output_description_event_interfaces = [null];
+static const wl_message[6] wl_output_events = [
+  wl_message ("geometry", "iiiiissi", wl_output_geometry_event_interfaces.ptr),
+  wl_message ("mode", "uiii", wl_output_mode_event_interfaces.ptr),
+  wl_message ("done", "2", wl_output_done_event_interfaces.ptr),
+  wl_message ("scale", "2i", wl_output_scale_event_interfaces.ptr),
+  wl_message ("name", "4s", wl_output_name_event_interfaces.ptr),
+  wl_message ("description", "4s", wl_output_description_event_interfaces.ptr),
+];
+extern (C) static const wl_interface wl_output_interface = {
+  "wl_output", 4,
+  wl_output_requests.length, wl_output_requests.ptr,
+  wl_output_events.length,   wl_output_events.ptr,
+};
 // module wayland.wl_region;
 
 struct
@@ -1453,9 +1785,21 @@ wl_region {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_region_interface;
-
+static const wl_interface*[0] wl_region_destroy_requiest_interfaces = [];
+static const wl_interface*[4] wl_region_add_requiest_interfaces = [null,null,null,null];
+static const wl_interface*[4] wl_region_subtract_requiest_interfaces = [null,null,null,null];
+static const wl_message[3] wl_region_requests = [
+  wl_message ("destroy", "", wl_region_destroy_requiest_interfaces.ptr),
+  wl_message ("add", "iiii", wl_region_add_requiest_interfaces.ptr),
+  wl_message ("subtract", "iiii", wl_region_subtract_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_region_events = [
+];
+extern (C) static const wl_interface wl_region_interface = {
+  "wl_region", 1,
+  wl_region_requests.length, wl_region_requests.ptr,
+  wl_region_events.length,   wl_region_events.ptr,
+};
 // module wayland.wl_subcompositor;
 
 struct
@@ -1484,9 +1828,19 @@ wl_subcompositor {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_subcompositor_interface;
-
+static const wl_interface*[0] wl_subcompositor_destroy_requiest_interfaces = [];
+static const wl_interface*[3] wl_subcompositor_get_subsurface_requiest_interfaces = [&wl_subsurface_interface,&wl_surface_interface,&wl_surface_interface];
+static const wl_message[2] wl_subcompositor_requests = [
+  wl_message ("destroy", "", wl_subcompositor_destroy_requiest_interfaces.ptr),
+  wl_message ("get_subsurface", "noo", wl_subcompositor_get_subsurface_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_subcompositor_events = [
+];
+extern (C) static const wl_interface wl_subcompositor_interface = {
+  "wl_subcompositor", 1,
+  wl_subcompositor_requests.length, wl_subcompositor_requests.ptr,
+  wl_subcompositor_events.length,   wl_subcompositor_events.ptr,
+};
 // module wayland.wl_subsurface;
 
 struct
@@ -1522,6 +1876,24 @@ wl_subsurface {
   }
 }
 
-// interface
-extern (C) extern __gshared wl_interface wl_subsurface_interface;
-
+static const wl_interface*[0] wl_subsurface_destroy_requiest_interfaces = [];
+static const wl_interface*[2] wl_subsurface_set_position_requiest_interfaces = [null,null];
+static const wl_interface*[1] wl_subsurface_place_above_requiest_interfaces = [&wl_surface_interface];
+static const wl_interface*[1] wl_subsurface_place_below_requiest_interfaces = [&wl_surface_interface];
+static const wl_interface*[0] wl_subsurface_set_sync_requiest_interfaces = [];
+static const wl_interface*[0] wl_subsurface_set_desync_requiest_interfaces = [];
+static const wl_message[6] wl_subsurface_requests = [
+  wl_message ("destroy", "", wl_subsurface_destroy_requiest_interfaces.ptr),
+  wl_message ("set_position", "ii", wl_subsurface_set_position_requiest_interfaces.ptr),
+  wl_message ("place_above", "o", wl_subsurface_place_above_requiest_interfaces.ptr),
+  wl_message ("place_below", "o", wl_subsurface_place_below_requiest_interfaces.ptr),
+  wl_message ("set_sync", "", wl_subsurface_set_sync_requiest_interfaces.ptr),
+  wl_message ("set_desync", "", wl_subsurface_set_desync_requiest_interfaces.ptr),
+];
+static const wl_message[0] wl_subsurface_events = [
+];
+extern (C) static const wl_interface wl_subsurface_interface = {
+  "wl_subsurface", 1,
+  wl_subsurface_requests.length, wl_subsurface_requests.ptr,
+  wl_subsurface_events.length,   wl_subsurface_events.ptr,
+};

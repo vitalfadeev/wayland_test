@@ -5,18 +5,21 @@ import std.conv;
 import dxml.dom;
 import std.range : empty;
 import std.algorithm.searching : canFind;
+import std.algorithm.searching : countUntil;
 import std : replicate;
 
 void 
 main (string[] args) {
 	string file_name = "wayland.xml";
+	bool   generate_iface = true;
 	if (args.length > 1) {
 		file_name = args[1];
+		generate_iface = true;
 	}
 
 	// READ-WRITE
 	foreach (protocol; Reader (file_name))
-		D_File_Writer (protocol).write ();
+		D_File_Writer (protocol,generate_iface).write ();
 }
 
 struct
@@ -37,11 +40,10 @@ Reader {
 struct
 D_File_Writer {
 	Protocol protocol;
+	bool     generate_iface;
 
 	void
 	write () {
-		// alias wl_id = wl_proxy;
-
 		// Protocol
 		auto protocol_name = protocol.name;
 		writefln ("// protocol %s", protocol_name);
@@ -61,6 +63,7 @@ D_File_Writer {
 		writefln ("import wayland_struct.util  : wl_fixed_t;");
 		writefln ("import wayland_struct.util  : wl_array;");
 		writefln ("");
+
 		foreach (iface; protocol.interfaces) {
 			// wl_display,wl_registry skip
 			if (iface.name == "wl_display")
@@ -250,74 +253,34 @@ D_File_Writer {
 			writefln ("");
 
 			// Interface
-			//writefln ("// Interface");
-			//string s1; //  = "wl_message (\"bind\",\"u\",null)";
-			//foreach (req; iface.requests) {
-			//	string r_types;
-			//	foreach (arg; req.args) {
-			//		string arg_type;
-			//		if (arg.type == "object")
-			//			arg_type = format!"&%s_interface" (arg.interface_);
-			//		else
-			//			arg_type = "null";
-			//		r_types ~= (arg_type ~ ",");
-			//	}
-			//	string _types_name = format!"_%s_request_%s_types" (iface_name,req.name);
-			//	writefln ("static const wl_interface*[%d] %s = [%s];", req.args.length, _types_name, r_types);
+			if (generate_iface) {
+				foreach (req; iface.requests)
+				writefln ("static const wl_interface*[%d] %s_%s_requiest_interfaces = %s;", req.args.length, iface_name, req.name, req.interface_types_array);
+				writefln ("static const wl_message[%d] %s_requests = [", iface.requests.length, iface_name);
+				foreach (req; iface.requests)
+				writefln ("  wl_message (\"%s\", \"%s\", %s_%s_requiest_interfaces.ptr),", req.name, req.serialized_types, iface_name, req.name);
+				writefln ("];");
 
-			//	//
-			//	s1 ~= format!
-			//		"wl_message (\"%s\",\"%s\",%s.ptr)," 
-			//		(/* name */ req.name, /* signature */ req.args.to_iface_args (iface.version_), _types_name);
-			//}
+				foreach (eve; iface.events)
+				writefln ("static const wl_interface*[%d] %s_%s_event_interfaces = %s;", eve.args.length, iface_name, eve.name, eve.interface_types_array);
+				writefln ("static const wl_message[%d] %s_events = [", iface.events.length, iface_name);
+				foreach (eve; iface.events)
+				writefln ("  wl_message (\"%s\", \"%s\", %s_%s_event_interfaces.ptr),", eve.name, eve.serialized_types, iface_name, eve.name);
+				writefln ("];");
 
-			//string s2; //  = "wl_message (\"global\",\"\",null), wl_message (\"global_remove\",\"\",null)";
-			//foreach (i,eve; iface.events) {
-			//	string e_types;
-			//	foreach (arg; eve.args) {
-			//		string arg_type;
-			//		if (arg.type == "object")
-			//			arg_type = format!"&%s_interface" (arg.interface_);
-			//		else
-			//			arg_type = "null";
-			//		e_types ~= (arg_type ~ ",");
-			//	}
-			//	string _types_name = format!"_%s_event_%s_types" (iface_name,eve.name);
-			//	writefln ("static const wl_interface*[%d] %s = [%s];", eve.args.length, _types_name, e_types);
-
-			//	//
-			//	s2 ~= format!
-			//		"wl_message (\"%s\",\"%s\",%s.ptr)," 
-			//		(/* name */ eve.name, /* signature */ eve.args.to_iface_args (iface.version_), _types_name);
-			//}
-			//writefln ("static const wl_message[%d] _%s_requests  = [%s];", iface.requests.length, iface_name, s1);
-			//writefln ("static const wl_message[%d] _%s_events    = [%s];", iface.events.length, iface_name, s2);
-			//writefln ("static const wl_interface %s_interface = {", iface_name);
-			//writefln ("  	\"%s\", %d,", iface_name, iface.version_.to!int);
-			//writefln ("  	%d, _%s_requests.ptr,", iface.requests.length, iface_name);
-			//writefln ("  	%d, _%s_events.ptr",    iface.events.length, iface_name);
-			//writefln ("};");
-			//writefln ("");
-
-			// foreach (i,eve; iface.events)
-			//   static wl_interface*[N] _wl_compositor_event_ENAME_types = [];
-
-			// objdump -T  libwayland-client.so  | grep _interface			
-			writefln ("// interface");
-			writefln ("extern (C) extern __gshared wl_interface %s_interface;", iface_name);
-			writefln ("");
+				writefln ("extern (C) static const wl_interface %s_interface = {", iface_name);
+				writefln ("  \"%s\", %s,", iface_name, (iface.version_.length? iface.version_: "0" ));
+				writefln ("  %s_requests.length, %s_requests.ptr,", iface_name, iface_name);
+				writefln ("  %s_events.length,   %s_events.ptr,",   iface_name, iface_name);
+				writefln ("};");
+			}
+			else {
+				// objdump -T  libwayland-client.so  | grep _interface			
+				writefln ("// interface");
+				writefln ("extern (C) extern __gshared wl_interface %s_interface;", iface_name);
+				writefln ("");
+			}
 		}
-
-		// wl_proxy interface
-		//writefln ("// wl_proxy interface");
-		//writefln ("static const wl_message[6] _wl_proxy_interface_requests  = [];");
-		//writefln ("static const wl_message[0] _wl_proxy_interface_events    = [];");
-		//writefln ("static const wl_interface wl_proxy_interface = {");
-	    //writefln ("    \"wl_proxy\", 1,");
-	    //writefln ("    0, _wl_proxy_interface_requests.ptr,");
-	    //writefln ("    0, _wl_proxy_interface_events.ptr");
-		//writefln ("};");
-	
 	}
 }
 
@@ -374,9 +337,8 @@ to_d_type (string a, Arg arg) {
 	return t;
 }
 
-string
-to_iface_args (Arg[] args, string version_) {
-	string s;
+auto
+serialized_types (T) (T request) {
 	string[string] types = [
 		"int"    : "i",
 		"uint"   : "u",
@@ -394,17 +356,30 @@ to_iface_args (Arg[] args, string version_) {
 	//   1 - version
 	//   ? - nullable
 	//   i - type
-
-	s ~= ((version_.length && version_ != "1") ? version_: "");
+	auto version_ = request.since;
+	string s = ((version_.length && version_ != "1") ? version_: "");
 
 	// o
 	//   o_interface
 	// { "bar", "2u?o", [NULL, &wl_baz_interface] }
 
-	foreach (arg; args)
-		s ~= (arg.allow_null? "?": "") ~ types.get (arg.type,"");
+	foreach (a; request.args)
+		s ~= (a.allow_null? "?": "") ~ types.get (a.type,"");
 
 	return s;
+}
+
+auto
+interface_types_array (T) (T request) {
+	// new_id, interface
+	string[] ifaces;
+	foreach (a; request.args)
+		if (a.interface_.length)
+			ifaces ~= format!"&%s_interface" (a.interface_);
+		else
+			ifaces ~= "null";
+
+	return format!"[%s]" (ifaces.join (","));
 }
 
 struct
