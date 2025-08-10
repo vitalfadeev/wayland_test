@@ -322,21 +322,27 @@ draw_frame (wayland_ctx* ctx) {
     int stride = width * 4;
     int size = stride * height;
 
+    writeln (90);
     int fd = allocate_shm_file (size);
     if (fd == -1) {
         return null;
     }
+    writeln (92);
 
     uint* data = cast (uint*) mmap (null, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (data == MAP_FAILED) {
         close (fd);
         return null;
     }
+    writeln (93);
 
     wl_shm_pool* pool = ctx.shm.create_pool (fd, size);
-    wl_buffer* buffer = ctx.pool.create_buffer (0, width, height, stride, wl_shm.format_.xrgb8888);
-    ctx.pool.destroy ();
+    writeln (931);
+    wl_buffer* buffer = pool.create_buffer (0, width, height, stride, wl_shm.format_.xrgb8888);
+    writeln (932);
+    pool.destroy ();
     close (fd);
+    writeln (94);
 
     /* Draw checkerboxed background */
     for (int y = 0; y < height; ++y) {
@@ -347,11 +353,14 @@ draw_frame (wayland_ctx* ctx) {
                 data[y * width + x] = 0xFFEEEEEE;
         }
     }
+    writeln (95);
 
     munmap (data, size);
+    writeln (96);
     buffer.add_listener (new wl_buffer.Listener (
             &_release_impl
         ), null);
+    writeln (97);
     return buffer;
 }
 
@@ -361,10 +370,14 @@ void
 _configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
     auto _ctx = cast (wayland_ctx*) ctx;
     _this.ack_configure (serial);
+    writeln (9);
 
     wl_buffer* buffer = draw_frame (_ctx);
+    writeln (10);
     _ctx.surface.attach (buffer, 0, 0);
+    writeln (11);
     _ctx.surface.commit ();
+    writeln (12);
 }
 
 int
@@ -418,12 +431,17 @@ main () {
 
     ctx.surface      = ctx.compositor.create_surface ();
     ctx._xdg_surface  = ctx._xdg_wm_base.get_xdg_surface (ctx.surface);
+    writeln (4);
     ctx._xdg_surface.add_listener (new xdg_surface.Listener (
             &_configure_impl
         ), ctx);
+    writeln (5);
     ctx._xdg_toplevel = ctx._xdg_surface.get_toplevel ();
+    writeln (6);
     ctx._xdg_toplevel.set_title ("Example client");
+    writeln (7);
     ctx.surface.commit ();
+    writeln (8);
     
     //create_pool (ctx);
     //create_buffers (ctx);
