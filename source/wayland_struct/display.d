@@ -16,7 +16,7 @@ enum display_opcode_get_registry = 1;
 
 
 auto
-_wl_display_get_registry (wl_display* display) {
+wl_display_get_registry (wl_display* display) {
     import wayland_struct.protocol.wayland : wl_registry,wl_registry_interface;
     return
         cast (wl_registry*) (

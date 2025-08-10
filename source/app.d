@@ -31,7 +31,6 @@ static const  int CURSOR_HOT_SPOT_Y = 35;
 static const uint PIXEL_FORMAT_ID   = wl_shm.format_.xrgb8888;
 
 // ctx
-static wayland_ctx* ctx;
 static bool  done = false;
 
 void 
@@ -274,13 +273,11 @@ main () {
         wl_shm_interface.event_count);
 
     auto wayland  = Wayland ();
-         ctx      = wayland.ctx ();
+    auto ctx      = wayland.ctx ();
 
     // setup
     ctx.display  = wayland.display;
     ctx.registry = wl_display_get_registry (ctx.display);
-    writeln (1, ": display  : ", ctx.display);
-    writeln (1, ": registry : ", ctx.registry);
     ctx.registry.add_listener (
         new wl_registry.Listener (  // is a vector of function pointers. 
             &global_impl,
