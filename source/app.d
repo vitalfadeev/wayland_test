@@ -68,10 +68,10 @@ wayland_ctx {
     //wl_shell*         shell;
     //wl_shell_surface* shell_surface;
 
-    //xdg_wm_base*   xdg_wm_base;
+    xdg_wm_base*      _xdg_wm_base;
+    xdg_surface*      _xdg_surface;
+    xdg_toplevel*     _xdg_toplevel;
 
-    //.xdg_surface*   xdg_surface;
-    //.xdg_toplevel*  xdg_toplevel;
     //.buffer[2]      buffers;
     Input          input;
 
@@ -142,22 +142,20 @@ extern (C)
 void 
 global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
     printf ("%d: %s\n", name, interface_);
-    if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
-        //xdg_wm_base_interface;
+    auto _ctx =  cast (wayland_ctx*) ctx;
 
-        //(cast (wayland_ctx*) ctx).xdg_wm_base = 
-        //cast (xdg_wm_base*) 
-        //    _this.bind (
-        //        name, 
-        //        //
-        //        &xdg_wm_base_interface, 
-        //        version_
-        //    );
+    if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
+        _ctx._xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &xdg_wm_base_interface, version_);
+        _ctx._xdg_wm_base.add_listener (
+            new xdg_wm_base.Listener (
+                    &_ping_impl
+                ), 
+                ctx);
     }
 
     if (strcmp (wl_seat_interface.name, interface_) == 0) {
-        (cast (wayland_ctx*) ctx).seat = cast (wl_seat*) _this.bind (name, &wl_seat_interface, version_);
-        (cast (wayland_ctx*) ctx).seat.add_listener (
+        _ctx.seat = cast (wl_seat*) _this.bind (name, &wl_seat_interface, version_);
+        _ctx.seat.add_listener (
             new wl_seat.Listener (  // is a vector of function pointers. 
                 &capabilities_impl,
                 &name_impl,
@@ -166,11 +164,11 @@ global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, 
     }
 
     if (strcmp (wl_compositor_interface.name, interface_) == 0) {
-        (cast (wayland_ctx*) ctx).compositor = cast (wl_compositor*) _this.bind (name, &wl_compositor_interface, version_);
+        _ctx.compositor = cast (wl_compositor*) _this.bind (name, &wl_compositor_interface, version_);
     }
 
     if (strcmp (wl_shm_interface.name, interface_) == 0) {
-        (cast (wayland_ctx*) ctx).shm = cast (wl_shm*) _this.bind (name, &wl_shm_interface, version_);
+        _ctx.shm = cast (wl_shm*) _this.bind (name, &wl_shm_interface, version_);
     }
 }
 extern (C) 
@@ -206,6 +204,14 @@ static
 void
 name_impl (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
     printf ("seat.name: %s\n", name);
+}
+
+
+extern (C)
+static
+void
+_ping_impl (void* ctx, xdg_wm_base* _this /* args: */ , uint serial) {
+    _this.pong (serial);
 }
 
 
@@ -302,6 +308,65 @@ create_buffers (wayland_ctx* ctx) {
     ctx.surface.commit ();
 }
 
+extern (C)
+static
+void
+_release_impl (void* ctx, wl_buffer* _this /* args: */ ) {
+    _this.destroy ();
+}
+
+static 
+wl_buffer*
+draw_frame (wayland_ctx* ctx) {
+    const int width = 640, height = 480;
+    int stride = width * 4;
+    int size = stride * height;
+
+    int fd = allocate_shm_file (size);
+    if (fd == -1) {
+        return null;
+    }
+
+    uint* data = cast (uint*) mmap (null, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (data == MAP_FAILED) {
+        close (fd);
+        return null;
+    }
+
+    wl_shm_pool* pool = ctx.shm.create_pool (fd, size);
+    wl_buffer* buffer = ctx.pool.create_buffer (0, width, height, stride, wl_shm.format_.xrgb8888);
+    ctx.pool.destroy ();
+    close (fd);
+
+    /* Draw checkerboxed background */
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            if ((x + y / 8 * 8) % 16 < 8)
+                data[y * width + x] = 0xFF666666;
+            else
+                data[y * width + x] = 0xFFEEEEEE;
+        }
+    }
+
+    munmap (data, size);
+    buffer.add_listener (new wl_buffer.Listener (
+            &_release_impl
+        ), null);
+    return buffer;
+}
+
+extern (C)
+static
+void
+_configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
+    auto _ctx = cast (wayland_ctx*) ctx;
+    _this.ack_configure (serial);
+
+    wl_buffer* buffer = draw_frame (_ctx);
+    _ctx.surface.attach (buffer, 0, 0);
+    _ctx.surface.commit ();
+}
+
 int
 main () {
     //version (Dynamic) loadWaylandClient ();
@@ -351,10 +416,17 @@ main () {
         printf ("Found seat\n");
     }
 
-    ctx.surface = ctx.compositor.create_surface ();
+    ctx.surface      = ctx.compositor.create_surface ();
+    ctx._xdg_surface  = ctx._xdg_wm_base.get_xdg_surface (ctx.surface);
+    ctx._xdg_surface.add_listener (new xdg_surface.Listener (
+            &_configure_impl
+        ), ctx);
+    ctx._xdg_toplevel = ctx._xdg_surface.get_toplevel ();
+    ctx._xdg_toplevel.set_title ("Example client");
+    ctx.surface.commit ();
     
-    create_pool (ctx);
-    create_buffers (ctx);
+    //create_pool (ctx);
+    //create_buffers (ctx);
 
     //
     while (!done) {
