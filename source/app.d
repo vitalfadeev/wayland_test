@@ -7,9 +7,6 @@ import core.stdc.stdlib        : EXIT_SUCCESS,EXIT_FAILURE;
 import core.stdc.stdlib        : free;
 import core.stdc.string        : strcmp;
 import std.conv                : to;
-import wayland_struct;
-import wayland_struct.protocol.wayland;
-import wayland_struct.protocol.xdg_shell;
 import core.sys.posix.signal   : timespec;
 import core.sys.posix.time     : clock_gettime;
 import core.sys.posix.time     : CLOCK_REALTIME;
@@ -21,11 +18,12 @@ import core.stdc.errno         : EINTR;
 import core.sys.posix.unistd   : close;
 import core.sys.posix.unistd   : ftruncate;
 import core.stdc.string        : memset;
-import std.conv : octal;
+import std.conv                : octal;
+import wayland_struct;
 
 
-static const uint WIDTH             = 320;
-static const uint HEIGHT            = 200;
+static const uint WIDTH             = 640;
+static const uint HEIGHT            = 480;
 static const uint CURSOR_WIDTH      = 100;
 static const uint CURSOR_HEIGHT     = 59;
 static const  int CURSOR_HOT_SPOT_X = 10;
@@ -53,8 +51,8 @@ Wayland {
 
 struct 
 wayland_ctx {
-    int               width  = 640;
-    int               height = 480;
+    int               width  = WIDTH;
+    int               height = HEIGHT;
     wl_display*       display;
     wl_registry*      registry;
     wl_seat*          seat;
