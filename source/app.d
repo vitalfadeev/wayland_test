@@ -263,19 +263,11 @@ int
 main () {
     //version (Dynamic) loadWaylandClient ();
 
-    printf ("%s:, %d, %d\n", 
-        wl_registry_interface.name, 
-        wl_registry_interface.method_count,
-        wl_registry_interface.event_count);
-    printf ("%s:, %d, %d\n", 
-        wl_shm_interface.name, 
-        wl_shm_interface.method_count,
-        wl_shm_interface.event_count);
-
+    // init
     auto wayland  = Wayland ();
     auto ctx      = wayland.ctx ();
 
-    // setup
+    // connect
     ctx.display  = wayland.display;
     ctx.registry = wl_display_get_registry (ctx.display);
     ctx.registry.add_listener (
@@ -303,7 +295,7 @@ main () {
         printf ("Found seat\n");
     }
 
-    // surface
+    // surface,window,draw
     ctx.surface       = ctx.compositor.create_surface ();
     ctx._xdg_surface  = ctx._xdg_wm_base.get_xdg_surface (ctx.surface);
     ctx._xdg_surface.add_listener (new xdg_surface.Listener (&_configure_impl), ctx);
@@ -311,7 +303,7 @@ main () {
     ctx._xdg_toplevel.set_title ("Example client");
     ctx.surface.commit ();
 
-    // loop
+    // loop,draw
     while (!done) {
         if (ctx.display.dispatch () < 0) {
             printf ("loop: dispatch 1\n");
