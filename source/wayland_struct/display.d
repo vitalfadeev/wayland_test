@@ -9,16 +9,34 @@ import wayland_struct.util     : timespec;
 import wayland_struct.util     : wl_message;
 import wayland_struct.util     : wl_display;
 import wayland_struct.proxy    : wl_proxy;
-import wayland_struct.proxy    : wl_proxy_marshal_flags,wl_proxy_get_version;
+import wayland_struct.proxy    : wl_proxy_marshal_constructor,wl_proxy_marshal_flags,wl_proxy_get_version;
 
 enum display_opcode_sync = 0;
 enum display_opcode_get_registry = 1;
+
+
+auto
+_wl_display_get_registry (wl_display* display) {
+    import wayland_struct.protocol.wayland : wl_registry,wl_registry_interface;
+    return
+        cast (wl_registry*) (
+            wl_proxy_marshal_flags (
+                cast (wl_proxy*) display, 
+                display_opcode_get_registry, 
+                &wl_registry_interface, 
+                wl_proxy_get_version (cast (wl_proxy *) display),
+                0,
+                null
+            )
+        );
+}
+
 
 extern (C) {
 //struct wl_display;
 
 // wl_display_get_registry
-//wl_registry     wl_display_get_registry (wl_display* wl_display);
+//wl_registry*    wl_display_get_registry (wl_display* wl_display);
 // wl_display_bind
 // auto wl_display_bind (wl_display* wl_display_, uint name) { return wl_proxy_marshal_flags (wl_display_, opcode.bind, &new_id.interface, wl_proxy_get_version (wl_display_), 0, null, name);  }
 wl_display*     wl_display_connect (const (char*) name);

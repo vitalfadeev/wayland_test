@@ -43,16 +43,17 @@ on_button (uint button) {
 struct
 Wayland {
     pragma (inline,true):
-    wl_display*  display ()                  { return (wl_display_connect (null)); }
-    wl_display*  display (const char *name)  { return (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
-    wl_display*  display (int fd)            { return (wl_display_connect_to_fd (fd)); }
-    wayland_ctx* ctx ()                      { return new wayland_ctx (); }
+    auto display ()                  { return (wl_display_connect (null)); }
+    auto display (const char *name)  { return (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
+    auto display (int fd)            { return (wl_display_connect_to_fd (fd)); }
+    auto ctx ()                      { return new wayland_ctx (); }
 }
 
 struct 
 wayland_ctx {
     int               width  = WIDTH;
     int               height = HEIGHT;
+
     wl_display*       display;
     wl_registry*      registry;
     wl_seat*          seat;
@@ -67,12 +68,9 @@ wayland_ctx {
 
     Input          input;
 
-    void* user_ctx;
-
+    //
     struct 
     Input {
-        int         repeat_fd;
-
         wl_keyboard* keyboard;
         wl_pointer*  pointer;
         wl_touch*    touch;
@@ -82,19 +80,6 @@ wayland_ctx {
 auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
 auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }
 
-
-auto
-wl_display_get_registry (wl_display* display) {
-    return
-        cast (wl_registry*) (
-            wl_proxy_marshal_constructor (
-                cast (wl_proxy*) display, 
-                display_opcode_get_registry, 
-                &wl_registry_interface, 
-                null
-            )
-        );
-}
 
 extern (C)
 void 
