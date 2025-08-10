@@ -77,9 +77,9 @@ wayland_ctx {
     Input {
         int         repeat_fd;
 
-        //wl_keyboard* keyboard;
-        //wl_pointer*  pointer;
-        //wl_touch*    touch;
+        wl_keyboard* keyboard;
+        wl_pointer*  pointer;
+        wl_touch*    touch;
 
         //pointer_event pointer_event;
         //touch_event   touch_event;
@@ -163,12 +163,21 @@ extern (C)
 static
 void
 capabilities_impl (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
-    if (capabilities & wl_seat.capability_.keyboard)
+    auto _ctx = cast (wayland_ctx*) ctx;
+    if (capabilities & wl_seat.capability_.keyboard) {
         printf ("seat.cap: keyboard\n");
+        _ctx.input.keyboard = _ctx.seat.get_keyboard ();
+        printf ("keyboard: %p\n", _ctx.input.keyboard);
+    }
     if (capabilities & wl_seat.capability_.pointer) {
         printf ("seat.cap: pointer\n");
-        auto pointer = (cast (wayland_ctx*) ctx).seat.get_pointer ();
-        printf ("pointer: \n");
+        _ctx.input.pointer = _ctx.seat.get_pointer ();
+        printf ("pointer: %p\n", _ctx.input.pointer);
+    }
+    if (capabilities & wl_seat.capability_.touch) {
+        printf ("seat.cap: touch\n");
+        _ctx.input.touch = _ctx.seat.get_touch ();
+        printf ("touch: %p\n", _ctx.input.touch);
     }
 }
 
