@@ -61,11 +61,11 @@ wayland_ctx {
     wl_shm*           shm;
     wl_shm_pool*      pool;
 
-    xdg_wm_base*      _xdg_wm_base;
-    xdg_surface*      _xdg_surface;
-    xdg_toplevel*     _xdg_toplevel;
+    xdg_wm_base*     _xdg_wm_base;
+    xdg_surface*     _xdg_surface;
+    xdg_toplevel*    _xdg_toplevel;
 
-    Input          input;
+    Input             input;
 
     //
     struct 
@@ -268,15 +268,17 @@ main () {
     auto ctx      = wayland.ctx ();
 
     // connect
-    ctx.display  = wayland.display;
-    ctx.registry = wl_display_get_registry (ctx.display);
-    ctx.registry.add_listener (
-        new wl_registry.Listener (  // is a vector of function pointers. 
-            &global_impl,
-            &global_remove_impl,
-        ),
-        ctx);  // wl_proxy.add_listener
-    ctx.display.roundtrip ();
+    with (ctx) {
+        display  = wayland.display;
+        registry = wl_display_get_registry (display);
+        registry.add_listener (
+            new wl_registry.Listener (  // is a vector of function pointers. 
+                &global_impl,
+                &global_remove_impl,
+            ),
+            ctx);  // wl_proxy.add_listener
+        display.roundtrip ();
+    }
 
     // checks
     if (ctx._xdg_wm_base is null) {
@@ -296,12 +298,14 @@ main () {
     }
 
     // surface,window,draw
-    ctx.surface       = ctx.compositor.create_surface ();
-    ctx._xdg_surface  = ctx._xdg_wm_base.get_xdg_surface (ctx.surface);
-    ctx._xdg_surface.add_listener (new xdg_surface.Listener (&_configure_impl), ctx);
-    ctx._xdg_toplevel = ctx._xdg_surface.get_toplevel ();
-    ctx._xdg_toplevel.set_title ("Example client");
-    ctx.surface.commit ();
+    with (ctx) {
+        surface       = compositor.create_surface ();
+        _xdg_surface  = _xdg_wm_base.get_xdg_surface (surface);
+        _xdg_surface.add_listener (new xdg_surface.Listener (&_configure_impl), ctx);
+        _xdg_toplevel = _xdg_surface.get_toplevel ();
+        _xdg_toplevel.set_title ("Example client");
+        surface.commit ();
+    }
 
     // loop,draw
     while (!done) {
@@ -312,10 +316,11 @@ main () {
         }
     }
 
-
     // cleanup
-    ctx.registry.destroy ();
-    ctx.display.disconnect ();
+    with (ctx) {
+        registry.destroy ();
+        display.disconnect ();
+    }
 
     //
     return EXIT_SUCCESS;
