@@ -1,0 +1,3 @@
+module wayland_struct.protocol;
+
+public import wayland_struct.protocol.wayland;

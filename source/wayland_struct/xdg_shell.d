@@ -1,5 +1,5 @@
 // protocol xdg_shell
-module wayland_struct.protocol;
+module wayland_struct.protocol.xdg_shell;
 
 import wayland_struct.proxy : wl_proxy;
 import wayland_struct.proxy : wl_proxy_marshal;
@@ -14,6 +14,7 @@ import wayland_struct.util  : wl_message;
 import wayland_struct.util  : wl_interface;
 import wayland_struct.util  : wl_fixed_t;
 import wayland_struct.util  : wl_array;
+import wayland_struct.protocol.wayland;
 
 // module xdg_shell.xdg_wm_base;
 

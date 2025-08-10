@@ -1,7 +1,7 @@
 module wayland_struct.display;
 
-import wayland_struct.protocol : wl_registry;
-import wayland_struct.protocol : wl_callback;
+//import wayland_struct.protocol : wl_registry;
+//import wayland_struct.protocol : wl_callback;
 import wayland_struct.util     : wl_interface;
 import wayland_struct.util     : wl_event_queue;
 import wayland_struct.util     : timespec;

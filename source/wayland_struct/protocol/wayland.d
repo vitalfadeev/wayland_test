@@ -1,5 +1,5 @@
 // protocol wayland
-module wayland_struct.protocol;
+module wayland_struct.protocol.wayland;
 
 import wayland_struct.proxy : wl_proxy;
 import wayland_struct.proxy : wl_proxy_marshal;

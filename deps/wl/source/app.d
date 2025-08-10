@@ -10,16 +10,18 @@ import std : replicate;
 
 void 
 main (string[] args) {
-	string file_name = "wayland.xml";
-	bool   generate_iface = true;
+	string file_name            = "wayland.xml";
+	bool   generate_iface       = true;
+	bool   import_base_protocol = false;
 	if (args.length > 1) {
-		file_name = args[1];
-		generate_iface = true;
+		file_name 			 = args[1];
+		generate_iface 		 = true;
+		import_base_protocol = true;
 	}
 
 	// READ-WRITE
 	foreach (protocol; Reader (file_name))
-		D_File_Writer (protocol,generate_iface).write ();
+		D_File_Writer (protocol,generate_iface,import_base_protocol).write ();
 }
 
 struct
@@ -41,13 +43,14 @@ struct
 D_File_Writer {
 	Protocol protocol;
 	bool     generate_iface;
+	bool     import_base_protocol;
 
 	void
 	write () {
 		// Protocol
 		auto protocol_name = protocol.name;
 		writefln ("// protocol %s", protocol_name);
-		writefln ("module wayland_struct.protocol;");
+		writefln ("module wayland_struct.protocol.%s;", protocol_name);
 		writefln ("");
 		writefln ("import wayland_struct.proxy : wl_proxy;");
 		writefln ("import wayland_struct.proxy : wl_proxy_marshal;");
@@ -62,6 +65,8 @@ D_File_Writer {
 		writefln ("import wayland_struct.util  : wl_interface;");
 		writefln ("import wayland_struct.util  : wl_fixed_t;");
 		writefln ("import wayland_struct.util  : wl_array;");
+		if (import_base_protocol)
+		writefln ("import wayland_struct.protocol.wayland;");
 		writefln ("");
 
 		foreach (iface; protocol.interfaces) {
