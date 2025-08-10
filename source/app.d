@@ -63,8 +63,8 @@ wayland_ctx {
     wl_surface*       surface;
     wl_shm*           shm;
     wl_shm_pool*      pool;
-    wl_buffer*        buffer;
-    ubyte* pool_data;
+    //wl_buffer*        buffer;
+    //ubyte* pool_data;
     //wl_shell*         shell;
     //wl_shell_surface* shell_surface;
 
@@ -261,52 +261,52 @@ allocate_shm_file (size_t size) {
     return fd;
 }
 
-void
-create_pool (wayland_ctx* ctx) {
-    const int width = 640, height = 480;
-    const int stride = width * 4;
-    const int shm_pool_size = height * stride * 2;
+//void
+//create_pool (wayland_ctx* ctx) {
+//    const int width = 640, height = 480;
+//    const int stride = width * 4;
+//    const int shm_pool_size = height * stride * 2;
 
-    int  fd        = allocate_shm_file (shm_pool_size);
-    auto pool_data = cast (ubyte*) mmap (null, shm_pool_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+//    int  fd        = allocate_shm_file (shm_pool_size);
+//    auto pool_data = cast (ubyte*) mmap (null, shm_pool_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
-    auto shm  = ctx.shm; // Bound from registry
-    auto pool = shm.create_pool (fd, shm_pool_size);
-    ctx.pool = pool;
-    ctx.pool_data = pool_data;
-}
+//    auto shm  = ctx.shm; // Bound from registry
+//    auto pool = shm.create_pool (fd, shm_pool_size);
+//    ctx.pool  = pool;
+//    ctx.pool_data = pool_data;
+//}
 
-void
-create_buffers (wayland_ctx* ctx) {
-    const int width = 640, height = 480;
-    const int stride = width * 4;
-    const int shm_pool_size = height * stride * 2;
+//void
+//create_buffers (wayland_ctx* ctx) {
+//    const int width = 640, height = 480;
+//    const int stride = width * 4;
+//    const int shm_pool_size = height * stride * 2;
 
-    int  index  = 0;
-    int  offset = height * stride * index;
-    auto buffer = ctx.pool.create_buffer (offset, width, height, stride, wl_shm.format_.xrgb8888);
-    ctx.buffer  = buffer;
+//    int  index  = 0;
+//    int  offset = height * stride * index;
+//    auto buffer = ctx.pool.create_buffer (offset, width, height, stride, wl_shm.format_.xrgb8888);
+//    ctx.buffer  = buffer;
 
-    //
-    uint32_t *pixels = cast (uint32_t*) &ctx.pool_data[offset];
-    memset (pixels, 0, width * height * 4);
+//    //
+//    uint32_t *pixels = cast (uint32_t*) &ctx.pool_data[offset];
+//    memset (pixels, 0, width * height * 4);
 
-    //
-    for (int y = 0; y < height; ++y) {
-      for (int x = 0; x < width; ++x) {
-        if ((x + y / 8 * 8) % 16 < 8) {
-          pixels[y * width + x] = 0xFF666666;
-        } else {
-          pixels[y * width + x] = 0xFFEEEEEE;
-        }
-      }
-    }
+//    //
+//    for (int y = 0; y < height; ++y) {
+//      for (int x = 0; x < width; ++x) {
+//        if ((x + y / 8 * 8) % 16 < 8) {
+//          pixels[y * width + x] = 0xFF666666;
+//        } else {
+//          pixels[y * width + x] = 0xFFEEEEEE;
+//        }
+//      }
+//    }
 
-    //
-    ctx.surface.attach (buffer, 0, 0);
-    ctx.surface.damage (0, 0, uint.max, uint.max);  // to redraw
-    ctx.surface.commit ();
-}
+//    //
+//    ctx.surface.attach (buffer, 0, 0);
+//    ctx.surface.damage (0, 0, uint.max, uint.max);  // to redraw
+//    ctx.surface.commit ();
+//}
 
 extern (C)
 static
@@ -349,9 +349,7 @@ draw_frame (wayland_ctx* ctx) {
     }
 
     munmap (data, size);
-    buffer.add_listener (new wl_buffer.Listener (
-            &_release_impl
-        ), null);
+    buffer.add_listener (new wl_buffer.Listener (&_release_impl), null);
     return buffer;
 }
 
@@ -362,7 +360,7 @@ _configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
     auto _ctx = cast (wayland_ctx*) ctx;
     _this.ack_configure (serial);
 
-    wl_buffer* buffer = draw_frame (_ctx);
+    auto buffer = draw_frame (_ctx);
     _ctx.surface.attach (buffer, 0, 0);
     _ctx.surface.commit ();
 }
@@ -398,13 +396,14 @@ main () {
     //ctx.display.flush ();
     ctx.display.roundtrip ();
 
-    //if (ctx.shell is null) {
-    //    printf ("Can't find shell\n");
-    //    return EXIT_FAILURE;
-    //} 
-    //else {
-    //    printf ("Found shell\n");
-    //}
+    // checks
+    if (ctx._xdg_wm_base is null) {
+        printf ("Can't find xdg_wm_base\n");
+        return EXIT_FAILURE;
+    } 
+    else {
+        printf ("Found xdg_wm_base\n");
+    }
 
     if (ctx.seat is null) {
         printf ("Can't find seat\n");
@@ -414,19 +413,15 @@ main () {
         printf ("Found seat\n");
     }
 
-    ctx.surface      = ctx.compositor.create_surface ();
+    // surface
+    ctx.surface       = ctx.compositor.create_surface ();
     ctx._xdg_surface  = ctx._xdg_wm_base.get_xdg_surface (ctx.surface);
-    ctx._xdg_surface.add_listener (new xdg_surface.Listener (
-            &_configure_impl
-        ), ctx);
+    ctx._xdg_surface.add_listener (new xdg_surface.Listener (&_configure_impl), ctx);
     ctx._xdg_toplevel = ctx._xdg_surface.get_toplevel ();
     ctx._xdg_toplevel.set_title ("Example client");
     ctx.surface.commit ();
-    
-    //create_pool (ctx);
-    //create_buffers (ctx);
 
-    //
+    // loop
     while (!done) {
         if (ctx.display.dispatch () < 0) {
             printf ("loop: dispatch 1\n");
