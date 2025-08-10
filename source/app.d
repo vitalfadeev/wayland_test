@@ -74,7 +74,7 @@ wayland_ctx {
         wl_pointer*  pointer;
         wl_touch*    touch;
     }
-};
+}
 
 auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
 auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }
@@ -235,7 +235,7 @@ draw_frame (wayland_ctx* ctx) {
     /* Draw checkerboxed background */
     for (int y = 0; y < ctx.height; ++y) {
         for (int x = 0; x < ctx.width; ++x) {
-            if ((x + y / 8 * 8) % 16 < 8)
+            if ((x + y / 32 * 32) % 64 < 32)
                 data[y * ctx.width + x] = 0xFF666666;
             else
                 data[y * ctx.width + x] = 0xFFEEEEEE;
@@ -259,7 +259,9 @@ _configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
     _ctx.surface.commit ();
 }
 
-int
+
+extern (C) 
+void
 main () {
     //version (Dynamic) loadWaylandClient ();
 
@@ -283,7 +285,8 @@ main () {
     // checks
     if (ctx._xdg_wm_base is null) {
         printf ("Can't find xdg_wm_base\n");
-        return EXIT_FAILURE;
+        //return EXIT_FAILURE;
+        return;
     } 
     else {
         printf ("Found xdg_wm_base\n");
@@ -291,7 +294,8 @@ main () {
 
     if (ctx.seat is null) {
         printf ("Can't find seat\n");
-        return EXIT_FAILURE;
+        //return EXIT_FAILURE;
+        return;
     } 
     else {
         printf ("Found seat\n");
@@ -323,7 +327,8 @@ main () {
     }
 
     //
-    return EXIT_SUCCESS;
+    //return EXIT_SUCCESS;
+    return;
 }
 
 //void 

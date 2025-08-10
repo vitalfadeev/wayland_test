@@ -20,9 +20,11 @@ import wayland_struct.protocol.wayland;
 
 struct
 xdg_wm_base {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(xdg_wm_base);
   @disable this(ref xdg_wm_base);
+  }
 
   // Requests
   pragma (inline,true):
@@ -94,9 +96,11 @@ extern (C) static const wl_interface xdg_wm_base_interface = {
 
 struct
 xdg_positioner {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(xdg_positioner);
   @disable this(ref xdg_positioner);
+  }
 
   // Requests
   pragma (inline,true):
@@ -200,9 +204,11 @@ extern (C) static const wl_interface xdg_positioner_interface = {
 
 struct
 xdg_surface {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(xdg_surface);
   @disable this(ref xdg_surface);
+  }
 
   // Requests
   pragma (inline,true):
@@ -277,9 +283,11 @@ extern (C) static const wl_interface xdg_surface_interface = {
 
 struct
 xdg_toplevel {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(xdg_toplevel);
   @disable this(ref xdg_toplevel);
+  }
 
   // Requests
   pragma (inline,true):
@@ -455,9 +463,11 @@ extern (C) static const wl_interface xdg_toplevel_interface = {
 
 struct
 xdg_popup {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(xdg_popup);
   @disable this(ref xdg_popup);
+  }
 
   // Requests
   pragma (inline,true):

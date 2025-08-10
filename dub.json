@@ -12,6 +12,7 @@
 			"libs": ["wayland-client"],
 			"targetType": "executable",
 			"versions": [],
+			#"dflags": ["-betterC"],
 		},
 		{
 			"name": "dynamic",
@@ -19,7 +20,8 @@
 				"derelict-util" : { "path":"deps/derelict-util" }
 			},
 			"targetType": "executable",
-			"versions": ["Dynamic"]
+			"versions": ["Dynamic"],
+			#"dflags": ["-betterC"],
 		}
 	],
 }

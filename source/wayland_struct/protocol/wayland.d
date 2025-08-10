@@ -19,9 +19,11 @@ import wayland_struct.util  : wl_array;
 
 struct
 wl_registry {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_registry);
   @disable this(ref wl_registry);
+  }
 
   // Requests
   pragma (inline,true):
@@ -94,9 +96,11 @@ extern (C) static const wl_interface wl_registry_interface = {
 
 struct
 wl_callback {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_callback);
   @disable this(ref wl_callback);
+  }
 
   // Events
   struct
@@ -132,9 +136,11 @@ extern (C) static const wl_interface wl_callback_interface = {
 
 struct
 wl_compositor {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_compositor);
   @disable this(ref wl_compositor);
+  }
 
   // Requests
   pragma (inline,true):
@@ -166,9 +172,11 @@ extern (C) static const wl_interface wl_compositor_interface = {
 
 struct
 wl_shm_pool {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_shm_pool);
   @disable this(ref wl_shm_pool);
+  }
 
   // Requests
   pragma (inline,true):
@@ -204,9 +212,11 @@ extern (C) static const wl_interface wl_shm_pool_interface = {
 
 struct
 wl_shm {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_shm);
   @disable this(ref wl_shm);
+  }
 
   // Requests
   pragma (inline,true):
@@ -392,9 +402,11 @@ extern (C) static const wl_interface wl_shm_interface = {
 
 struct
 wl_buffer {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_buffer);
   @disable this(ref wl_buffer);
+  }
 
   // Requests
   pragma (inline,true):
@@ -442,9 +454,11 @@ extern (C) static const wl_interface wl_buffer_interface = {
 
 struct
 wl_data_offer {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_data_offer);
   @disable this(ref wl_data_offer);
+  }
 
   // Requests
   pragma (inline,true):
@@ -539,9 +553,11 @@ extern (C) static const wl_interface wl_data_offer_interface = {
 
 struct
 wl_data_source {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_data_source);
   @disable this(ref wl_data_source);
+  }
 
   // Requests
   pragma (inline,true):
@@ -659,9 +675,11 @@ extern (C) static const wl_interface wl_data_source_interface = {
 
 struct
 wl_data_device {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_data_device);
   @disable this(ref wl_data_device);
+  }
 
   // Requests
   pragma (inline,true):
@@ -779,9 +797,11 @@ extern (C) static const wl_interface wl_data_device_interface = {
 
 struct
 wl_data_device_manager {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_data_device_manager);
   @disable this(ref wl_data_device_manager);
+  }
 
   // Requests
   pragma (inline,true):
@@ -822,9 +842,11 @@ extern (C) static const wl_interface wl_data_device_manager_interface = {
 
 struct
 wl_shell {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_shell);
   @disable this(ref wl_shell);
+  }
 
   // Requests
   pragma (inline,true):
@@ -858,9 +880,11 @@ extern (C) static const wl_interface wl_shell_interface = {
 
 struct
 wl_shell_surface {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_shell_surface);
   @disable this(ref wl_shell_surface);
+  }
 
   // Requests
   pragma (inline,true):
@@ -991,9 +1015,11 @@ extern (C) static const wl_interface wl_shell_surface_interface = {
 
 struct
 wl_surface {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_surface);
   @disable this(ref wl_surface);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1124,9 +1150,11 @@ extern (C) static const wl_interface wl_surface_interface = {
 
 struct
 wl_seat {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_seat);
   @disable this(ref wl_seat);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1209,9 +1237,11 @@ extern (C) static const wl_interface wl_seat_interface = {
 
 struct
 wl_pointer {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_pointer);
   @disable this(ref wl_pointer);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1401,9 +1431,11 @@ extern (C) static const wl_interface wl_pointer_interface = {
 
 struct
 wl_keyboard {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_keyboard);
   @disable this(ref wl_keyboard);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1518,9 +1550,11 @@ extern (C) static const wl_interface wl_keyboard_interface = {
 
 struct
 wl_touch {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_touch);
   @disable this(ref wl_touch);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1634,9 +1668,11 @@ extern (C) static const wl_interface wl_touch_interface = {
 
 struct
 wl_output {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_output);
   @disable this(ref wl_output);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1766,9 +1802,11 @@ extern (C) static const wl_interface wl_output_interface = {
 
 struct
 wl_region {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_region);
   @disable this(ref wl_region);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1804,9 +1842,11 @@ extern (C) static const wl_interface wl_region_interface = {
 
 struct
 wl_subcompositor {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_subcompositor);
   @disable this(ref wl_subcompositor);
+  }
 
   // Requests
   pragma (inline,true):
@@ -1845,9 +1885,11 @@ extern (C) static const wl_interface wl_subcompositor_interface = {
 
 struct
 wl_subsurface {
+  version (D_BetterC) {} else {
   @disable this();
   @disable this(wl_subsurface);
   @disable this(ref wl_subsurface);
+  }
 
   // Requests
   pragma (inline,true):

@@ -88,9 +88,11 @@ D_File_Writer {
 			auto struct_name = iface_name;
 			writefln ("struct");
 			writefln ("%s {", struct_name);
+			writefln ("  version (D_BetterC) {} else {");
 			writefln ("  @disable this();");
 			writefln ("  @disable this(%s);", struct_name);
 			writefln ("  @disable this(ref %s);", struct_name);
+			writefln ("  }");
 
 			// Request
 			if (iface.requests.length) {
