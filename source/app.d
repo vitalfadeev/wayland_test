@@ -16,20 +16,6 @@ Wayland {
 }
 
 
-auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
-auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }
-
-auto
-BIND (T,TTHIS) (void* ctx, TTHIS _this, uint name, const(char)* interface_, uint version_) {
-    if (strcmp (T.IFACE.name, interface_) == 0) {
-        mixin (format!
-            "(cast (wayland_ctx*) ctx).%s = cast (%s*) _this.bind (name, &T.IFACE, version_);" 
-            (T.stringof, T.stringof)
-        );
-    }
-}
-
-
 //extern (C)
 int
 main () {

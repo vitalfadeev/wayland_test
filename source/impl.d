@@ -136,3 +136,14 @@ _configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
     _ctx.surface.commit ();
 }
 
+
+auto
+BIND (T,TTHIS) (void* ctx, TTHIS _this, uint name, const(char)* interface_, uint version_) {
+    if (strcmp (T.IFACE.name, interface_) == 0) {
+        mixin (format!
+            "(cast (wayland_ctx*) ctx).%s = cast (%s*) _this.bind (name, &T.IFACE, version_);" 
+            (T.stringof, T.stringof)
+        );
+    }
+}
+
