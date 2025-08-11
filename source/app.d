@@ -17,10 +17,10 @@ main () {
 
     // connect
     with (ctx) {
-        display  = wayland.display;
-        wl_registry = wl_display_get_registry (display);  // return wl_registry__impl
+        wl_display  = wayland.display;
+        wl_registry = wl_display.get_registry ();  // return wl_registry__impl
         wl_registry.add_listener (&wl_registry.listener,ctx);  // wl_proxy.add_listener
-        display.roundtrip ();
+        wl_display.roundtrip ();
     }
 
     // checks
@@ -40,7 +40,7 @@ main () {
 
     // loop,draw
     while (!ctx.done) {
-        if (ctx.display.dispatch () < 0) {
+        if (ctx.wl_display.dispatch () < 0) {
             printf ("loop: dispatch 1\n");
             perror ("Main loop error");
             ctx.done = true;
@@ -50,7 +50,7 @@ main () {
     // cleanup
     with (ctx) {
         wl_registry.destroy ();
-        display.disconnect ();
+        wl_display.disconnect ();
     }
 
     //

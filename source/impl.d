@@ -24,7 +24,7 @@ wayland_ctx {
     int                 width  = WIDTH;
     int                 height = HEIGHT;
 
-    wl_display*         display;
+    wl_display__impl    wl_display;
     wl_registry__impl   wl_registry;
     wl_seat__impl       wl_seat;
     wl_compositor__impl wl_compositor;
@@ -62,6 +62,34 @@ wayland_ctx {
         } 
 
         return true;
+    }
+}
+
+// wl_display
+struct
+wl_display__impl {
+    wl_display* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    auto
+    get_registry () {
+        import wayland_struct.protocol.wayland : wl_registry,wl_registry_interface;
+        return
+            cast (wl_registry*) (
+                wl_proxy_marshal_flags (
+                    cast (wl_proxy*) _super, 
+                    display_opcode_get_registry, 
+                    &wl_registry_interface, 
+                    wl_proxy_get_version (cast (wl_proxy *) _super),
+                    0,
+                    null
+                )
+            );
     }
 }
 

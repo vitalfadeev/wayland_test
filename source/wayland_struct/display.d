@@ -15,23 +15,6 @@ enum display_opcode_sync = 0;
 enum display_opcode_get_registry = 1;
 
 
-auto
-wl_display_get_registry (wl_display* display) {
-    import wayland_struct.protocol.wayland : wl_registry,wl_registry_interface;
-    return
-        cast (wl_registry*) (
-            wl_proxy_marshal_flags (
-                cast (wl_proxy*) display, 
-                display_opcode_get_registry, 
-                &wl_registry_interface, 
-                wl_proxy_get_version (cast (wl_proxy *) display),
-                0,
-                null
-            )
-        );
-}
-
-
 extern (C) {
 //struct wl_display;
 
