@@ -1,4 +1,4 @@
-import std.stdio;
+import std.stdio; 
 import std.format : format;
 import core.stdc.string        : strcmp;
 import wayland_struct;
@@ -205,6 +205,7 @@ wl_registry__impl {
         &global,
         &global_remove,
     };
+
 
     extern (C)
     static
