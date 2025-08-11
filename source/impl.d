@@ -13,19 +13,21 @@ struct
 Wayland {
     wayland_ctx ctx;
 
-    void 
+    auto 
     connect () {
         with (ctx) {
             wl_display  = wl_display_connect (null);
             _init_registry ();
         }
+        return check ();
     }
-    void 
+    auto 
     connect (const char* name) {
         with (ctx) {
             wl_display  = wl_display_connect (name);
             _init_registry ();
         }
+        return check ();
     }
     auto 
     connect (int fd) { 
@@ -33,6 +35,7 @@ Wayland {
             wl_display_connect_to_fd (fd); 
             _init_registry ();
         }
+        return check ();
     }
     void 
     _init_registry () {

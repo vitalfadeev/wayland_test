@@ -13,13 +13,8 @@ main () {
 
     // init, connect
     auto wayland = Wayland ();
-    wayland.connect ();    
-
-    // checks
-    if (!wayland.check ())
+    if (!wayland.connect ())
         return EXIT_FAILURE;
-
-    // surface,window,draw
     wayland.create_surface ();
 
     // EVENT LOOP
@@ -27,10 +22,8 @@ main () {
         writeln (event);
     }
 
-    // cleanup
     wayland.cleanup ();
 
-    //
     return EXIT_SUCCESS;
 }
 
