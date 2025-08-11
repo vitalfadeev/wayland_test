@@ -157,9 +157,9 @@ wayland_ctx {
     //
     struct 
     Input {
-        wl_keyboard*   keyboard;
-        wl_pointer*    pointer;
-        wl_touch*      touch;
+        wl_keyboard__impl wl_keyboard;
+        wl_pointer__impl  wl_pointer;
+        wl_touch__impl    wl_touch;
     }
 }
 
@@ -342,20 +342,19 @@ wl_seat__impl {
     void
     capabilities (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
         auto _ctx = cast (wayland_ctx*) ctx;
-        if (capabilities & wl_seat.capability_.keyboard) {
-            printf ("seat.cap: keyboard\n");
-            _ctx.input.keyboard = _ctx.wl_seat.get_keyboard ();
-            printf ("keyboard: %p\n", _ctx.input.keyboard);
-        }
-        if (capabilities & wl_seat.capability_.pointer) {
-            printf ("seat.cap: pointer\n");
-            _ctx.input.pointer = _ctx.wl_seat.get_pointer ();
-            printf ("pointer: %p\n", _ctx.input.pointer);
-        }
-        if (capabilities & wl_seat.capability_.touch) {
-            printf ("seat.cap: touch\n");
-            _ctx.input.touch = _ctx.wl_seat.get_touch ();
-            printf ("touch: %p\n", _ctx.input.touch);
+        with (_ctx) {
+            if (capabilities & wl_seat.capability_.keyboard) {
+                input.wl_keyboard = wl_seat.get_keyboard ();
+                input.wl_keyboard.add_listener (&input.wl_keyboard.listener,ctx);  // wl_proxy.add_listener
+            }
+            if (capabilities & wl_seat.capability_.pointer) {
+                input.wl_pointer = wl_seat.get_pointer ();
+                input.wl_pointer.add_listener (&input.wl_pointer.listener,ctx);  // wl_proxy.add_listener
+            }
+            if (capabilities & wl_seat.capability_.touch) {
+                input.wl_touch = wl_seat.get_touch ();
+                input.wl_touch.add_listener (&input.wl_touch.listener,ctx);  // wl_proxy.add_listener
+            }
         }
     }
 
@@ -457,6 +456,245 @@ xdg_toplevel__impl {
         _super = b;
     }
 }
+
+
+// wl_pointer
+struct
+wl_pointer__impl {
+    wl_pointer* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    typeof(_super).Listener listener = {
+        &enter,
+        &leave,
+        &motion,
+        &button,
+        &axis,
+        &frame,
+        &axis_source,
+        &axis_stop,
+        &axis_discrete,
+        &axis_value120,
+        &axis_relative_direction,
+    };
+
+    extern (C)
+    static
+    void
+    enter (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    leave (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    motion (void* ctx, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+        writeln ("MOTION");
+    }
+
+    extern (C)
+    static
+    void
+    button (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
+        writeln ("BTN");
+    }
+
+    extern (C)
+    static
+    void
+    axis (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    frame (void* ctx, wl_pointer* _this /* args: */ ) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    axis_source (void* ctx, wl_pointer* _this /* args: */ , uint axis_source) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    axis_stop (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    axis_discrete (void* ctx, wl_pointer* _this /* args: */ , uint axis, int discrete) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    axis_value120 (void* ctx, wl_pointer* _this /* args: */ , uint axis, int value120) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    axis_relative_direction (void* ctx, wl_pointer* _this /* args: */ , uint axis, uint direction) {
+        // 
+    }
+}
+
+// wl_keyboard
+struct
+wl_keyboard__impl {
+    wl_keyboard* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    typeof(_super).Listener listener = {
+        &keymap,
+        &enter,
+        &leave,
+        &key,
+        &modifiers,
+        &repeat_info,
+    };
+
+    extern (C)
+    static
+    void
+    keymap (void* ctx, wl_keyboard* _this /* args: */ , uint format, int fd, uint size) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    enter (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface, wl_array* keys) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    leave (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    key (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
+        writeln ("KEY");
+    }
+
+    extern (C)
+    static
+    void
+    modifiers (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    repeat_info (void* ctx, wl_keyboard* _this /* args: */ , int rate, int delay) {
+        // 
+    }
+}
+
+// wl_touch
+struct
+wl_touch__impl {
+    wl_touch* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    typeof(_super).Listener listener = {
+        &down,
+        &up,
+        &motion,
+        &frame,
+        &cancel,
+        &shape,
+        &orientation,
+    };
+
+        extern (C)
+    static
+    void
+    down (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, wl_surface* surface, int id, wl_fixed_t x, wl_fixed_t y) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    up (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, int id) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    motion (void* ctx, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    frame (void* ctx, wl_touch* _this /* args: */ ) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    cancel (void* ctx, wl_touch* _this /* args: */ ) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    shape (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    orientation (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation) {
+        // 
+    }
+}
+
 
 
 template
