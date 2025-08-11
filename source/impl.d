@@ -109,15 +109,15 @@ Events {
     bool  
     empty () {
         with (wayland.ctx)
-        while (!done) {
-            if (wl_display.dispatch () < 0) {
-                printf ("loop: dispatch 1\n");
-                perror ("Main loop error");
-                done = true;
-            }
+        if (wl_display.dispatch () < 0) {
+            printf ("loop: dispatch 1\n");
+            perror ("Main loop error");
+            done = true;
+            return done;
         }
-
-        return true;
+        else {
+            return done;
+        }
     }
 
     void 
