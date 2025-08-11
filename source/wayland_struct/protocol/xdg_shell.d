@@ -71,6 +71,8 @@ xdg_wm_base {
     get_xdg_surface = 2,
     pong = 3,
   }
+
+  alias IFACE = xdg_wm_base_interface;
 }
 
 static const wl_interface*[0] xdg_wm_base_destroy_requiest_interfaces = [];
@@ -169,6 +171,8 @@ xdg_positioner {
     set_parent_size = 8,
     set_parent_configure = 9,
   }
+
+  alias IFACE = xdg_positioner_interface;
 }
 
 static const wl_interface*[0] xdg_positioner_destroy_requiest_interfaces = [];
@@ -256,6 +260,8 @@ xdg_surface {
     set_window_geometry = 3,
     ack_configure = 4,
   }
+
+  alias IFACE = xdg_surface_interface;
 }
 
 static const wl_interface*[0] xdg_surface_destroy_requiest_interfaces = [];
@@ -412,6 +418,8 @@ xdg_toplevel {
     unset_fullscreen = 12,
     set_minimized = 13,
   }
+
+  alias IFACE = xdg_toplevel_interface;
 }
 
 static const wl_interface*[0] xdg_toplevel_destroy_requiest_interfaces = [];
@@ -524,6 +532,8 @@ xdg_popup {
     grab = 1,
     reposition = 2,
   }
+
+  alias IFACE = xdg_popup_interface;
 }
 
 static const wl_interface*[0] xdg_popup_destroy_requiest_interfaces = [];

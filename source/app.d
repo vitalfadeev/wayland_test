@@ -1,42 +1,9 @@
 import std.stdio;
-import core.sys.posix.sys.mman : mmap,munmap,PROT_READ,PROT_WRITE,MAP_SHARED,MAP_FAILED;
-import core.sys.posix.sys.stat : fstat,stat_t;
-import core.sys.posix.fcntl    : open,O_RDWR;
-import core.sys.posix.fcntl    : O_CREAT,O_EXCL;
 import core.stdc.stdlib        : EXIT_SUCCESS,EXIT_FAILURE;
-import core.stdc.stdlib        : free;
-import core.stdc.string        : strcmp;
-import std.conv                : to;
-import core.sys.posix.signal   : timespec;
-import core.sys.posix.time     : clock_gettime;
-import core.sys.posix.time     : CLOCK_REALTIME;
-import core.sys.posix.sys.mman : shm_open;
-import core.sys.posix.sys.mman : shm_unlink;
-import core.stdc.errno         : errno;
-import core.stdc.errno         : EEXIST;
-import core.stdc.errno         : EINTR;
-import core.sys.posix.unistd   : close;
-import core.sys.posix.unistd   : ftruncate;
-import core.stdc.string        : memset;
-import std.conv                : octal;
+import std.format              : format;
 import wayland_struct;
-
-
-static const uint WIDTH             = 640;
-static const uint HEIGHT            = 480;
-static const uint CURSOR_WIDTH      = 100;
-static const uint CURSOR_HEIGHT     = 59;
-static const  int CURSOR_HOT_SPOT_X = 10;
-static const  int CURSOR_HOT_SPOT_Y = 35;
-static const uint PIXEL_FORMAT_ID   = wl_shm.format_.xrgb8888;
-
-// ctx
-static bool  done = false;
-
-void 
-on_button (uint button) {
-    done = true;
-}
+import impl;
+import util;
 
 
 struct
@@ -48,220 +15,23 @@ Wayland {
     auto ctx ()                      { return new wayland_ctx (); }
 }
 
-struct 
-wayland_ctx {
-    int               width  = WIDTH;
-    int               height = HEIGHT;
-
-    wl_display*       display;
-    wl_registry*      registry;
-    wl_seat*          seat;
-    wl_compositor*    compositor;
-    wl_surface*       surface;
-    wl_shm*           shm;
-    wl_shm_pool*      pool;
-
-    xdg_wm_base*     _xdg_wm_base;
-    xdg_surface*     _xdg_surface;
-    xdg_toplevel*    _xdg_toplevel;
-
-    Input             input;
-
-    //
-    struct 
-    Input {
-        wl_keyboard* keyboard;
-        wl_pointer*  pointer;
-        wl_touch*    touch;
-    }
-}
 
 auto min (A,B) (A a, B b) { return (a) < (b) ? (a) : (b); }
 auto max (A,B) (A a, B b) { return (a) > (b) ? (a) : (b); }
 
-
-extern (C)
-void 
-global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
-    printf ("%d: %s\n", name, interface_);
-    auto _ctx =  cast (wayland_ctx*) ctx;
-
-    if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
-        _ctx._xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &xdg_wm_base_interface, version_);
-        _ctx._xdg_wm_base.add_listener (
-            new xdg_wm_base.Listener (
-                    &_ping_impl
-                ), 
-                ctx);
-    }
-
-    if (strcmp (wl_seat_interface.name, interface_) == 0) {
-        _ctx.seat = cast (wl_seat*) _this.bind (name, &wl_seat_interface, version_);
-        _ctx.seat.add_listener (
-            new wl_seat.Listener (  // is a vector of function pointers. 
-                &capabilities_impl,
-                &name_impl,
-            ),
-            ctx);  // wl_proxy.add_listener
-    }
-
-    if (strcmp (wl_compositor_interface.name, interface_) == 0) {
-        _ctx.compositor = cast (wl_compositor*) _this.bind (name, &wl_compositor_interface, version_);
-    }
-
-    if (strcmp (wl_shm_interface.name, interface_) == 0) {
-        _ctx.shm = cast (wl_shm*) _this.bind (name, &wl_shm_interface, version_);
-    }
-}
-extern (C) 
-void 
-global_remove_impl (void* data, wl_registry* _wl_registry, uint name) {
-    //
-}
-
-extern (C)
-static
-void
-capabilities_impl (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
-    auto _ctx = cast (wayland_ctx*) ctx;
-    if (capabilities & wl_seat.capability_.keyboard) {
-        printf ("seat.cap: keyboard\n");
-        _ctx.input.keyboard = _ctx.seat.get_keyboard ();
-        printf ("keyboard: %p\n", _ctx.input.keyboard);
-    }
-    if (capabilities & wl_seat.capability_.pointer) {
-        printf ("seat.cap: pointer\n");
-        _ctx.input.pointer = _ctx.seat.get_pointer ();
-        printf ("pointer: %p\n", _ctx.input.pointer);
-    }
-    if (capabilities & wl_seat.capability_.touch) {
-        printf ("seat.cap: touch\n");
-        _ctx.input.touch = _ctx.seat.get_touch ();
-        printf ("touch: %p\n", _ctx.input.touch);
+auto
+BIND (T,TTHIS) (void* ctx, TTHIS _this, uint name, const(char)* interface_, uint version_) {
+    if (strcmp (T.IFACE.name, interface_) == 0) {
+        mixin (format!
+            "(cast (wayland_ctx*) ctx).%s = cast (%s*) _this.bind (name, &T.IFACE, version_);" 
+            (T.stringof, T.stringof)
+        );
     }
 }
 
-extern (C)
-static
-void
-name_impl (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
-    printf ("seat.name: %s\n", name);
-}
 
-
-extern (C)
-static
-void
-_ping_impl (void* ctx, xdg_wm_base* _this /* args: */ , uint serial) {
-    _this.pong (serial);
-}
-
-
-static 
-string
-randname () {
-    char[7] buf;
-    timespec ts;
-    clock_gettime (CLOCK_REALTIME, &ts);
-    long r = ts.tv_nsec;
-    for (int i = 0; i < 6; ++i) {
-        buf[i] = 'A'+(r&15)+(r&16)*2;
-        r >>= 5;
-    }
-    return buf.to!string;
-}
-
-static 
+//extern (C)
 int
-create_shm_file () {
-    int retries = 100;
-    do {
-        string name = "/wl_shm-" ~ randname ();
-        retries--;
-        int fd = shm_open (name.ptr, O_RDWR | O_CREAT | O_EXCL, octal!"600");
-        if (fd >= 0) {
-            shm_unlink (name.ptr);
-            return fd;
-        }
-    } while (retries > 0 && errno == EEXIST);
-    return -1;
-}
-
-int
-allocate_shm_file (size_t size) {
-    int fd = create_shm_file ();
-    if (fd < 0)
-        return -1;
-    int ret;
-    do {
-        ret = ftruncate (fd,size);
-    } while (ret < 0 && errno == EINTR);
-    if (ret < 0) {
-        close (fd);
-        return -1;
-    }
-    return fd;
-}
-
-extern (C)
-static
-void
-_release_impl (void* ctx, wl_buffer* _this /* args: */ ) {
-    _this.destroy ();
-}
-
-static 
-wl_buffer*
-draw_frame (wayland_ctx* ctx) {
-    int stride = ctx.width * 4;
-    int size = stride * ctx.height;
-
-    int fd = allocate_shm_file (size);
-    if (fd == -1) {
-        return null;
-    }
-
-    uint* data = cast (uint*) mmap (null, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (data == MAP_FAILED) {
-        close (fd);
-        return null;
-    }
-
-    wl_shm_pool* pool = ctx.shm.create_pool (fd, size);
-    wl_buffer* buffer = pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
-    pool.destroy ();
-    close (fd);
-
-    /* Draw checkerboxed background */
-    for (int y = 0; y < ctx.height; ++y) {
-        for (int x = 0; x < ctx.width; ++x) {
-            if ((x + y / 32 * 32) % 64 < 32)
-                data[y * ctx.width + x] = 0xFF666666;
-            else
-                data[y * ctx.width + x] = 0xFFEEEEEE;
-        }
-    }
-
-    munmap (data, size);
-    buffer.add_listener (new wl_buffer.Listener (&_release_impl), null);
-    return buffer;
-}
-
-extern (C)
-static
-void
-_configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
-    auto _ctx = cast (wayland_ctx*) ctx;
-    _this.ack_configure (serial);
-
-    auto buffer = draw_frame (_ctx);
-    _ctx.surface.attach (buffer, 0, 0);
-    _ctx.surface.commit ();
-}
-
-
-extern (C) 
-void
 main () {
     //version (Dynamic) loadWaylandClient ();
 
@@ -283,10 +53,9 @@ main () {
     }
 
     // checks
-    if (ctx._xdg_wm_base is null) {
+    if (ctx.xdg_wm_base is null) {
         printf ("Can't find xdg_wm_base\n");
-        //return EXIT_FAILURE;
-        return;
+        return EXIT_FAILURE;
     } 
     else {
         printf ("Found xdg_wm_base\n");
@@ -294,8 +63,7 @@ main () {
 
     if (ctx.seat is null) {
         printf ("Can't find seat\n");
-        //return EXIT_FAILURE;
-        return;
+        return EXIT_FAILURE;
     } 
     else {
         printf ("Found seat\n");
@@ -303,15 +71,16 @@ main () {
 
     // surface,window,draw
     with (ctx) {
-        surface       = compositor.create_surface ();
-        _xdg_surface  = _xdg_wm_base.get_xdg_surface (surface);
-        _xdg_surface.add_listener (new xdg_surface.Listener (&_configure_impl), ctx);
-        _xdg_toplevel = _xdg_surface.get_toplevel ();
-        _xdg_toplevel.set_title ("Example client");
+        surface      = compositor.create_surface ();
+        xdg_surface  = xdg_wm_base.get_xdg_surface (surface);
+        xdg_surface.add_listener (new ctx.xdg_surface.Listener (&_configure_impl), ctx);
+        xdg_toplevel = xdg_surface.get_toplevel ();
+        xdg_toplevel.set_title ("Example client");
         surface.commit ();
     }
 
     // loop,draw
+    bool done = false;
     while (!done) {
         if (ctx.display.dispatch () < 0) {
             printf ("loop: dispatch 1\n");
@@ -327,8 +96,7 @@ main () {
     }
 
     //
-    //return EXIT_SUCCESS;
-    return;
+    return EXIT_SUCCESS;
 }
 
 //void 

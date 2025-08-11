@@ -75,6 +75,8 @@ wl_registry {
   opcode : uint {
     bind = 0,
   }
+
+  alias IFACE = wl_registry_interface;
 }
 
 static const wl_interface*[2] wl_registry_bind_requiest_interfaces = [null,null];
@@ -119,6 +121,8 @@ wl_callback {
 
   // Event listener
   auto add_listener (Listener* impl, void* ctx) { return wl_proxy_add_listener (cast(wl_proxy*)&this, cast (wl_proxy_callback*) impl, ctx); }
+
+  alias IFACE = wl_callback_interface;
 }
 
 static const wl_message[0] wl_callback_requests = [
@@ -153,6 +157,8 @@ wl_compositor {
     create_surface = 0,
     create_region = 1,
   }
+
+  alias IFACE = wl_compositor_interface;
 }
 
 static const wl_interface*[1] wl_compositor_create_surface_requiest_interfaces = [&wl_surface_interface];
@@ -191,6 +197,8 @@ wl_shm_pool {
     destroy = 1,
     resize = 2,
   }
+
+  alias IFACE = wl_shm_pool_interface;
 }
 
 static const wl_interface*[6] wl_shm_pool_create_buffer_requiest_interfaces = [&wl_buffer_interface,null,null,null,null,null];
@@ -381,6 +389,8 @@ wl_shm {
     create_pool = 0,
     release = 1,
   }
+
+  alias IFACE = wl_shm_interface;
 }
 
 static const wl_interface*[3] wl_shm_create_pool_requiest_interfaces = [&wl_shm_pool_interface,null,null];
@@ -435,6 +445,8 @@ wl_buffer {
   opcode : uint {
     destroy = 0,
   }
+
+  alias IFACE = wl_buffer_interface;
 }
 
 static const wl_interface*[0] wl_buffer_destroy_requiest_interfaces = [];
@@ -522,6 +534,8 @@ wl_data_offer {
     finish = 3,
     set_actions = 4,
   }
+
+  alias IFACE = wl_data_offer_interface;
 }
 
 static const wl_interface*[2] wl_data_offer_accept_requiest_interfaces = [null,null];
@@ -642,6 +656,8 @@ wl_data_source {
     destroy = 1,
     set_actions = 2,
   }
+
+  alias IFACE = wl_data_source_interface;
 }
 
 static const wl_interface*[1] wl_data_source_offer_requiest_interfaces = [null];
@@ -764,6 +780,8 @@ wl_data_device {
     set_selection = 1,
     release = 2,
   }
+
+  alias IFACE = wl_data_device_interface;
 }
 
 static const wl_interface*[4] wl_data_device_start_drag_requiest_interfaces = [&wl_data_source_interface,&wl_surface_interface,&wl_surface_interface,null];
@@ -823,6 +841,8 @@ wl_data_device_manager {
     create_data_source = 0,
     get_data_device = 1,
   }
+
+  alias IFACE = wl_data_device_manager_interface;
 }
 
 static const wl_interface*[1] wl_data_device_manager_create_data_source_requiest_interfaces = [&wl_data_source_interface];
@@ -863,6 +883,8 @@ wl_shell {
   opcode : uint {
     get_shell_surface = 0,
   }
+
+  alias IFACE = wl_shell_interface;
 }
 
 static const wl_interface*[2] wl_shell_get_shell_surface_requiest_interfaces = [&wl_shell_surface_interface,&wl_surface_interface];
@@ -974,6 +996,8 @@ wl_shell_surface {
     set_title = 8,
     set_class = 9,
   }
+
+  alias IFACE = wl_shell_surface_interface;
 }
 
 static const wl_interface*[1] wl_shell_surface_pong_requiest_interfaces = [null];
@@ -1105,6 +1129,8 @@ wl_surface {
     damage_buffer = 9,
     offset = 10,
   }
+
+  alias IFACE = wl_surface_interface;
 }
 
 static const wl_interface*[0] wl_surface_destroy_requiest_interfaces = [];
@@ -1210,6 +1236,8 @@ wl_seat {
     get_touch = 2,
     release = 3,
   }
+
+  alias IFACE = wl_seat_interface;
 }
 
 static const wl_interface*[1] wl_seat_get_pointer_requiest_interfaces = [&wl_pointer_interface];
@@ -1390,6 +1418,8 @@ wl_pointer {
     set_cursor = 0,
     release = 1,
   }
+
+  alias IFACE = wl_pointer_interface;
 }
 
 static const wl_interface*[4] wl_pointer_set_cursor_requiest_interfaces = [null,&wl_surface_interface,null,null];
@@ -1521,6 +1551,8 @@ wl_keyboard {
   opcode : uint {
     release = 0,
   }
+
+  alias IFACE = wl_keyboard_interface;
 }
 
 static const wl_interface*[0] wl_keyboard_release_requiest_interfaces = [];
@@ -1637,6 +1669,8 @@ wl_touch {
   opcode : uint {
     release = 0,
   }
+
+  alias IFACE = wl_touch_interface;
 }
 
 static const wl_interface*[0] wl_touch_release_requiest_interfaces = [];
@@ -1773,6 +1807,8 @@ wl_output {
   opcode : uint {
     release = 0,
   }
+
+  alias IFACE = wl_output_interface;
 }
 
 static const wl_interface*[0] wl_output_release_requiest_interfaces = [];
@@ -1821,6 +1857,8 @@ wl_region {
     add = 1,
     subtract = 2,
   }
+
+  alias IFACE = wl_region_interface;
 }
 
 static const wl_interface*[0] wl_region_destroy_requiest_interfaces = [];
@@ -1866,6 +1904,8 @@ wl_subcompositor {
     destroy = 0,
     get_subsurface = 1,
   }
+
+  alias IFACE = wl_subcompositor_interface;
 }
 
 static const wl_interface*[0] wl_subcompositor_destroy_requiest_interfaces = [];
@@ -1916,6 +1956,8 @@ wl_subsurface {
     set_sync = 4,
     set_desync = 5,
   }
+
+  alias IFACE = wl_subsurface_interface;
 }
 
 static const wl_interface*[0] wl_subsurface_destroy_requiest_interfaces = [];

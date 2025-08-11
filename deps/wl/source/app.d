@@ -256,6 +256,10 @@ D_File_Writer {
 				writefln ("  }");
 			}
 
+			// alias IFACE
+			writefln ("");
+			writefln ("  alias IFACE = %s_interface;", iface_name);
+
 			writefln ("}");  // struct_name
 			writefln ("");
 

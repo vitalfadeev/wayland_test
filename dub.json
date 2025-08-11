@@ -24,4 +24,5 @@
 			#"dflags": ["-betterC"],
 		}
 	],
+	"dflags"       : [ "-mixin=mixins.d" ],
 }
