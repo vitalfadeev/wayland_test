@@ -14,3 +14,4 @@ wayland_test-test-*
 *.o
 *.obj
 *.lst
+mixins.d
