@@ -24,7 +24,7 @@ main () {
 
     // EVENT LOOP
     foreach (event; wayland.events) {
-        //
+        writeln (event);
     }
 
     // cleanup
