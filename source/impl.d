@@ -11,11 +11,121 @@ static const uint PIXEL_FORMAT_ID   = wl_shm.format_.xrgb8888;
 
 struct
 Wayland {
-    pragma (inline,true):
-    auto display ()                  { return (wl_display_connect (null)); }
-    auto display (const char *name)  { return (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
-    auto display (int fd)            { return (wl_display_connect_to_fd (fd)); }
-    auto ctx ()                      { return new wayland_ctx (); }
+    wayland_ctx ctx;
+
+    void 
+    connect () {
+        with (ctx) {
+            wl_display  = wl_display_connect (null);
+            _init_registry ();
+        }
+    }
+    void 
+    connect (const char* name) {
+        with (ctx) {
+            wl_display  = wl_display_connect (name);
+            _init_registry ();
+        }
+    }
+    auto 
+    connect (int fd) { 
+        with (ctx) {
+            wl_display_connect_to_fd (fd); 
+            _init_registry ();
+        }
+    }
+    void 
+    _init_registry () {
+        with (ctx) {
+            wl_registry = wl_display.get_registry ();  // return wl_registry__impl
+            wl_registry.add_listener (&wl_registry.listener,&ctx);  // wl_proxy.add_listener
+            wl_display.roundtrip ();
+        }
+    }
+
+    auto
+    check () {
+        with (ctx) {
+            if (xdg_wm_base is null) {
+                printf ("Can't find xdg_wm_base\n");
+                return false;
+            } 
+
+            if (wl_seat is null) {
+                printf ("Can't find seat\n");
+                return false;
+            } 
+        } 
+
+        return true;
+    }
+
+    void
+    create_surface () {
+        with (ctx) {
+            wl_surface   = wl_compositor.create_surface ();
+            xdg_surface  = xdg_wm_base.get_xdg_surface (wl_surface);
+            xdg_surface.add_listener (&xdg_surface.listener, &ctx);
+            xdg_toplevel = xdg_surface.get_toplevel ();
+            xdg_toplevel.set_title ("Example client");
+            wl_surface.commit ();
+        }
+    }
+
+    auto
+    events () {
+        return Events (&this);
+    }
+
+    void
+    loop () {
+        with (ctx)
+        while (!done) {
+            if (wl_display.dispatch () < 0) {
+                printf ("loop: dispatch 1\n");
+                perror ("Main loop error");
+                done = true;
+            }
+        }
+    }
+
+    void
+    cleanup () {
+        with (ctx) {
+            wl_registry.destroy ();
+            wl_display.disconnect ();        
+        }
+    }
+}
+
+struct
+Events {
+    Wayland* wayland;
+    Event    front;
+
+    bool  
+    empty () {
+        with (wayland.ctx)
+        while (!done) {
+            if (wl_display.dispatch () < 0) {
+                printf ("loop: dispatch 1\n");
+                perror ("Main loop error");
+                done = true;
+            }
+        }
+
+        return true;
+    }
+
+    void 
+    popFront () {
+        //
+    }
+}
+
+struct
+Event {
+    //
 }
 
 
@@ -47,21 +157,6 @@ wayland_ctx {
         wl_keyboard*   keyboard;
         wl_pointer*    pointer;
         wl_touch*      touch;
-    }
-
-    auto
-    check () {
-        if (xdg_wm_base is null) {
-            printf ("Can't find xdg_wm_base\n");
-            return false;
-        } 
-
-        if (wl_seat is null) {
-            printf ("Can't find seat\n");
-            return false;
-        } 
-
-        return true;
     }
 }
 

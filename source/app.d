@@ -11,47 +11,24 @@ int
 main () {
     //version (Dynamic) loadWaylandClient ();
 
-    // init
+    // init, connect
     auto wayland  = Wayland ();
-    auto ctx      = wayland.ctx ();
-
-    // connect
-    with (ctx) {
-        wl_display  = wayland.display;
-        wl_registry = wl_display.get_registry ();  // return wl_registry__impl
-        wl_registry.add_listener (&wl_registry.listener,ctx);  // wl_proxy.add_listener
-        wl_display.roundtrip ();
-    }
+    wayland.connect ();    
 
     // checks
-    if (!ctx.check) {
+    if (!wayland.check ())
         return EXIT_FAILURE;
-    } 
 
     // surface,window,draw
-    with (ctx) {
-        wl_surface   = wl_compositor.create_surface ();
-        xdg_surface  = xdg_wm_base.get_xdg_surface (wl_surface);
-        xdg_surface.add_listener (&xdg_surface.listener, ctx);
-        xdg_toplevel = xdg_surface.get_toplevel ();
-        xdg_toplevel.set_title ("Example client");
-        wl_surface.commit ();
-    }
+    wayland.create_surface ();
 
-    // loop,draw
-    while (!ctx.done) {
-        if (ctx.wl_display.dispatch () < 0) {
-            printf ("loop: dispatch 1\n");
-            perror ("Main loop error");
-            ctx.done = true;
-        }
+    // EVENT LOOP
+    foreach (event; wayland.events) {
+        //
     }
 
     // cleanup
-    with (ctx) {
-        wl_registry.destroy ();
-        wl_display.disconnect ();
-    }
+    wayland.cleanup ();
 
     //
     return EXIT_SUCCESS;
