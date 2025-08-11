@@ -6,16 +6,6 @@ import impl;
 import util;
 
 
-struct
-Wayland {
-    pragma (inline,true):
-    auto display ()                  { return (wl_display_connect (null)); }
-    auto display (const char *name)  { return (wl_display_connect (name)); }  // name, NULL, from: env WAYLAND_DISPLAY, env WAYLAND_SOCKET, env XDG_RUNTIME_DIR
-    auto display (int fd)            { return (wl_display_connect_to_fd (fd)); }
-    auto ctx ()                      { return new wayland_ctx (); }
-}
-
-
 //extern (C)
 int
 main () {
@@ -29,12 +19,7 @@ main () {
     with (ctx) {
         display  = wayland.display;
         registry = wl_display_get_registry (display);
-        registry.add_listener (
-            new wl_registry.Listener (  // is a vector of function pointers. 
-                &global_impl,
-                &global_remove_impl,
-            ),
-            ctx);  // wl_proxy.add_listener
+        registry.add_listener (&registry.listener,ctx);  // wl_proxy.add_listener
         display.roundtrip ();
     }
 
@@ -59,19 +44,18 @@ main () {
     with (ctx) {
         surface      = compositor.create_surface ();
         xdg_surface  = xdg_wm_base.get_xdg_surface (surface);
-        xdg_surface.add_listener (new ctx.xdg_surface.Listener (&_configure_impl), ctx);
+        xdg_surface.add_listener (&ctx.xdg_surface.listener, ctx);
         xdg_toplevel = xdg_surface.get_toplevel ();
         xdg_toplevel.set_title ("Example client");
         surface.commit ();
     }
 
     // loop,draw
-    bool done = false;
-    while (!done) {
+    while (!ctx.done) {
         if (ctx.display.dispatch () < 0) {
             printf ("loop: dispatch 1\n");
             perror ("Main loop error");
-            done = true;
+            ctx.done = true;
         }
     }
 

@@ -82,7 +82,7 @@ draw_frame (wayland_ctx* ctx) {
     }
 
     wl_shm_pool* pool = ctx.shm.create_pool (fd, size);
-    wl_buffer* buffer = pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
+    ctx.buffer = pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
     pool.destroy ();
     close (fd);
 
@@ -97,6 +97,6 @@ draw_frame (wayland_ctx* ctx) {
     }
 
     munmap (data, size);
-    buffer.add_listener (new wl_buffer.Listener (&_release_impl), null);
-    return buffer;
+    ctx.buffer.add_listener (&ctx.buffer.listener, null);
+    return ctx.buffer;
 }
