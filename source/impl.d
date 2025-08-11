@@ -508,7 +508,7 @@ wl_pointer__impl {
     static
     void
     button (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
-        writeln ("BTN: ", button);
+        writeln ("BTN: ", decode_btn (button));
         with (cast (wayland_ctx*) ctx) {
             if (button == BTN_LEFT)
                 done = true;
@@ -610,7 +610,7 @@ wl_keyboard__impl {
     static
     void
     key (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
-        writeln ("KEY: ", key);
+        writeln ("KEY: ", decode_key (key));
         with (cast (wayland_ctx*) ctx) {
             if (key ==KEY_ESC)
                 done = true;

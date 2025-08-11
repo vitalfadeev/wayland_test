@@ -151,3 +151,21 @@ lhs < rhs
         }
 
 
+// expansion at /usr/include/dmd/phobos/std/functional.d(225,13)
+alias a = __a ;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(226,13)
+alias b = __b ;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(227,20)
+a == b
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(225,13)
+alias a = __a ;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(226,13)
+alias b = __b ;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(227,20)
+a == b
+
