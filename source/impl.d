@@ -259,9 +259,10 @@ BIND (T) {
         writeln (\"XXX\");
         if (strcmp (_ctx.%s.IFACE.name, interface_) == 0) {
             _ctx.%s = cast (%s*) _this.bind (name, &_ctx.%s.IFACE, version_); 
-        }
-        static if (__traits (hasMember, _ctx.%s, \"listener\")) {
-            _ctx.%s.add_listener (&_ctx.%s.listener,_ctx);
+            
+            static if (__traits (hasMember, _ctx.%s, \"listener\")) {
+                _ctx.%s.add_listener (&_ctx.%s.listener,_ctx);
+            }
         }
         "
         (T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof);

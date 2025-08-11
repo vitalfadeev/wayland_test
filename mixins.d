@@ -82,9 +82,10 @@ lhs == rhs
         writeln ("XXX");
         if (strcmp (_ctx.xdg_wm_base.IFACE.name, interface_) == 0) {
             _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &_ctx.xdg_wm_base.IFACE, version_);
-        }
-        static if (__traits (hasMember, _ctx.xdg_wm_base, "listener")) {
-            _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener,_ctx);
+
+            static if (__traits (hasMember, _ctx.xdg_wm_base, "listener")) {
+                _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener,_ctx);
+            }
         }
 
 
