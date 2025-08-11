@@ -510,7 +510,7 @@ wl_pointer__impl {
     button (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
         writeln ("BTN: ", button);
         with (cast (wayland_ctx*) ctx) {
-            if (button == 272)
+            if (button == BTN_LEFT)
                 done = true;
         }
     }
@@ -612,7 +612,7 @@ wl_keyboard__impl {
     key (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
         writeln ("KEY: ", key);
         with (cast (wayland_ctx*) ctx) {
-            if (key == 1)
+            if (key ==KEY_ESC)
                 done = true;
         }
     }
