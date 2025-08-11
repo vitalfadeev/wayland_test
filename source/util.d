@@ -81,9 +81,9 @@ draw_frame (wayland_ctx* ctx) {
         return null;
     }
 
-    wl_shm_pool* pool = ctx.wl_shm.create_pool (fd, size);
-    ctx.buffer = pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
-    pool.destroy ();
+    ctx.wl_shm_pool = ctx.wl_shm.create_pool (fd, size);
+    ctx.wl_buffer   = ctx.wl_shm_pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
+    ctx.wl_shm_pool.destroy ();
     close (fd);
 
     /* Draw checkerboxed background */
@@ -97,6 +97,6 @@ draw_frame (wayland_ctx* ctx) {
     }
 
     munmap (data, size);
-    ctx.buffer.add_listener (&ctx.buffer.listener, null);
-    return ctx.buffer;
+    ctx.wl_buffer.add_listener (&ctx.wl_buffer.listener, null);
+    return ctx.wl_buffer;
 }

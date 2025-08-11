@@ -21,25 +21,25 @@ Wayland {
 
 struct 
 wayland_ctx {
-    int                width  = WIDTH;
-    int                height = HEIGHT;
+    int                 width  = WIDTH;
+    int                 height = HEIGHT;
 
-    wl_display*        display;
-    wl_registry__impl  registry;
-    wl_seat__impl      wl_seat;
-    .wl_compositor*    wl_compositor;
-    wl_surface*        surface;
-    .wl_shm*           wl_shm;
-    wl_shm_pool*       pool;
-    wl_buffer__impl    buffer;
+    wl_display*         display;
+    wl_registry__impl   wl_registry;
+    wl_seat__impl       wl_seat;
+    wl_compositor__impl wl_compositor;
+    wl_surface__impl    wl_surface;
+    wl_shm__impl        wl_shm;
+    wl_shm_pool__impl   wl_shm_pool;
+    wl_buffer__impl     wl_buffer;
 
-    xdg_wm_base__impl  xdg_wm_base;
-    xdg_surface__impl  xdg_surface;
-    xdg_toplevel__impl xdg_toplevel;
+    xdg_wm_base__impl   xdg_wm_base;
+    xdg_surface__impl   xdg_surface;
+    xdg_toplevel__impl  xdg_toplevel;
 
-    Input              input;
+    Input               input;
 
-    bool               done;
+    bool                done;
 
     //
     struct 
@@ -74,7 +74,6 @@ wl_registry__impl {
     void
     opAssign (typeof(_super) b) {
         _super = b;
-        // add_listener (&listener,ctx);
     }
 
     typeof(_super).Listener listener = {
@@ -103,6 +102,105 @@ wl_registry__impl {
     }
 }
 
+// wl_compositor
+struct
+wl_compositor__impl {
+    wl_compositor* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    // no listener, no events
+    //typeof(_super).Listener listener = {
+    //    //
+    //};
+}
+
+// wl_surface
+struct
+wl_surface__impl {
+    wl_surface* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    typeof(_super).Listener listener = {
+        &enter_impl,
+        &leave_impl,
+        &preferred_buffer_scale_impl,
+        &preferred_buffer_transform,
+    };
+
+    extern (C)
+    static
+    void
+    enter_impl (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    leave_impl (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    preferred_buffer_scale_impl (void* ctx, wl_surface* _this /* args: */ , int factor) {
+        // 
+    }
+
+    extern (C)
+    static
+    void
+    preferred_buffer_transform (void* ctx, wl_surface* _this /* args: */ , uint transform) {
+        // 
+    }
+}
+
+// wl_shm
+struct
+wl_shm__impl {
+    wl_shm* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    typeof(_super).Listener listener = {
+        &format_impl,
+    };
+
+    extern (C)
+    static
+    void
+    format_impl (void* ctx, wl_shm* _this /* args: */ , uint format) {
+        // 
+    }
+}
+
+// wl_shm_pool
+struct
+wl_shm_pool__impl {
+    wl_shm_pool* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+}
+
 // wl_seat
 struct
 wl_seat__impl {
@@ -112,7 +210,6 @@ wl_seat__impl {
     void
     opAssign (typeof(_super) b) {
         _super = b;
-        // add_listener (&listener,ctx);
     }
 
     typeof(_super).Listener listener = {
@@ -159,7 +256,6 @@ wl_buffer__impl {
     void
     opAssign (typeof(_super) b) {
         _super = b;
-        // add_listener (&listener,ctx);
     }
 
     typeof(_super).Listener listener = {
@@ -220,8 +316,8 @@ xdg_surface__impl {
         _this.ack_configure (serial);
 
         auto buffer = draw_frame (_ctx);
-        _ctx.surface.attach (buffer, 0, 0);
-        _ctx.surface.commit ();
+        _ctx.wl_surface.attach (buffer, 0, 0);
+        _ctx.wl_surface.commit ();
     }
 }
 

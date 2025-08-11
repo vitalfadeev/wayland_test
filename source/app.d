@@ -18,8 +18,8 @@ main () {
     // connect
     with (ctx) {
         display  = wayland.display;
-        registry = wl_display_get_registry (display);  // return wl_registry__impl
-        registry.add_listener (&registry.listener,ctx);  // wl_proxy.add_listener
+        wl_registry = wl_display_get_registry (display);  // return wl_registry__impl
+        wl_registry.add_listener (&wl_registry.listener,ctx);  // wl_proxy.add_listener
         display.roundtrip ();
     }
 
@@ -30,12 +30,12 @@ main () {
 
     // surface,window,draw
     with (ctx) {
-        surface      = wl_compositor.create_surface ();
-        xdg_surface  = xdg_wm_base.get_xdg_surface (surface);
+        wl_surface   = wl_compositor.create_surface ();
+        xdg_surface  = xdg_wm_base.get_xdg_surface (wl_surface);
         xdg_surface.add_listener (&xdg_surface.listener, ctx);
         xdg_toplevel = xdg_surface.get_toplevel ();
         xdg_toplevel.set_title ("Example client");
-        surface.commit ();
+        wl_surface.commit ();
     }
 
     // loop,draw
@@ -49,7 +49,7 @@ main () {
 
     // cleanup
     with (ctx) {
-        registry.destroy ();
+        wl_registry.destroy ();
         display.disconnect ();
     }
 

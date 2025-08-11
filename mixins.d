@@ -77,7 +77,7 @@ lhs == rhs
 // expansion at /usr/include/dmd/phobos/std/typecons.d(526,31)
 lhs == rhs
 
-// expansion at source/impl.d(92,9)
+// expansion at source/impl.d(91,9)
 
         if (strcmp (_ctx.xdg_wm_base.IFACE.name, interface_) == 0) {
             _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &_ctx.xdg_wm_base.IFACE, version_);
@@ -88,7 +88,7 @@ lhs == rhs
         }
 
 
-// expansion at source/impl.d(93,9)
+// expansion at source/impl.d(92,9)
 
         if (strcmp (_ctx.wl_seat.IFACE.name, interface_) == 0) {
             _ctx.wl_seat = cast (wl_seat*) _this.bind (name, &_ctx.wl_seat.IFACE, version_);
@@ -99,7 +99,7 @@ lhs == rhs
         }
 
 
-// expansion at source/impl.d(94,9)
+// expansion at source/impl.d(93,9)
 
         if (strcmp (_ctx.wl_compositor.IFACE.name, interface_) == 0) {
             _ctx.wl_compositor = cast (wl_compositor*) _this.bind (name, &_ctx.wl_compositor.IFACE, version_);
@@ -110,7 +110,7 @@ lhs == rhs
         }
 
 
-// expansion at source/impl.d(95,9)
+// expansion at source/impl.d(94,9)
 
         if (strcmp (_ctx.wl_shm.IFACE.name, interface_) == 0) {
             _ctx.wl_shm = cast (wl_shm*) _this.bind (name, &_ctx.wl_shm.IFACE, version_);
