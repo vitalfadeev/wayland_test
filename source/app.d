@@ -15,7 +15,7 @@ main () {
     auto wayland = Wayland ();
     if (!wayland.connect ())
         return EXIT_FAILURE;
-    wayland.create_surface ();
+    wayland.create_surface ();  // wayland.ctx.wl_surface
 
     // EVENT LOOP
     foreach (event; wayland.events) {

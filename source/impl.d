@@ -425,13 +425,13 @@ xdg_surface__impl {
     }
 
     typeof(_super).Listener listener = {
-        /* configure: */ &_configure_impl,
+        configure: &configure_impl,
     };
 
     extern (C)
     static
     void
-    _configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
+    configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
         auto _ctx = cast (wayland_ctx*) ctx;
         _this.ack_configure (serial);
 
