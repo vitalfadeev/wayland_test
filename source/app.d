@@ -12,7 +12,7 @@ main () {
     //version (Dynamic) loadWaylandClient ();
 
     // init, connect
-    auto wayland  = Wayland ();
+    auto wayland = Wayland ();
     wayland.connect ();    
 
     // checks

@@ -174,16 +174,15 @@ wl_display__impl {
     auto
     get_registry () {
         import wayland_struct.protocol.wayland : wl_registry,wl_registry_interface;
-        return
-            cast (wl_registry*) (
-                wl_proxy_marshal_flags (
-                    cast (wl_proxy*) _super, 
-                    display_opcode_get_registry, 
-                    &wl_registry_interface, 
-                    wl_proxy_get_version (cast (wl_proxy *) _super),
-                    0,
-                    null
-                )
+        return 
+            cast (wl_registry*)
+            wl_proxy_marshal_flags (
+                cast (wl_proxy*) _super, 
+                display_opcode_get_registry, 
+                &wl_registry_interface, 
+                wl_proxy_get_version (cast (wl_proxy *) _super),
+                0,
+                null
             );
     }
 }
@@ -235,11 +234,6 @@ wl_compositor__impl {
     opAssign (typeof(_super) b) {
         _super = b;
     }
-
-    // no listener, no events
-    //typeof(_super).Listener listener = {
-    //    //
-    //};
 }
 
 // wl_surface
@@ -438,9 +432,13 @@ xdg_surface__impl {
         auto _ctx = cast (wayland_ctx*) ctx;
         _this.ack_configure (serial);
 
-        auto buffer = draw_frame (_ctx);
-        _ctx.wl_surface.attach (buffer, 0, 0);
-        _ctx.wl_surface.commit ();
+        with (_ctx) {
+            auto buffer = draw_frame (_ctx);
+            if (buffer !is null) {
+                wl_surface.attach (buffer, 0, 0);
+                wl_surface.commit ();
+            }
+        }
     }
 }
 

@@ -67,36 +67,38 @@ allocate_shm_file (size_t size) {
 static 
 wl_buffer*
 draw_frame (wayland_ctx* ctx) {
-    int stride = ctx.width * 4;
-    int size = stride * ctx.height;
+    with (ctx) {
+        int stride = width * 4;
+        int size = stride * height;
 
-    int fd = allocate_shm_file (size);
-    if (fd == -1) {
-        return null;
-    }
-
-    uint* data = cast (uint*) mmap (null, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (data == MAP_FAILED) {
-        close (fd);
-        return null;
-    }
-
-    ctx.wl_shm_pool = ctx.wl_shm.create_pool (fd, size);
-    ctx.wl_buffer   = ctx.wl_shm_pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
-    ctx.wl_shm_pool.destroy ();
-    close (fd);
-
-    /* Draw checkerboxed background */
-    for (int y = 0; y < ctx.height; ++y) {
-        for (int x = 0; x < ctx.width; ++x) {
-            if ((x + y / 32 * 32) % 64 < 32)
-                data[y * ctx.width + x] = 0xFF666666;
-            else
-                data[y * ctx.width + x] = 0xFFEEEEEE;
+        int fd = allocate_shm_file (size);
+        if (fd == -1) {
+            return null;
         }
-    }
 
-    munmap (data, size);
-    ctx.wl_buffer.add_listener (&ctx.wl_buffer.listener, null);
-    return ctx.wl_buffer;
+        uint* data = cast (uint*) mmap (null, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (data == MAP_FAILED) {
+            close (fd);
+            return null;
+        }
+
+        wl_shm_pool = wl_shm.create_pool (fd, size);
+        wl_buffer   = wl_shm_pool.create_buffer (0, width, height, stride, PIXEL_FORMAT_ID);
+        wl_shm_pool.destroy ();
+        close (fd);
+
+        /* Draw checkerboxed background */
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                if ((x + y / 32 * 32) % 64 < 32)
+                    data[y * width + x] = 0xFF666666;
+                else
+                    data[y * width + x] = 0xFFEEEEEE;
+            }
+        }
+
+        munmap (data, size);
+        wl_buffer.add_listener (&wl_buffer.listener, null);
+        return wl_buffer;
+    }
 }
