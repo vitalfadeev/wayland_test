@@ -9,14 +9,17 @@
 	"configurations": [
 		{
 			"name": "static",
-			"libs": ["wayland-client"],
 			"targetType": "executable",
 			"versions": [],
+			"dependencies": {
+				"wayland_struct" : { "path":"deps/wayland_struct" }
+			},
 			#"dflags": ["-betterC"],
 		},
 		{
 			"name": "dynamic",
 			"dependencies": {
+				"wayland_struct" : { "path":"deps/wayland_struct" },
 				"derelict-util" : { "path":"deps/derelict-util" }
 			},
 			"targetType": "executable",
