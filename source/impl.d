@@ -501,7 +501,7 @@ wl_pointer__impl {
     static
     void
     motion (void* ctx, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
-        writeln ("MOTION");
+        writeln ("MOTION: x,y: ", surface_x.to_int, ",", surface_y.to_int);
     }
 
     extern (C)
@@ -519,7 +519,7 @@ wl_pointer__impl {
     static
     void
     axis (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value) {
-        // 
+        writeln ("AXIS: ", cast (wl_pointer.axis_) axis, ": ", value.to_int);
     }
 
     extern (C)
@@ -533,21 +533,21 @@ wl_pointer__impl {
     static
     void
     axis_source (void* ctx, wl_pointer* _this /* args: */ , uint axis_source) {
-        // 
+        writeln ("AXIS_SOURCE: ", cast (wl_pointer.axis_source_) axis_source);
     }
 
     extern (C)
     static
     void
     axis_stop (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis) {
-        // 
+        writeln ("AXIS_STOP: ", cast (wl_pointer.axis_) axis);
     }
 
     extern (C)
     static
     void
     axis_discrete (void* ctx, wl_pointer* _this /* args: */ , uint axis, int discrete) {
-        // 
+        writeln ("AXIS_DISCRETE: ", cast (wl_pointer.axis_) axis, ": ", discrete);
     }
 
     extern (C)
@@ -561,7 +561,7 @@ wl_pointer__impl {
     static
     void
     axis_relative_direction (void* ctx, wl_pointer* _this /* args: */ , uint axis, uint direction) {
-        // 
+        writeln ("AXIS_DIRECTION: ", cast (wl_pointer.axis_) axis, ": ", cast (wl_pointer.axis_relative_direction_) direction);
     }
 }
 
@@ -719,3 +719,10 @@ BIND (T) {
         (T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof);
 }
 
+auto
+to_float (wl_fixed_t a) {
+    return 1.0f * (a / 2^^8) + (1.0f * (a & 0xFF) / 0xFF);
+}auto
+to_int (wl_fixed_t a) {
+    return (a / 2^^8) + (a & 0xFF) / 0xFF;
+}
