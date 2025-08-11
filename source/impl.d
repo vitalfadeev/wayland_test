@@ -508,7 +508,11 @@ wl_pointer__impl {
     static
     void
     button (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
-        writeln ("BTN");
+        writeln ("BTN: ", button);
+        with (cast (wayland_ctx*) ctx) {
+            if (button == 272)
+                done = true;
+        }
     }
 
     extern (C)
@@ -606,7 +610,11 @@ wl_keyboard__impl {
     static
     void
     key (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
-        writeln ("KEY");
+        writeln ("KEY: ", key);
+        with (cast (wayland_ctx*) ctx) {
+            if (key == 1)
+                done = true;
+        }
     }
 
     extern (C)
