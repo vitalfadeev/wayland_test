@@ -1,4 +1,5 @@
 import std.stdio;
+import std.format : format;
 import core.stdc.string        : strcmp;
 import wayland_struct;
 import util;
@@ -47,6 +48,21 @@ wayland_ctx {
         wl_pointer*    pointer;
         wl_touch*      touch;
     }
+
+    auto
+    check () {
+        if (xdg_wm_base is null) {
+            printf ("Can't find xdg_wm_base\n");
+            return false;
+        } 
+
+        if (seat is null) {
+            printf ("Can't find seat\n");
+            return false;
+        } 
+
+        return true;
+    }
 }
 
 // wl_registry
@@ -73,7 +89,7 @@ wl_registry__impl {
         printf ("%d: %s\n", name, interface_);
         auto _ctx =  cast (wayland_ctx*) ctx;
 
-        //BIND!xdg_wm_base (ctx,_this,name,interface_,version_);
+        //mixin BIND!xdg_wm_base;
         if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
             _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &xdg_wm_base_interface, version_);
             _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener, ctx);
@@ -237,13 +253,12 @@ xdg_toplevel__impl {
 }
 
 
-auto
-BIND (T,TTHIS) (void* ctx, TTHIS _this, uint name, const(char)* interface_, uint version_) {
-    if (strcmp (T.IFACE.name, interface_) == 0) {
-        mixin (format!
-            "(cast (wayland_ctx*) ctx).%s = cast (%s*) _this.bind (name, &T.IFACE, version_);" 
-            (T.stringof, T.stringof)
-        );
-    }
+mixin template
+BIND (T) {
+    enum BIND = format!"
+        if (strcmp (T.IFACE.name, interface_) == 0) {
+            (cast (wayland_ctx*) ctx).%s = cast (%s*) _this.bind (name, &T.IFACE, version_); 
+        }"
+    (T.stringof, T.stringof);    
 }
 

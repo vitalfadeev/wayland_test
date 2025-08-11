@@ -18,33 +18,21 @@ main () {
     // connect
     with (ctx) {
         display  = wayland.display;
-        registry = wl_display_get_registry (display);
+        registry = wl_display_get_registry (display);  // return wl_registry__impl
         registry.add_listener (&registry.listener,ctx);  // wl_proxy.add_listener
         display.roundtrip ();
     }
 
     // checks
-    if (ctx.xdg_wm_base is null) {
-        printf ("Can't find xdg_wm_base\n");
+    if (!ctx.check) {
         return EXIT_FAILURE;
     } 
-    else {
-        printf ("Found xdg_wm_base\n");
-    }
-
-    if (ctx.seat is null) {
-        printf ("Can't find seat\n");
-        return EXIT_FAILURE;
-    } 
-    else {
-        printf ("Found seat\n");
-    }
 
     // surface,window,draw
     with (ctx) {
         surface      = compositor.create_surface ();
         xdg_surface  = xdg_wm_base.get_xdg_surface (surface);
-        xdg_surface.add_listener (&ctx.xdg_surface.listener, ctx);
+        xdg_surface.add_listener (&xdg_surface.listener, ctx);
         xdg_toplevel = xdg_surface.get_toplevel ();
         xdg_toplevel.set_title ("Example client");
         surface.commit ();
