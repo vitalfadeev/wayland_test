@@ -26,10 +26,10 @@ wayland_ctx {
 
     wl_display*        display;
     wl_registry__impl  registry;
-    wl_seat__impl      seat;
-    wl_compositor*     compositor;
+    wl_seat__impl      wl_seat;
+    .wl_compositor*    wl_compositor;
     wl_surface*        surface;
-    wl_shm*            shm;
+    .wl_shm*           wl_shm;
     wl_shm_pool*       pool;
     wl_buffer__impl    buffer;
 
@@ -56,7 +56,7 @@ wayland_ctx {
             return false;
         } 
 
-        if (seat is null) {
+        if (wl_seat is null) {
             printf ("Can't find seat\n");
             return false;
         } 
@@ -90,23 +90,9 @@ wl_registry__impl {
         auto _ctx =  cast (wayland_ctx*) ctx;
 
         mixin (BIND!xdg_wm_base);
-        //if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
-        //    _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &xdg_wm_base_interface, version_);
-        //    _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener, ctx);
-        //}
-
-        if (strcmp (wl_seat_interface.name, interface_) == 0) {
-            _ctx.seat = cast (wl_seat*) _this.bind (name, &wl_seat_interface, version_);
-            _ctx.seat.add_listener (&_ctx.seat.listener, ctx);
-        }
-
-        if (strcmp (wl_compositor_interface.name, interface_) == 0) {
-            _ctx.compositor = cast (wl_compositor*) _this.bind (name, &wl_compositor_interface, version_);
-        }
-
-        if (strcmp (wl_shm_interface.name, interface_) == 0) {
-            _ctx.shm = cast (wl_shm*) _this.bind (name, &wl_shm_interface, version_);
-        }
+        mixin (BIND!wl_seat);
+        mixin (BIND!wl_compositor);
+        mixin (BIND!wl_shm);
     }
 
     extern (C) 
@@ -141,17 +127,17 @@ wl_seat__impl {
         auto _ctx = cast (wayland_ctx*) ctx;
         if (capabilities & wl_seat.capability_.keyboard) {
             printf ("seat.cap: keyboard\n");
-            _ctx.input.keyboard = _ctx.seat.get_keyboard ();
+            _ctx.input.keyboard = _ctx.wl_seat.get_keyboard ();
             printf ("keyboard: %p\n", _ctx.input.keyboard);
         }
         if (capabilities & wl_seat.capability_.pointer) {
             printf ("seat.cap: pointer\n");
-            _ctx.input.pointer = _ctx.seat.get_pointer ();
+            _ctx.input.pointer = _ctx.wl_seat.get_pointer ();
             printf ("pointer: %p\n", _ctx.input.pointer);
         }
         if (capabilities & wl_seat.capability_.touch) {
             printf ("seat.cap: touch\n");
-            _ctx.input.touch = _ctx.seat.get_touch ();
+            _ctx.input.touch = _ctx.wl_seat.get_touch ();
             printf ("touch: %p\n", _ctx.input.touch);
         }
     }
@@ -256,10 +242,9 @@ xdg_toplevel__impl {
 template
 BIND (T) {
     enum BIND = format!"
-        writeln (\"XXX\");
         if (strcmp (_ctx.%s.IFACE.name, interface_) == 0) {
             _ctx.%s = cast (%s*) _this.bind (name, &_ctx.%s.IFACE, version_); 
-            
+
             static if (__traits (hasMember, _ctx.%s, \"listener\")) {
                 _ctx.%s.add_listener (&_ctx.%s.listener,_ctx);
             }

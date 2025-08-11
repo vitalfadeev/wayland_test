@@ -81,7 +81,7 @@ draw_frame (wayland_ctx* ctx) {
         return null;
     }
 
-    wl_shm_pool* pool = ctx.shm.create_pool (fd, size);
+    wl_shm_pool* pool = ctx.wl_shm.create_pool (fd, size);
     ctx.buffer = pool.create_buffer (0, ctx.width, ctx.height, stride, PIXEL_FORMAT_ID);
     pool.destroy ();
     close (fd);

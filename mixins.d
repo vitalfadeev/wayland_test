@@ -79,12 +79,44 @@ lhs == rhs
 
 // expansion at source/impl.d(92,9)
 
-        writeln ("XXX");
         if (strcmp (_ctx.xdg_wm_base.IFACE.name, interface_) == 0) {
             _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &_ctx.xdg_wm_base.IFACE, version_);
 
             static if (__traits (hasMember, _ctx.xdg_wm_base, "listener")) {
                 _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener,_ctx);
+            }
+        }
+
+
+// expansion at source/impl.d(93,9)
+
+        if (strcmp (_ctx.wl_seat.IFACE.name, interface_) == 0) {
+            _ctx.wl_seat = cast (wl_seat*) _this.bind (name, &_ctx.wl_seat.IFACE, version_);
+
+            static if (__traits (hasMember, _ctx.wl_seat, "listener")) {
+                _ctx.wl_seat.add_listener (&_ctx.wl_seat.listener,_ctx);
+            }
+        }
+
+
+// expansion at source/impl.d(94,9)
+
+        if (strcmp (_ctx.wl_compositor.IFACE.name, interface_) == 0) {
+            _ctx.wl_compositor = cast (wl_compositor*) _this.bind (name, &_ctx.wl_compositor.IFACE, version_);
+
+            static if (__traits (hasMember, _ctx.wl_compositor, "listener")) {
+                _ctx.wl_compositor.add_listener (&_ctx.wl_compositor.listener,_ctx);
+            }
+        }
+
+
+// expansion at source/impl.d(95,9)
+
+        if (strcmp (_ctx.wl_shm.IFACE.name, interface_) == 0) {
+            _ctx.wl_shm = cast (wl_shm*) _this.bind (name, &_ctx.wl_shm.IFACE, version_);
+
+            static if (__traits (hasMember, _ctx.wl_shm, "listener")) {
+                _ctx.wl_shm.add_listener (&_ctx.wl_shm.listener,_ctx);
             }
         }
 

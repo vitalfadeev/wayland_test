@@ -30,7 +30,7 @@ main () {
 
     // surface,window,draw
     with (ctx) {
-        surface      = compositor.create_surface ();
+        surface      = wl_compositor.create_surface ();
         xdg_surface  = xdg_wm_base.get_xdg_surface (surface);
         xdg_surface.add_listener (&xdg_surface.listener, ctx);
         xdg_toplevel = xdg_surface.get_toplevel ();
