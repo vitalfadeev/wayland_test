@@ -202,14 +202,14 @@ wl_registry__impl {
     }
 
     typeof(_super).Listener listener = {
-        &global_impl,
-        &global_remove_impl,
+        &global,
+        &global_remove,
     };
 
     extern (C)
     static
     void 
-    global_impl (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
+    global (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
         printf ("%d: %s\n", name, interface_);
         auto _ctx =  cast (wayland_ctx*) ctx;
 
@@ -222,7 +222,7 @@ wl_registry__impl {
     extern (C) 
     static
     void 
-    global_remove_impl (void* ctx, wl_registry* _this, uint name) {
+    global_remove (void* ctx, wl_registry* _this, uint name) {
         //
     }
 }
@@ -251,30 +251,30 @@ wl_surface__impl {
     }
 
     typeof(_super).Listener listener = {
-        &enter_impl,
-        &leave_impl,
-        &preferred_buffer_scale_impl,
+        &enter,
+        &leave,
+        &preferred_buffer_scale,
         &preferred_buffer_transform,
     };
 
     extern (C)
     static
     void
-    enter_impl (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
+    enter (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
         // 
     }
 
     extern (C)
     static
     void
-    leave_impl (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
+    leave (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
         // 
     }
 
     extern (C)
     static
     void
-    preferred_buffer_scale_impl (void* ctx, wl_surface* _this /* args: */ , int factor) {
+    preferred_buffer_scale (void* ctx, wl_surface* _this /* args: */ , int factor) {
         // 
     }
 
@@ -298,13 +298,13 @@ wl_shm__impl {
     }
 
     typeof(_super).Listener listener = {
-        &format_impl,
+        &format,
     };
 
     extern (C)
     static
     void
-    format_impl (void* ctx, wl_shm* _this /* args: */ , uint format) {
+    format (void* ctx, wl_shm* _this /* args: */ , uint format) {
         // 
     }
 }
@@ -333,14 +333,14 @@ wl_seat__impl {
     }
 
     typeof(_super).Listener listener = {
-        &capabilities_impl,
-        &name_impl,
+        &capabilities,
+        &name,
     };
 
     extern (C)
     static
     void
-    capabilities_impl (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
+    capabilities (void* ctx, wl_seat* _this /* args: */ , uint capabilities) {
         auto _ctx = cast (wayland_ctx*) ctx;
         if (capabilities & wl_seat.capability_.keyboard) {
             printf ("seat.cap: keyboard\n");
@@ -362,7 +362,7 @@ wl_seat__impl {
     extern (C)
     static
     void
-    name_impl (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
+    name (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
         printf ("seat.name: %s\n", name);
     }
 }
@@ -379,13 +379,13 @@ wl_buffer__impl {
     }
 
     typeof(_super).Listener listener = {
-        &_release_impl,
+        &release,
     };
 
     extern (C)
     static
     void
-    _release_impl (void* ctx, wl_buffer* _this /* args: */ ) {
+    release (void* ctx, wl_buffer* _this /* args: */ ) {
         _this.destroy ();
     }
 }
@@ -402,13 +402,13 @@ xdg_wm_base__impl {
     }
 
     typeof(_super).Listener listener = {
-        /*ping:*/ &_ping_impl,
+        /*ping:*/ &ping,
     };
 
     extern (C)
     static
     void
-    _ping_impl (void* ctx, typeof(_super) _this /* args: */ , uint serial) {
+    ping (void* ctx, typeof(_super) _this /* args: */ , uint serial) {
         _this.pong (serial);
     }
 }
@@ -425,13 +425,13 @@ xdg_surface__impl {
     }
 
     typeof(_super).Listener listener = {
-        configure: &configure_impl,
+        configure: &configure,
     };
 
     extern (C)
     static
     void
-    configure_impl (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
+    configure (void* ctx, xdg_surface* _this /* args: */ , uint serial) {
         auto _ctx = cast (wayland_ctx*) ctx;
         _this.ack_configure (serial);
 
