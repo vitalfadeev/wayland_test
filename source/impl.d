@@ -89,11 +89,11 @@ wl_registry__impl {
         printf ("%d: %s\n", name, interface_);
         auto _ctx =  cast (wayland_ctx*) ctx;
 
-        //mixin BIND!xdg_wm_base;
-        if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
-            _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &xdg_wm_base_interface, version_);
-            _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener, ctx);
-        }
+        mixin (BIND!xdg_wm_base);
+        //if (strcmp (xdg_wm_base_interface.name, interface_) == 0) {
+        //    _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &xdg_wm_base_interface, version_);
+        //    _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener, ctx);
+        //}
 
         if (strcmp (wl_seat_interface.name, interface_) == 0) {
             _ctx.seat = cast (wl_seat*) _this.bind (name, &wl_seat_interface, version_);
@@ -253,12 +253,17 @@ xdg_toplevel__impl {
 }
 
 
-mixin template
+template
 BIND (T) {
     enum BIND = format!"
-        if (strcmp (T.IFACE.name, interface_) == 0) {
-            (cast (wayland_ctx*) ctx).%s = cast (%s*) _this.bind (name, &T.IFACE, version_); 
-        }"
-    (T.stringof, T.stringof);    
+        writeln (\"XXX\");
+        if (strcmp (_ctx.%s.IFACE.name, interface_) == 0) {
+            _ctx.%s = cast (%s*) _this.bind (name, &_ctx.%s.IFACE, version_); 
+        }
+        static if (__traits (hasMember, _ctx.%s, \"listener\")) {
+            _ctx.%s.add_listener (&_ctx.%s.listener,_ctx);
+        }
+        "
+        (T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof);
 }
 
