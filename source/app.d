@@ -15,11 +15,22 @@ main () {
     auto wayland = Wayland ();
     if (!wayland.connect ())
         return EXIT_FAILURE;
-    wayland.create_surface ();  // wayland.ctx.wl_surface
+    wayland.create_surface (640,480);  // wayland.ctx.wl_surface
 
     // EVENT LOOP
-    foreach (event; wayland.events) {
-        writeln (event);
+    foreach (Event* event; wayland.events) {
+        switch (event.type) {
+            case Event.Type.POINTER_BUTTON: 
+                if (event.pointer.button == BTN_LEFT)
+                    wayland.ctx.done = true;
+                break;
+            case Event.Type.KEYBOARD_KEY: 
+                if (event.keyboard.key == KEY_ESC)
+                    wayland.ctx.done = true;
+                break;
+            default:
+        }
+        writeln (*event);
     }
 
     wayland.cleanup ();

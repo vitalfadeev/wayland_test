@@ -4,8 +4,8 @@ import core.stdc.string        : strcmp;
 import wayland_struct;
 import util;
 
-static const uint WIDTH             = 640;
-static const uint HEIGHT            = 480;
+static const uint WIDTH             = 320;
+static const uint HEIGHT            = 240;
 static const uint PIXEL_FORMAT_ID   = wl_shm.format_.xrgb8888;
 
 
@@ -64,8 +64,10 @@ Wayland {
     }
 
     void
-    create_surface () {
+    create_surface (int w=WIDTH, int h=HEIGHT) {
         with (ctx) {
+            width        = w;
+            height       = h;
             wl_surface   = wl_compositor.create_surface ();
             xdg_surface  = xdg_wm_base.get_xdg_surface (wl_surface);
             xdg_surface.add_listener (&xdg_surface.listener, &ctx);
@@ -104,10 +106,18 @@ Wayland {
 struct
 Events {
     Wayland* wayland;
-    Event    front;
+    Event*   front;
+
+    this (Wayland* wayland) {
+        this.wayland   = wayland;
+        this.front     = &wayland.ctx.event;
+        this.front.ctx = &wayland.ctx;
+    }
 
     bool  
     empty () {
+        front.type = Event.type.NONE;
+
         with (wayland.ctx)
         if (wl_display.dispatch () < 0) {
             printf ("loop: dispatch 1\n");
@@ -128,7 +138,139 @@ Events {
 
 struct
 Event {
-    //
+    Type         type;
+    wayland_ctx* ctx;
+    union {
+        Device_Event   device;
+        Keyboard_Event keyboard;
+        Pointer_Event  pointer;
+        Touch_Event    touch;
+    }
+
+    struct
+    Device_Event {
+        //
+    }
+
+    struct
+    Keyboard_Event {
+        wl_surface* surface;
+        uint key;
+        uint state;
+    }
+
+    struct
+    Pointer_Event {
+        wl_surface* surface;
+        int  x;
+        int  y;
+        uint button;
+        uint state;
+        uint axis;
+        uint axis_source;
+        uint axis_value;
+        uint axis_stop;
+        int  axis_discrete;
+        uint axis_direction;
+    }
+
+    struct
+    Touch_Event {
+        //
+    }
+
+    import libinput_d : libinput_event_type;
+
+    string
+    toString () {
+        import std.format : format;
+        import std.conv   : to;
+
+        switch (type) {
+            //case Type.DEVICE_ADDED:
+            //case Type.DEVICE_REMOVED:
+            //    return format!"%s: %s" (
+            //        type, 
+            //        device.name.to!string);
+            case Type.KEYBOARD_KEY:
+                return format!"%s: %d: %s: %s" ( 
+                    type, 
+                    keyboard.key,  // KEY_1,KEY_ESC,KEY_BACKSPACE
+                    keyboard.key.decode_key,
+                    cast (wl_keyboard.key_state_) keyboard.state);
+            case Type.POINTER_MOTION:
+                return format!"%s: x,y: %d,%d" (
+                    type, 
+                    pointer.x, 
+                    pointer.y); 
+            //case Type.POINTER_MOTION_ABSOLUTE:
+            //    return format!"%s: abs_x,abx_y: %f,%f" (
+            //        type, 
+            //        pointer.absolute_x, 
+            //        pointer.absolute_y);
+            case Type.POINTER_BUTTON:
+                return format!"%s: %d %s: %s" (
+                    type, 
+                    pointer.button,  // BTN_LEFT,BTN_RIGHT,BTN_MIDDLE
+                    decode_btn (pointer.button),
+                    cast (wl_pointer.button_state_) pointer.state);
+            case Type.POINTER_AXIS:
+                return format!"%s: %s: %s: %d" (
+                    type, 
+                    cast (wl_pointer.axis_source_) pointer.axis_source,
+                    cast (wl_pointer.axis_) pointer.axis,
+                    // cast (wl_pointer.axis_relative_direction_) axis_direction,
+                    pointer.axis_value);
+            case Type.TOUCH_DOWN:
+            case Type.TOUCH_UP:
+            case Type.TOUCH_MOTION:
+            case Type.TOUCH_CANCEL:
+            case Type.TOUCH_FRAME:
+                return format!"%s" (type);
+            case Type.TABLET_TOOL_AXIS:
+            case Type.TABLET_TOOL_PROXIMITY:
+            case Type.TABLET_TOOL_TIP:
+            case Type.TABLET_TOOL_BUTTON:
+                return format!"%s" (type);
+            case Type.GESTURE_SWIPE_BEGIN:
+            case Type.GESTURE_SWIPE_UPDATE:
+            case Type.GESTURE_SWIPE_END:
+            case Type.GESTURE_PINCH_BEGIN:
+            case Type.GESTURE_PINCH_UPDATE:
+            case Type.GESTURE_PINCH_END:
+                return format!"%s" (type);
+            default:
+                return format!"%s" (type);
+        }
+    }
+
+    enum
+    Type : ushort {
+        NONE                    = libinput_event_type.LIBINPUT_EVENT_NONE,
+        DEVICE_ADDED            = libinput_event_type.LIBINPUT_EVENT_DEVICE_ADDED,
+        DEVICE_REMOVED          = libinput_event_type.LIBINPUT_EVENT_DEVICE_REMOVED,
+        KEYBOARD_KEY            = libinput_event_type.LIBINPUT_EVENT_KEYBOARD_KEY,
+        POINTER_MOTION          = libinput_event_type.LIBINPUT_EVENT_POINTER_MOTION,
+        POINTER_MOTION_ABSOLUTE = libinput_event_type.LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE,
+        POINTER_BUTTON          = libinput_event_type.LIBINPUT_EVENT_POINTER_BUTTON,
+        POINTER_AXIS            = libinput_event_type.LIBINPUT_EVENT_POINTER_AXIS,
+        POINTER_AXIS_           = 404,
+        TOUCH_DOWN              = libinput_event_type.LIBINPUT_EVENT_TOUCH_DOWN,
+        TOUCH_UP                = libinput_event_type.LIBINPUT_EVENT_TOUCH_UP,
+        TOUCH_MOTION            = libinput_event_type.LIBINPUT_EVENT_TOUCH_MOTION,
+        TOUCH_CANCEL            = libinput_event_type.LIBINPUT_EVENT_TOUCH_CANCEL,
+        TOUCH_FRAME             = libinput_event_type.LIBINPUT_EVENT_TOUCH_FRAME,
+        TABLET_TOOL_AXIS        = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_AXIS,
+        TABLET_TOOL_PROXIMITY   = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_PROXIMITY,
+        TABLET_TOOL_TIP         = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_TIP,
+        TABLET_TOOL_BUTTON      = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_BUTTON,
+        GESTURE_SWIPE_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_BEGIN,
+        GESTURE_SWIPE_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_UPDATE,
+        GESTURE_SWIPE_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_END,
+        GESTURE_PINCH_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_BEGIN,
+        GESTURE_PINCH_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_UPDATE,
+        GESTURE_PINCH_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_END,
+    }
 }
 
 
@@ -151,6 +293,7 @@ wayland_ctx {
     xdg_toplevel__impl  xdg_toplevel;
 
     Input               input;
+    Event               event;
 
     bool                done;
 
@@ -488,31 +631,43 @@ wl_pointer__impl {
     static
     void
     enter (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t surface_x, wl_fixed_t surface_y) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            // event.type = Event.Type.POINTER_*;
+            event.pointer.surface = surface;
+            event.pointer.x = surface_x.to_int;
+            event.pointer.y = surface_y.to_int;
+        }
     }
 
     extern (C)
     static
     void
     leave (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            // event.type = Event.Type.POINTER_*;
+            event.pointer.surface = null;
+        }
     }
 
     extern (C)
     static
     void
     motion (void* ctx, wl_pointer* _this /* args: */ , uint time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
-        writeln ("MOTION: x,y: ", surface_x.to_int, ",", surface_y.to_int);
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_MOTION;
+            event.pointer.x = surface_x.to_int;
+            event.pointer.y = surface_y.to_int;
+        }
     }
 
     extern (C)
     static
     void
     button (void* ctx, wl_pointer* _this /* args: */ , uint serial, uint time, uint button, uint state) {
-        writeln ("BTN: ", decode_btn (button), ": ", cast(wl_pointer.button_state_) state);
         with (cast (wayland_ctx*) ctx) {
-            if (button == BTN_LEFT)
-                done = true;
+            event.type = Event.Type.POINTER_BUTTON;
+            event.pointer.button = button;
+            event.pointer.state  = state;
         }
     }
 
@@ -520,7 +675,11 @@ wl_pointer__impl {
     static
     void
     axis (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis, wl_fixed_t value) {
-        writeln ("AXIS: ", cast (wl_pointer.axis_) axis, ": ", value.to_int);
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_AXIS;
+            event.pointer.axis       = axis;
+            event.pointer.axis_value = value.to_int;
+        }
     }
 
     extern (C)
@@ -534,21 +693,31 @@ wl_pointer__impl {
     static
     void
     axis_source (void* ctx, wl_pointer* _this /* args: */ , uint axis_source) {
-        writeln ("AXIS_SOURCE: ", cast (wl_pointer.axis_source_) axis_source);
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_AXIS;
+            event.pointer.axis_source = axis_source;
+        }
     }
 
     extern (C)
     static
     void
     axis_stop (void* ctx, wl_pointer* _this /* args: */ , uint time, uint axis) {
-        writeln ("AXIS_STOP: ", cast (wl_pointer.axis_) axis);
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_AXIS;
+            event.pointer.axis_stop = axis;
+        }
     }
 
     extern (C)
     static
     void
     axis_discrete (void* ctx, wl_pointer* _this /* args: */ , uint axis, int discrete) {
-        writeln ("AXIS_DISCRETE: ", cast (wl_pointer.axis_) axis, ": ", discrete);
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_AXIS;
+            event.pointer.axis_stop     = axis;
+            event.pointer.axis_discrete = discrete;
+        }
     }
 
     extern (C)
@@ -562,7 +731,11 @@ wl_pointer__impl {
     static
     void
     axis_relative_direction (void* ctx, wl_pointer* _this /* args: */ , uint axis, uint direction) {
-        writeln ("AXIS_DIRECTION: ", cast (wl_pointer.axis_) axis, ": ", cast (wl_pointer.axis_relative_direction_) direction);
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_AXIS;
+            event.pointer.axis           = axis;
+            event.pointer.axis_direction = direction;
+        }
     }
 }
 
@@ -597,24 +770,30 @@ wl_keyboard__impl {
     static
     void
     enter (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface, wl_array* keys) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            // event.type = Event.Type.KEYBOARD_KEY*;
+            event.keyboard.surface = surface;
+        }
     }
 
     extern (C)
     static
     void
     leave (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            // event.type = Event.Type.KEYBOARD_KEY*;
+            event.keyboard.surface = null;
+        }
     }
 
     extern (C)
     static
     void
     key (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint time, uint key, uint state) {
-        writeln ("KEY: ", decode_key (key), ": ", cast(wl_keyboard.key_state_) state);
         with (cast (wayland_ctx*) ctx) {
-            if (key ==KEY_ESC)
-                done = true;
+            event.type = Event.Type.KEYBOARD_KEY;
+            event.keyboard.key   = key;
+            event.keyboard.state = state;
         }
     }
 
