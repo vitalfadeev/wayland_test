@@ -178,7 +178,7 @@ Event {
         uint state;
         uint axis;
         uint axis_source;
-        uint axis_value;
+        int  axis_value;
         uint axis_stop;
         int  axis_discrete;
         uint axis_direction;
