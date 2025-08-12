@@ -9,10 +9,10 @@ int
 main () {
     //version (Dynamic) loadWaylandClient ();
 
-    // init, connect
+    // init, connect, surface, window
     auto wayland = Wayland (640,480);
 
-    // EVENT LOOP
+    // event loop
     foreach (Event* event; wayland.events) {
         writeln (*event);
         switch (event.type) {
