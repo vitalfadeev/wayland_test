@@ -13,6 +13,16 @@ struct
 Wayland {
     wayland_ctx ctx;
 
+    this (int w, int h) {
+        if (!connect ())
+            throw new Exception ("Not connected");
+        create_surface (w,h);
+    }
+
+    ~this () {
+        cleanup ();
+    }
+
     auto 
     connect () {
         with (ctx) {

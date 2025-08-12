@@ -10,10 +10,7 @@ main () {
     //version (Dynamic) loadWaylandClient ();
 
     // init, connect
-    auto wayland = Wayland ();
-    if (!wayland.connect ())
-        return EXIT_FAILURE;
-    wayland.create_surface (640,480);  // wayland.ctx.wl_surface
+    auto wayland = Wayland (640,480);
 
     // EVENT LOOP
     foreach (Event* event; wayland.events) {
@@ -30,8 +27,6 @@ main () {
             default:
         }
     }
-
-    wayland.cleanup ();
 
     return EXIT_SUCCESS;
 }
