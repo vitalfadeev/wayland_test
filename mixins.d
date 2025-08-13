@@ -985,6 +985,62 @@ lhs < rhs
 // expansion at /usr/include/dmd/phobos/std/typecons.d(526,31)
 lhs < rhs
 
+// expansion at source/impl.d(233,9)
+
+    {
+        auto dest = &(cast (wayland_ctx*) ctx).wl_seat;
+
+        if (strcmp (dest.IFACE.name, interface_) == 0) {
+            *dest = cast (wl_seat*) _this.bind (name, &dest.IFACE, version_);
+
+            static if (__traits (hasMember, dest, "listener")) {
+                dest.add_listener (&dest.listener,ctx);
+            }
+        }
+    }
+
+// expansion at source/impl.d(234,9)
+
+    {
+        auto dest = &(cast (wayland_ctx*) ctx).wl_compositor;
+
+        if (strcmp (dest.IFACE.name, interface_) == 0) {
+            *dest = cast (wl_compositor*) _this.bind (name, &dest.IFACE, version_);
+
+            static if (__traits (hasMember, dest, "listener")) {
+                dest.add_listener (&dest.listener,ctx);
+            }
+        }
+    }
+
+// expansion at source/impl.d(235,9)
+
+    {
+        auto dest = &(cast (wayland_ctx*) ctx).xdg_wm_base;
+
+        if (strcmp (dest.IFACE.name, interface_) == 0) {
+            *dest = cast (xdg_wm_base*) _this.bind (name, &dest.IFACE, version_);
+
+            static if (__traits (hasMember, dest, "listener")) {
+                dest.add_listener (&dest.listener,ctx);
+            }
+        }
+    }
+
+// expansion at source/impl.d(236,9)
+
+    {
+        auto dest = &(cast (wayland_ctx*) ctx).wl_shm;
+
+        if (strcmp (dest.IFACE.name, interface_) == 0) {
+            *dest = cast (wl_shm*) _this.bind (name, &dest.IFACE, version_);
+
+            static if (__traits (hasMember, dest, "listener")) {
+                dest.add_listener (&dest.listener,ctx);
+            }
+        }
+    }
+
 // expansion at /usr/include/dmd/phobos/std/functional.d(225,13)
 alias a = __a ;
 
@@ -1002,48 +1058,4 @@ alias b = __b ;
 
 // expansion at /usr/include/dmd/phobos/std/functional.d(227,20)
 a == b
-
-// expansion at source/impl.d(370,9)
-
-        if (strcmp (_ctx.xdg_wm_base.IFACE.name, interface_) == 0) {
-            _ctx.xdg_wm_base = cast (xdg_wm_base*) _this.bind (name, &_ctx.xdg_wm_base.IFACE, version_);
-
-            static if (__traits (hasMember, _ctx.xdg_wm_base, "listener")) {
-                _ctx.xdg_wm_base.add_listener (&_ctx.xdg_wm_base.listener,_ctx);
-            }
-        }
-
-
-// expansion at source/impl.d(371,9)
-
-        if (strcmp (_ctx.wl_seat.IFACE.name, interface_) == 0) {
-            _ctx.wl_seat = cast (wl_seat*) _this.bind (name, &_ctx.wl_seat.IFACE, version_);
-
-            static if (__traits (hasMember, _ctx.wl_seat, "listener")) {
-                _ctx.wl_seat.add_listener (&_ctx.wl_seat.listener,_ctx);
-            }
-        }
-
-
-// expansion at source/impl.d(372,9)
-
-        if (strcmp (_ctx.wl_compositor.IFACE.name, interface_) == 0) {
-            _ctx.wl_compositor = cast (wl_compositor*) _this.bind (name, &_ctx.wl_compositor.IFACE, version_);
-
-            static if (__traits (hasMember, _ctx.wl_compositor, "listener")) {
-                _ctx.wl_compositor.add_listener (&_ctx.wl_compositor.listener,_ctx);
-            }
-        }
-
-
-// expansion at source/impl.d(373,9)
-
-        if (strcmp (_ctx.wl_shm.IFACE.name, interface_) == 0) {
-            _ctx.wl_shm = cast (wl_shm*) _this.bind (name, &_ctx.wl_shm.IFACE, version_);
-
-            static if (__traits (hasMember, _ctx.wl_shm, "listener")) {
-                _ctx.wl_shm.add_listener (&_ctx.wl_shm.listener,_ctx);
-            }
-        }
-
 

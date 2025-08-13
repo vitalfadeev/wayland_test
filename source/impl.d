@@ -113,177 +113,7 @@ Wayland {
     }
 }
 
-struct
-Events {
-    Wayland* wayland;
-    Event*   front;
-
-    this (Wayland* wayland) {
-        this.wayland   = wayland;
-        this.front     = &wayland.ctx.event;
-        this.front.ctx = &wayland.ctx;
-    }
-
-    bool  
-    empty () {
-        front.type = Event.type.NONE;
-
-        with (wayland.ctx)
-        if (wl_display.dispatch () < 0) {
-            printf ("loop: dispatch 1\n");
-            perror ("Main loop error");
-            done = true;
-            return done;
-        }
-        else {
-            return done;
-        }
-    }
-
-    void 
-    popFront () {
-        //
-    }
-}
-
-struct
-Event {
-    Type         type;
-    wayland_ctx* ctx;
-    union {
-        Device_Event   device;
-        Keyboard_Event keyboard;
-        Pointer_Event  pointer;
-        Touch_Event    touch;
-    }
-
-    struct
-    Device_Event {
-        //
-    }
-
-    struct
-    Keyboard_Event {
-        wl_surface* surface;
-        uint key;
-        uint state;
-    }
-
-    struct
-    Pointer_Event {
-        wl_surface* surface;
-        int  x;
-        int  y;
-        uint button;
-        uint state;
-        uint axis;
-        uint axis_source;
-        int  axis_value;
-        uint axis_stop;
-        int  axis_discrete;
-        uint axis_direction;
-    }
-
-    struct
-    Touch_Event {
-        //
-    }
-
-    import libinput_d : libinput_event_type;
-
-    string
-    toString () {
-        import std.format : format;
-        import std.conv   : to;
-
-        switch (type) {
-            //case Type.DEVICE_ADDED:
-            //case Type.DEVICE_REMOVED:
-            //    return format!"%s: %s" (
-            //        type, 
-            //        device.name.to!string);
-            case Type.KEYBOARD_KEY:
-                return format!"%s: %d: %s: %s" ( 
-                    type, 
-                    keyboard.key,  // KEY_1,KEY_ESC,KEY_BACKSPACE
-                    keyboard.key.decode_key,
-                    cast (wl_keyboard.key_state_) keyboard.state);
-            case Type.POINTER_MOTION:
-                return format!"%s: x,y: %d,%d" (
-                    type, 
-                    pointer.x, 
-                    pointer.y); 
-            //case Type.POINTER_MOTION_ABSOLUTE:
-            //    return format!"%s: abs_x,abx_y: %f,%f" (
-            //        type, 
-            //        pointer.absolute_x, 
-            //        pointer.absolute_y);
-            case Type.POINTER_BUTTON:
-                return format!"%s: %d %s: %s" (
-                    type, 
-                    pointer.button,  // BTN_LEFT,BTN_RIGHT,BTN_MIDDLE
-                    decode_btn (pointer.button),
-                    cast (wl_pointer.button_state_) pointer.state);
-            case Type.POINTER_AXIS:
-                return format!"%s: %s: %s: %d" (
-                    type, 
-                    cast (wl_pointer.axis_source_) pointer.axis_source,
-                    cast (wl_pointer.axis_) pointer.axis,
-                    // cast (wl_pointer.axis_relative_direction_) axis_direction,
-                    pointer.axis_value);
-            case Type.TOUCH_DOWN:
-            case Type.TOUCH_UP:
-            case Type.TOUCH_MOTION:
-            case Type.TOUCH_CANCEL:
-            case Type.TOUCH_FRAME:
-                return format!"%s" (type);
-            case Type.TABLET_TOOL_AXIS:
-            case Type.TABLET_TOOL_PROXIMITY:
-            case Type.TABLET_TOOL_TIP:
-            case Type.TABLET_TOOL_BUTTON:
-                return format!"%s" (type);
-            case Type.GESTURE_SWIPE_BEGIN:
-            case Type.GESTURE_SWIPE_UPDATE:
-            case Type.GESTURE_SWIPE_END:
-            case Type.GESTURE_PINCH_BEGIN:
-            case Type.GESTURE_PINCH_UPDATE:
-            case Type.GESTURE_PINCH_END:
-                return format!"%s" (type);
-            default:
-                return format!"%s" (type);
-        }
-    }
-
-    enum
-    Type : ushort {
-        NONE                    = libinput_event_type.LIBINPUT_EVENT_NONE,
-        DEVICE_ADDED            = libinput_event_type.LIBINPUT_EVENT_DEVICE_ADDED,
-        DEVICE_REMOVED          = libinput_event_type.LIBINPUT_EVENT_DEVICE_REMOVED,
-        KEYBOARD_KEY            = libinput_event_type.LIBINPUT_EVENT_KEYBOARD_KEY,
-        POINTER_MOTION          = libinput_event_type.LIBINPUT_EVENT_POINTER_MOTION,
-        POINTER_MOTION_ABSOLUTE = libinput_event_type.LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE,
-        POINTER_BUTTON          = libinput_event_type.LIBINPUT_EVENT_POINTER_BUTTON,
-        POINTER_AXIS            = libinput_event_type.LIBINPUT_EVENT_POINTER_AXIS,
-        POINTER_AXIS_           = 404,
-        TOUCH_DOWN              = libinput_event_type.LIBINPUT_EVENT_TOUCH_DOWN,
-        TOUCH_UP                = libinput_event_type.LIBINPUT_EVENT_TOUCH_UP,
-        TOUCH_MOTION            = libinput_event_type.LIBINPUT_EVENT_TOUCH_MOTION,
-        TOUCH_CANCEL            = libinput_event_type.LIBINPUT_EVENT_TOUCH_CANCEL,
-        TOUCH_FRAME             = libinput_event_type.LIBINPUT_EVENT_TOUCH_FRAME,
-        TABLET_TOOL_AXIS        = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_AXIS,
-        TABLET_TOOL_PROXIMITY   = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_PROXIMITY,
-        TABLET_TOOL_TIP         = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_TIP,
-        TABLET_TOOL_BUTTON      = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_BUTTON,
-        GESTURE_SWIPE_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_BEGIN,
-        GESTURE_SWIPE_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_UPDATE,
-        GESTURE_SWIPE_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_END,
-        GESTURE_PINCH_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_BEGIN,
-        GESTURE_PINCH_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_UPDATE,
-        GESTURE_PINCH_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_END,
-    }
-}
-
-
+extern (C)
 struct 
 wayland_ctx {
     int                 width  = WIDTH;
@@ -343,6 +173,41 @@ wl_display__impl {
     }
 }
 
+//extern (C)
+//alias _wl_registry__impl = 
+//    T_impl!(
+//        wl_registry, 
+//        wl_registry.Listener (
+//            // global:
+//            (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
+//                printf ("%d: %s\n", name, interface_);
+
+//                mixin (BIND!wl_seat);
+//                mixin (BIND!wl_compositor);
+//                mixin (BIND!xdg_wm_base);
+//                mixin (BIND!wl_shm);
+//            },
+
+//            // global_remove:
+//            (void* ctx, wl_registry* _this, uint name) {
+//                //
+//            }
+//        )
+//    );
+
+struct
+T_impl (T,alias _listener) {
+    T* _super;
+    alias _super this;
+
+    void
+    opAssign (typeof(_super) b) {
+        _super = b;
+    }
+
+    T.Listener listener = _listener;
+}
+
 // wl_registry
 struct
 wl_registry__impl {
@@ -359,17 +224,15 @@ wl_registry__impl {
         &global_remove,
     };
 
-
     extern (C)
     static
     void 
     global (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
         printf ("%d: %s\n", name, interface_);
-        auto _ctx =  cast (wayland_ctx*) ctx;
 
-        mixin (BIND!xdg_wm_base);
         mixin (BIND!wl_seat);
         mixin (BIND!wl_compositor);
+        mixin (BIND!xdg_wm_base);
         mixin (BIND!wl_shm);
     }
 
@@ -893,20 +756,192 @@ wl_touch__impl {
     }
 }
 
+struct
+Events {
+    Wayland* wayland;
+    Event*   front;
 
+    this (Wayland* wayland) {
+        this.wayland   = wayland;
+        this.front     = &wayland.ctx.event;
+        this.front.ctx = &wayland.ctx;
+    }
 
-template
+    bool  
+    empty () {
+        front.type = Event.type.NONE;
+
+        with (wayland.ctx)
+        if (wl_display.dispatch () < 0) {
+            printf ("loop: dispatch 1\n");
+            perror ("Main loop error");
+            done = true;
+            return done;
+        }
+        else {
+            return done;
+        }
+    }
+
+    void 
+    popFront () {
+        //
+    }
+}
+
+struct
+Event {
+    Type         type;
+    wayland_ctx* ctx;
+    union {
+        Device_Event   device;
+        Keyboard_Event keyboard;
+        Pointer_Event  pointer;
+        Touch_Event    touch;
+    }
+
+    struct
+    Device_Event {
+        //
+    }
+
+    struct
+    Keyboard_Event {
+        wl_surface* surface;
+        uint key;
+        uint state;
+    }
+
+    struct
+    Pointer_Event {
+        wl_surface* surface;
+        int  x;
+        int  y;
+        uint button;
+        uint state;
+        uint axis;
+        uint axis_source;
+        int  axis_value;
+        uint axis_stop;
+        int  axis_discrete;
+        uint axis_direction;
+    }
+
+    struct
+    Touch_Event {
+        //
+    }
+
+    import libinput_d : libinput_event_type;
+
+    string
+    toString () {
+        import std.format : format;
+        import std.conv   : to;
+
+        switch (type) {
+            //case Type.DEVICE_ADDED:
+            //case Type.DEVICE_REMOVED:
+            //    return format!"%s: %s" (
+            //        type, 
+            //        device.name.to!string);
+            case Type.KEYBOARD_KEY:
+                return format!"%s: %d: %s: %s" ( 
+                    type, 
+                    keyboard.key,  // KEY_1,KEY_ESC,KEY_BACKSPACE
+                    keyboard.key.decode_key,
+                    cast (wl_keyboard.key_state_) keyboard.state);
+            case Type.POINTER_MOTION:
+                return format!"%s: x,y: %d,%d" (
+                    type, 
+                    pointer.x, 
+                    pointer.y); 
+            //case Type.POINTER_MOTION_ABSOLUTE:
+            //    return format!"%s: abs_x,abx_y: %f,%f" (
+            //        type, 
+            //        pointer.absolute_x, 
+            //        pointer.absolute_y);
+            case Type.POINTER_BUTTON:
+                return format!"%s: %d %s: %s" (
+                    type, 
+                    pointer.button,  // BTN_LEFT,BTN_RIGHT,BTN_MIDDLE
+                    decode_btn (pointer.button),
+                    cast (wl_pointer.button_state_) pointer.state);
+            case Type.POINTER_AXIS:
+                return format!"%s: %s: %s: %d" (
+                    type, 
+                    cast (wl_pointer.axis_source_) pointer.axis_source,
+                    cast (wl_pointer.axis_) pointer.axis,
+                    // cast (wl_pointer.axis_relative_direction_) axis_direction,
+                    pointer.axis_value);
+            case Type.TOUCH_DOWN:
+            case Type.TOUCH_UP:
+            case Type.TOUCH_MOTION:
+            case Type.TOUCH_CANCEL:
+            case Type.TOUCH_FRAME:
+                return format!"%s" (type);
+            case Type.TABLET_TOOL_AXIS:
+            case Type.TABLET_TOOL_PROXIMITY:
+            case Type.TABLET_TOOL_TIP:
+            case Type.TABLET_TOOL_BUTTON:
+                return format!"%s" (type);
+            case Type.GESTURE_SWIPE_BEGIN:
+            case Type.GESTURE_SWIPE_UPDATE:
+            case Type.GESTURE_SWIPE_END:
+            case Type.GESTURE_PINCH_BEGIN:
+            case Type.GESTURE_PINCH_UPDATE:
+            case Type.GESTURE_PINCH_END:
+                return format!"%s" (type);
+            default:
+                return format!"%s" (type);
+        }
+    }
+
+    enum
+    Type : ushort {
+        NONE                    = libinput_event_type.LIBINPUT_EVENT_NONE,
+        DEVICE_ADDED            = libinput_event_type.LIBINPUT_EVENT_DEVICE_ADDED,
+        DEVICE_REMOVED          = libinput_event_type.LIBINPUT_EVENT_DEVICE_REMOVED,
+        KEYBOARD_KEY            = libinput_event_type.LIBINPUT_EVENT_KEYBOARD_KEY,
+        POINTER_MOTION          = libinput_event_type.LIBINPUT_EVENT_POINTER_MOTION,
+        POINTER_MOTION_ABSOLUTE = libinput_event_type.LIBINPUT_EVENT_POINTER_MOTION_ABSOLUTE,
+        POINTER_BUTTON          = libinput_event_type.LIBINPUT_EVENT_POINTER_BUTTON,
+        POINTER_AXIS            = libinput_event_type.LIBINPUT_EVENT_POINTER_AXIS,
+        POINTER_AXIS_           = 404,
+        TOUCH_DOWN              = libinput_event_type.LIBINPUT_EVENT_TOUCH_DOWN,
+        TOUCH_UP                = libinput_event_type.LIBINPUT_EVENT_TOUCH_UP,
+        TOUCH_MOTION            = libinput_event_type.LIBINPUT_EVENT_TOUCH_MOTION,
+        TOUCH_CANCEL            = libinput_event_type.LIBINPUT_EVENT_TOUCH_CANCEL,
+        TOUCH_FRAME             = libinput_event_type.LIBINPUT_EVENT_TOUCH_FRAME,
+        TABLET_TOOL_AXIS        = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_AXIS,
+        TABLET_TOOL_PROXIMITY   = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_PROXIMITY,
+        TABLET_TOOL_TIP         = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_TIP,
+        TABLET_TOOL_BUTTON      = libinput_event_type.LIBINPUT_EVENT_TABLET_TOOL_BUTTON,
+        GESTURE_SWIPE_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_BEGIN,
+        GESTURE_SWIPE_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_UPDATE,
+        GESTURE_SWIPE_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_SWIPE_END,
+        GESTURE_PINCH_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_BEGIN,
+        GESTURE_PINCH_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_UPDATE,
+        GESTURE_PINCH_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_END,
+    }
+}
+
+template 
 BIND (T) {
-    enum BIND = format!"
-        if (strcmp (_ctx.%s.IFACE.name, interface_) == 0) {
-            _ctx.%s = cast (%s*) _this.bind (name, &_ctx.%s.IFACE, version_); 
+    enum BIND = format!
+    "
+    {
+        auto dest = &(cast (wayland_ctx*) ctx).%s;
 
-            static if (__traits (hasMember, _ctx.%s, \"listener\")) {
-                _ctx.%s.add_listener (&_ctx.%s.listener,_ctx);
+        if (strcmp (dest.IFACE.name, interface_) == 0) {
+            *dest = cast (%s*) _this.bind (name, &dest.IFACE, version_); 
+
+            static if (__traits (hasMember, dest, \"listener\")) {
+                dest.add_listener (&dest.listener,ctx);
             }
         }
-        "
-        (T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof, T.stringof);
+    }"
+    (T.stringof, T.stringof);
 }
 
 auto
