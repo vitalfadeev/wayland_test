@@ -127,7 +127,6 @@ wayland_ctx {
     wl_shm__impl        wl_shm;
     wl_shm_pool__impl   wl_shm_pool;
     wl_buffer__impl     wl_buffer;
-
     xdg_wm_base__impl   xdg_wm_base;
     xdg_surface__impl   xdg_surface;
     xdg_toplevel__impl  xdg_toplevel;
@@ -329,7 +328,7 @@ wl_shm__impl {
     static
     void
     format (void* ctx, wl_shm* _this /* args: */ , uint format) {
-        // 
+        // supported pixel formats.  argb8888 || xrgb8888
     }
 }
 
@@ -425,7 +424,7 @@ xdg_wm_base__impl {
     }
 
     typeof(_super).Listener listener = {
-        /*ping:*/ &ping,
+        ping: &ping,
     };
 
     extern (C)
@@ -566,7 +565,9 @@ wl_pointer__impl {
     static
     void
     frame (void* ctx, wl_pointer* _this /* args: */ ) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            //event.type = Event.Type.POINTER_FRAME;
+        }
     }
 
     extern (C)
@@ -604,7 +605,12 @@ wl_pointer__impl {
     static
     void
     axis_value120 (void* ctx, wl_pointer* _this /* args: */ , uint axis, int value120) {
-        // 
+        // value120 - scroll distance as fraction of 120
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.POINTER_AXIS;
+            event.pointer.axis     = axis;
+            event.pointer.value120 = value120;
+        }
     }
 
     extern (C)
@@ -643,7 +649,12 @@ wl_keyboard__impl {
     static
     void
     keymap (void* ctx, wl_keyboard* _this /* args: */ , uint format, int fd, uint size) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.KEYBOARD_KEYMAP;
+            event.keyboard.keymap_format = format;
+            event.keyboard.keymap_fd     = fd;
+            event.keyboard.keymap_size   = size;
+        }
     }
 
     extern (C)
@@ -681,14 +692,24 @@ wl_keyboard__impl {
     static
     void
     modifiers (void* ctx, wl_keyboard* _this /* args: */ , uint serial, uint mods_depressed, uint mods_latched, uint mods_locked, uint group) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.KEYBOARD_MODIFIERS;
+            event.keyboard.mods_depressed = mods_depressed;
+            event.keyboard.mods_latched   = mods_latched;
+            event.keyboard.mods_locked    = mods_locked;
+            event.keyboard.group          = group;
+        }
     }
 
     extern (C)
     static
     void
     repeat_info (void* ctx, wl_keyboard* _this /* args: */ , int rate, int delay) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.KEYBOARD_REPEAT_INFO;
+            event.keyboard.rate  = rate;
+            event.keyboard.delay = delay;
+        }
     }
 }
 
@@ -738,7 +759,9 @@ wl_touch__impl {
     static
     void
     frame (void* ctx, wl_touch* _this /* args: */ ) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            //event.type = Event.Type.TOUCH_FRAME;
+        }
     }
 
     extern (C)
@@ -798,15 +821,13 @@ Events {
 
 struct
 Event {
-    Type         type;
-    wayland_ctx* ctx;
-    union {
-        Device_Event   device;
-        Keyboard_Event keyboard;
-        Pointer_Event  pointer;
-        Touch_Event    touch;
-        Surface_Event  surface;
-    }
+    Type           type;
+    wayland_ctx*   ctx;
+    Device_Event   device;
+    Keyboard_Event keyboard;
+    Pointer_Event  pointer;
+    Touch_Event    touch;
+    Surface_Event  surface;
 
     struct
     Device_Event {
@@ -816,23 +837,52 @@ Event {
     struct
     Keyboard_Event {
         wl_surface* surface;
-        uint key;
-        uint state;
+        uint        key;
+        uint        state;
+        uint        keymap_format;
+        int         keymap_fd;
+        uint        keymap_size;
+        uint        mods_depressed;
+        uint        mods_latched;
+        uint        mods_locked;
+        uint        group;
+        int         rate;
+        int         delay;
     }
 
     struct
     Pointer_Event {
         wl_surface* surface;
-        int  x;
-        int  y;
-        uint button;
-        uint state;
-        uint axis;
-        uint axis_source;
-        int  axis_value;
-        uint axis_stop;
-        int  axis_discrete;
-        uint axis_direction;
+        int         x;
+        int         y;
+        uint        button;
+        uint        state;
+        uint        axis;
+        uint        axis_source;
+        int         axis_value;
+        uint        axis_stop;
+        int         axis_discrete;
+        uint        axis_direction;
+        int         value120;
+
+        string
+        toString () {
+            return format!"%s: x,y: %d,%d, button: %d %s: %s, axis: %s: %s: %d" (
+                typeof (this).stringof, 
+                //
+                x, 
+                y,
+                //
+                button,  // BTN_LEFT,BTN_RIGHT,BTN_MIDDLE
+                decode_btn (button),
+                cast (wl_pointer.button_state_) state,
+                //
+                cast (wl_pointer.axis_source_) axis_source,
+                cast (wl_pointer.axis_) axis,
+                // cast (wl_pointer.axis_relative_direction_) axis_direction,
+                axis_value
+            ); 
+        }
     }
 
     struct
@@ -868,6 +918,11 @@ Event {
                     keyboard.key,  // KEY_1,KEY_ESC,KEY_BACKSPACE
                     keyboard.key.decode_key,
                     cast (wl_keyboard.key_state_) keyboard.state);
+
+            case Type.POINTER_FRAME:
+                return format!"%s: %s" (
+                    type, 
+                    pointer);
             case Type.POINTER_MOTION:
                 return format!"%s: x,y: %d,%d" (
                     type, 
@@ -909,6 +964,24 @@ Event {
             case Type.GESTURE_PINCH_UPDATE:
             case Type.GESTURE_PINCH_END:
                 return format!"%s" (type);
+            case Type.KEYBOARD_KEYMAP:
+                return format!"%s: %d: %d: %d" (
+                    type, 
+                    keyboard.keymap_format,
+                    keyboard.keymap_fd,
+                    keyboard.keymap_size);
+            case Type.KEYBOARD_MODIFIERS:
+                return format!"%s: %d: %d: %d: %d" (
+                    type, 
+                    keyboard.mods_depressed,
+                    keyboard.mods_latched,
+                    keyboard.mods_locked,
+                    keyboard.group);
+            case Type.KEYBOARD_REPEAT_INFO:
+                return format!"%s: %d: %d" (
+                    type, 
+                    keyboard.rate,
+                    keyboard.delay);
             default:
                 return format!"%s" (type);
         }
@@ -943,7 +1016,12 @@ Event {
         //
         SURFACE_ENTER = 4096,
         SURFACE_LEAVE = 4097,
-    }
+        //
+        POINTER_FRAME,
+        KEYBOARD_KEYMAP,
+        KEYBOARD_MODIFIERS,
+        KEYBOARD_REPEAT_INFO,
+        }
 }
 
 template 

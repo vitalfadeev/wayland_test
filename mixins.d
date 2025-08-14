@@ -985,7 +985,7 @@ lhs < rhs
 // expansion at /usr/include/dmd/phobos/std/typecons.d(526,31)
 lhs < rhs
 
-// expansion at source/impl.d(233,9)
+// expansion at source/impl.d(232,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_seat;
@@ -999,7 +999,7 @@ lhs < rhs
         }
     }
 
-// expansion at source/impl.d(234,9)
+// expansion at source/impl.d(233,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_compositor;
@@ -1013,7 +1013,7 @@ lhs < rhs
         }
     }
 
-// expansion at source/impl.d(235,9)
+// expansion at source/impl.d(234,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).xdg_wm_base;
@@ -1027,7 +1027,7 @@ lhs < rhs
         }
     }
 
-// expansion at source/impl.d(236,9)
+// expansion at source/impl.d(235,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_shm;
