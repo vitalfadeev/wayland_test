@@ -734,25 +734,42 @@ wl_touch__impl {
         &orientation,
     };
 
-        extern (C)
+    extern (C)
     static
     void
     down (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, wl_surface* surface, int id, wl_fixed_t x, wl_fixed_t y) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.TOUCH_DOWN;
+            event.touch.surface = surface;
+            event.touch.time    = time;
+            event.touch.id      = id;
+            event.touch.x       = x.to_int;
+            event.touch.y       = y.to_int;
+        }
     }
 
     extern (C)
     static
     void
     up (void* ctx, wl_touch* _this /* args: */ , uint serial, uint time, int id) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.TOUCH_UP;
+            event.touch.time    = time;
+            event.touch.id      = id;
+        }
     }
 
     extern (C)
     static
     void
     motion (void* ctx, wl_touch* _this /* args: */ , uint time, int id, wl_fixed_t x, wl_fixed_t y) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.TOUCH_MOTION;
+            event.touch.time = time;
+            event.touch.id   = id;
+            event.touch.x    = x.to_int;
+            event.touch.y    = y.to_int;
+        }
     }
 
     extern (C)
@@ -768,21 +785,32 @@ wl_touch__impl {
     static
     void
     cancel (void* ctx, wl_touch* _this /* args: */ ) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.TOUCH_CANCEL;
+        }
     }
 
     extern (C)
     static
     void
     shape (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t major, wl_fixed_t minor) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.TOUCH_SHAPE;
+            event.touch.id    = id;
+            event.touch.major = major;
+            event.touch.minor = minor;
+        }
     }
 
     extern (C)
     static
     void
     orientation (void* ctx, wl_touch* _this /* args: */ , int id, wl_fixed_t orientation) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.TOUCH_ORIENTATION;
+            event.touch.id          = id;
+            event.touch.orientation = orientation;
+        }
     }
 }
 
@@ -887,7 +915,14 @@ Event {
 
     struct
     Touch_Event {
-        //
+        wl_surface* surface;
+        uint        time;
+        int         id;
+        int         x;
+        int         y;
+        wl_fixed_t  major;
+        wl_fixed_t  minor;
+        wl_fixed_t  orientation;
     }
 
     struct
@@ -1021,6 +1056,8 @@ Event {
         KEYBOARD_KEYMAP,
         KEYBOARD_MODIFIERS,
         KEYBOARD_REPEAT_INFO,
+        TOUCH_SHAPE,
+        TOUCH_ORIENTATION,
         }
 }
 
