@@ -228,7 +228,7 @@ wl_registry__impl {
     static
     void 
     global (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
-        printf ("%d: %s\n", name, interface_);
+        //printf ("%d: %s\n", name, interface_);
 
         mixin (BIND!wl_seat);
         mixin (BIND!wl_compositor);
@@ -386,7 +386,12 @@ wl_seat__impl {
     static
     void
     name (void* ctx, wl_seat* _this /* args: */ , const(char)* name) {
-        printf ("seat.name: %s\n", name);
+        //printf ("seat.name: %s\n", name);
+        import std.conv : to;
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.SEAT_NAME;
+            event.seat.name = name.to!string;
+        }
     }
 }
 
@@ -857,6 +862,7 @@ Event {
     Pointer_Event  pointer;
     Touch_Event    touch;
     Surface_Event  surface;
+    Seat_Event     seat;
 
     struct
     Device_Event {
@@ -933,6 +939,19 @@ Event {
         int         y;
         wl_array*   keys;
         wl_output*  output;
+    }
+
+    struct
+    Seat_Event {
+        string name;
+
+        string
+        toString () {
+            return format!"%s: %s" (
+                typeof (this).stringof, 
+                name
+            );
+        }
     }
 
     import libinput_d : libinput_event_type;
@@ -1018,6 +1037,10 @@ Event {
                     type, 
                     keyboard.rate,
                     keyboard.delay);
+            case Type.SEAT_NAME:
+                return format!"%s: %s" (
+                    type, 
+                    seat.name);
             default:
                 return format!"%s" (type);
         }
@@ -1059,6 +1082,8 @@ Event {
         KEYBOARD_REPEAT_INFO,
         TOUCH_SHAPE,
         TOUCH_ORIENTATION,
+        //
+        SEAT_NAME,
         }
 }
 
