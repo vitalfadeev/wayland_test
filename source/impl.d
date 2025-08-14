@@ -278,14 +278,21 @@ wl_surface__impl {
     static
     void
     enter (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.SURFACE_ENTER;
+            event.surface.surface = _this;
+        }
     }
 
     extern (C)
     static
     void
     leave (void* ctx, wl_surface* _this /* args: */ , wl_output* output) {
-        // 
+        with (cast (wayland_ctx*) ctx) {
+            event.type = Event.Type.SURFACE_LEAVE;
+            event.surface.surface = _this;
+            event.surface.output  = output;
+        }
     }
 
     extern (C)
@@ -505,10 +512,10 @@ wl_pointer__impl {
     void
     enter (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface, wl_fixed_t surface_x, wl_fixed_t surface_y) {
         with (cast (wayland_ctx*) ctx) {
-            // event.type = Event.Type.POINTER_*;
-            event.pointer.surface = surface;
-            event.pointer.x = surface_x.to_int;
-            event.pointer.y = surface_y.to_int;
+            event.type = Event.Type.SURFACE_ENTER;
+            event.surface.surface = surface;
+            event.surface.x = surface_x.to_int;
+            event.surface.y = surface_y.to_int;
         }
     }
 
@@ -517,8 +524,8 @@ wl_pointer__impl {
     void
     leave (void* ctx, wl_pointer* _this /* args: */ , uint serial, wl_surface* surface) {
         with (cast (wayland_ctx*) ctx) {
-            // event.type = Event.Type.POINTER_*;
-            event.pointer.surface = null;
+            event.type = Event.Type.SURFACE_LEAVE;
+            event.surface.surface = surface;
         }
     }
 
@@ -644,8 +651,9 @@ wl_keyboard__impl {
     void
     enter (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface, wl_array* keys) {
         with (cast (wayland_ctx*) ctx) {
-            // event.type = Event.Type.KEYBOARD_KEY*;
-            event.keyboard.surface = surface;
+            event.type = Event.Type.SURFACE_ENTER;
+            event.surface.surface = surface;
+            event.surface.keys    = keys;
         }
     }
 
@@ -654,8 +662,7 @@ wl_keyboard__impl {
     void
     leave (void* ctx, wl_keyboard* _this /* args: */ , uint serial, wl_surface* surface) {
         with (cast (wayland_ctx*) ctx) {
-            // event.type = Event.Type.KEYBOARD_KEY*;
-            event.keyboard.surface = null;
+            event.type = Event.Type.SURFACE_LEAVE;
         }
     }
 
@@ -798,6 +805,7 @@ Event {
         Keyboard_Event keyboard;
         Pointer_Event  pointer;
         Touch_Event    touch;
+        Surface_Event  surface;
     }
 
     struct
@@ -830,6 +838,15 @@ Event {
     struct
     Touch_Event {
         //
+    }
+
+    struct
+    Surface_Event {
+        wl_surface* surface;
+        int         x;
+        int         y;
+        wl_array*   keys;
+        wl_output*  output;
     }
 
     import libinput_d : libinput_event_type;
@@ -923,6 +940,9 @@ Event {
         GESTURE_PINCH_BEGIN     = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_BEGIN,
         GESTURE_PINCH_UPDATE    = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_UPDATE,
         GESTURE_PINCH_END       = libinput_event_type.LIBINPUT_EVENT_GESTURE_PINCH_END,
+        //
+        SURFACE_ENTER = 4096,
+        SURFACE_LEAVE = 4097,
     }
 }
 
