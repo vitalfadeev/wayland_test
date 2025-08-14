@@ -172,27 +172,28 @@ wl_display__impl {
     }
 }
 
-//extern (C)
-//alias _wl_registry__impl = 
-//    T_impl!(
-//        wl_registry, 
-//        wl_registry.Listener (
-//            // global:
-//            (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
-//                printf ("%d: %s\n", name, interface_);
+extern (C)
+struct _CTX {
+    auto _wl_registry = new T_impl!(
+        wl_registry, 
+        wl_registry.Listener (
+            global:
+            (void* ctx, wl_registry* _this, uint name, const(char)* interface_, uint version_) {
+                printf ("%d: %s\n", name, interface_);
 
-//                mixin (BIND!wl_seat);
-//                mixin (BIND!wl_compositor);
-//                mixin (BIND!xdg_wm_base);
-//                mixin (BIND!wl_shm);
-//            },
+                mixin (BIND!wl_seat);
+                mixin (BIND!wl_compositor);
+                mixin (BIND!xdg_wm_base);
+                mixin (BIND!wl_shm);
+            },
 
-//            // global_remove:
-//            (void* ctx, wl_registry* _this, uint name) {
-//                //
-//            }
-//        )
-//    );
+            global_remove:
+            (void* ctx, wl_registry* _this, uint name) {
+                //
+            }
+        )
+    );
+}
 
 struct
 T_impl (T,alias _listener) {
