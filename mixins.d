@@ -952,7 +952,7 @@ lhs == rhs
 // expansion at /usr/include/dmd/phobos/std/typecons.d(526,31)
 lhs == rhs
 
-// expansion at source/impl.d(184,17)
+// expansion at source/impl.d(187,17)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_seat;
@@ -966,7 +966,7 @@ lhs == rhs
         }
     }
 
-// expansion at source/impl.d(185,17)
+// expansion at source/impl.d(188,17)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_compositor;
@@ -980,7 +980,7 @@ lhs == rhs
         }
     }
 
-// expansion at source/impl.d(186,17)
+// expansion at source/impl.d(189,17)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).xdg_wm_base;
@@ -994,7 +994,7 @@ lhs == rhs
         }
     }
 
-// expansion at source/impl.d(187,17)
+// expansion at source/impl.d(190,17)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_shm;
@@ -1047,7 +1047,7 @@ lhs < rhs
 // expansion at
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
 
-// expansion at source/impl.d(233,9)
+// expansion at source/impl.d(236,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_seat;
@@ -1061,7 +1061,7 @@ lhs < rhs
         }
     }
 
-// expansion at source/impl.d(234,9)
+// expansion at source/impl.d(237,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_compositor;
@@ -1075,7 +1075,7 @@ lhs < rhs
         }
     }
 
-// expansion at source/impl.d(235,9)
+// expansion at source/impl.d(238,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).xdg_wm_base;
@@ -1089,7 +1089,7 @@ lhs < rhs
         }
     }
 
-// expansion at source/impl.d(236,9)
+// expansion at source/impl.d(239,9)
 
     {
         auto dest = &(cast (wayland_ctx*) ctx).wl_shm;

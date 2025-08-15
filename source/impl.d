@@ -7,13 +7,15 @@ import util;
 static const uint WIDTH             = 320;
 static const uint HEIGHT            = 240;
 static const uint PIXEL_FORMAT_ID   = wl_shm.format_.xrgb8888;
+alias Draw_cb = void function (wayland_ctx* ctx, uint* pixels);
 
 
 struct
 Wayland {
     wayland_ctx ctx;
 
-    this (int w, int h) {
+    this (int w, int h, Draw_cb draw) {
+        ctx.draw = draw;
         if (!connect ())
             throw new Exception ("Not connected");
         create_surface (w,h);
@@ -133,6 +135,7 @@ wayland_ctx {
 
     Input               input;
     Event               event;
+    Draw_cb             draw;
 
     bool                done;
 
